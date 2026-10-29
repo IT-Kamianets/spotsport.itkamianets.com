@@ -5,8 +5,16 @@ import { companyProfile } from './feature/company/company.data';
 export const routes: Routes = [
 	{
 		path: '',
-		pathMatch: 'full',
-		redirectTo: 'home',
+		loadComponent: () =>
+			import('./pages/home/home.component').then((m) => m.HomeComponent),
+		data: {
+			meta: {
+				...buildRouteMeta(companyProfile, '/'),
+				title: 'SpotSport',
+				description:
+					'Active and previous tournaments, create or join tournaments via QR/code.',
+			},
+		},
 	},
 	{
 		path: 'home',
@@ -109,6 +117,6 @@ export const routes: Routes = [
 	},
 	{
 		path: '**',
-		redirectTo: 'home',
+		redirectTo: '',
 	},
 ];

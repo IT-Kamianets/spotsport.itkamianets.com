@@ -31,7 +31,16 @@ jobs:
               run: cp CNAME dist/app/browser/
 
             - name: Add SPA fallback for GitHub Pages route reload
-              run: cp dist/app/browser/index.html dist/app/browser/404.html
+              run: |
+                  if [ -f dist/app/browser/index.html ]; then
+                      cp dist/app/browser/index.html dist/app/browser/404.html
+                  elif [ -f dist/app/browser/home/index.html ]; then
+                      cp dist/app/browser/home/index.html dist/app/browser/404.html
+                      cp dist/app/browser/home/index.html dist/app/browser/index.html
+                  elif [ -f dist/app/browser/index.csr.html ]; then
+                      cp dist/app/browser/index.csr.html dist/app/browser/404.html
+                      cp dist/app/browser/index.csr.html dist/app/browser/index.html
+                  fi
 
             - name: Set up SSH
               env:
