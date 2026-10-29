@@ -1,0 +1,132 @@
+<section class="mx-auto max-w-[var(--container)] px-4 py-8 sm:px-6 sm:py-12">
+	<!-- Page Header -->
+	<header class="mb-8">
+		<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+			<div class="flex items-center gap-3">
+				<span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--c-primary)] text-white shadow-sm">
+					<span class="material-symbols-outlined text-[24px]">gavel</span>
+				</span>
+				<div>
+					<div class="flex items-center gap-2">
+						<span class="rounded bg-[var(--c-primary)]/10 px-2 py-0.5 text-xs font-semibold text-[var(--c-primary)]">
+							MVP Page 06
+						</span>
+						<span class="text-xs uppercase tracking-wider text-[var(--c-text-muted)]">Arbiter & Judging</span>
+					</div>
+					<h1 class="text-2xl font-bold tracking-tight text-[var(--c-text-strong)] sm:text-3xl">
+						Judging & Catch Verification
+					</h1>
+				</div>
+			</div>
+
+			<div class="flex items-center gap-2.5">
+				<a
+					routerLink="/tournament"
+					class="theme-interactive inline-flex items-center gap-2 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2.5 text-sm font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] shadow-sm"
+				>
+					<span class="material-symbols-outlined text-[20px] text-[var(--c-primary)]">leaderboard</span>
+					<span>Public Leaderboard</span>
+				</a>
+			</div>
+		</div>
+		<p class="mt-3 max-w-2xl text-base text-[var(--c-text)]">
+			Review catches, approve/reject, manage penalties, and view live leaderboard.
+		</p>
+	</header>
+
+	<!-- Main Empty Canvas Card -->
+	<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-6 shadow-[var(--shadow-sm)] sm:p-8">
+		<!-- Sub-navigation Tabs -->
+		<div class="flex flex-wrap items-center gap-2 border-b border-[var(--c-border)] pb-4">
+			<button
+				type="button"
+				(click)="setTab('review')"
+				class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all"
+				[class]="activeTab() === 'review' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
+			>
+				<span class="material-symbols-outlined text-[18px]">rate_review</span>
+				<span>1. Catch Review Queue</span>
+			</button>
+
+			<button
+				type="button"
+				(click)="setTab('penalties')"
+				class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all"
+				[class]="activeTab() === 'penalties' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
+			>
+				<span class="material-symbols-outlined text-[18px]">balance</span>
+				<span>2. Manage Penalties</span>
+			</button>
+
+			<button
+				type="button"
+				(click)="setTab('leaderboard')"
+				class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all"
+				[class]="activeTab() === 'leaderboard' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
+			>
+				<span class="material-symbols-outlined text-[18px]">monitoring</span>
+				<span>3. Live Leaderboard Monitor</span>
+			</button>
+		</div>
+
+		<!-- Empty Page Content Body -->
+		<div class="mt-8 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-16 text-center">
+			<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--c-bg-secondary)] shadow-sm">
+				@switch (activeTab()) {
+					@case ('review') {
+						<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">checklist</span>
+					}
+					@case ('penalties') {
+						<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">warning_amber</span>
+					}
+					@case ('leaderboard') {
+						<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">trending_up</span>
+					}
+				}
+			</div>
+
+			<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
+				@switch (activeTab()) {
+					@case ('review') {
+						Catches Verification Queue (Empty State)
+					}
+					@case ('penalties') {
+						Participant Penalty Manager (Empty State)
+					}
+					@case ('leaderboard') {
+						Live Arbiter Leaderboard Control (Empty State)
+					}
+				}
+			</h3>
+
+			<p class="mt-2 max-w-md text-sm text-[var(--c-text-muted)]">
+				@switch (activeTab()) {
+					@case ('review') {
+						Incoming catch queue: photo measurement ruler check, side-by-side verification, quick Approve (green) / Reject (red) buttons with rejection reason picker.
+					}
+					@case ('penalties') {
+						Assign yellow cards, points deduction, boundary violation sanctions, or disqualifications with judge notes.
+					}
+					@case ('leaderboard') {
+						Arbiter view of real-time point distribution, instant recalculation, freeze board toggle, and audit history.
+					}
+				}
+			</p>
+
+			<div class="mt-6 flex flex-wrap justify-center gap-2 text-xs text-[var(--c-text-muted)]">
+				<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+					Two-Judge Audit Ready
+				</span>
+				<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+					Dispute Resolution Protocol Ready
+				</span>
+				<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+					Real-Time Socket Sync Ready
+				</span>
+			</div>
+		</div>
+	</div>
+
+	<!-- Shared MVP Navigation Hub -->
+	<app-page-nav currentPageId="judging" />
+</section>

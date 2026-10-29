@@ -1,8 +1,8 @@
 {
   "_id": "",
-  "name": "IT Kamianets",
-  "title": "IT Kamianets",
-  "description": "Web and mobile app development, IT education, internships, and digital solutions for businesses.",
-  "image": "https://ngx.itkamianets.com/logo.png",
-	"siteUrl": "https://ngx.itkamianets.com"
+  "name": "SpotSport",
+  "title": "SpotSport",
+  "description": "Fishing and sports tournaments platform: tournament management, catch submissions, live judging, and leaderboards.",
+  "image": "logo.png",
+  "siteUrl": "https://spotspor.itkamianets.com"
 }

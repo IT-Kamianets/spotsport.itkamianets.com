@@ -1,15 +1,16 @@
 import { NgOptimizedImage } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { LanguageService, TranslateDirective, TranslateService } from '@wawjs/ngx-translate';
 import { ThemeService } from '@wawjs/ngx-ui';
 import type { Language } from '@wawjs/ngx-translate';
 import type { AppLanguage } from '../../../environments/environment.prod';
 import { CompanyService } from '../../feature/company/company.service';
+import { MVP_PAGES } from '../../feature/navigation/navigation.const';
 
 @Component({
 	selector: 'app-topbar',
-	imports: [NgOptimizedImage, RouterLink, TranslateDirective],
+	imports: [NgOptimizedImage, RouterLink, RouterLinkActive, TranslateDirective],
 	templateUrl: './topbar.component.html',
 	styleUrl: './topbar.component.scss',
 })
@@ -20,6 +21,8 @@ export class TopbarComponent {
 	private readonly _companyService = inject(CompanyService);
 	private readonly _router = inject(Router);
 
+	protected readonly navPages = MVP_PAGES;
+	protected readonly mobileNavOpen = signal(false);
 	protected readonly mode = computed(() => this._themeService.mode() ?? 'light');
 	protected readonly languageMenuOpen = signal(false);
 	protected readonly languages = computed(() =>
@@ -55,6 +58,14 @@ export class TopbarComponent {
 	protected toggleMode() {
 		const nextMode = this.mode() === 'dark' ? 'light' : 'dark';
 		this._themeService.setMode(nextMode);
+	}
+
+	protected toggleMobileNav(): void {
+		this.mobileNavOpen.update((v) => !v);
+	}
+
+	protected closeMobileNav(): void {
+		this.mobileNavOpen.set(false);
 	}
 
 	protected async nextLanguage() {

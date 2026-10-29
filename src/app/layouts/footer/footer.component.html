@@ -1,5 +1,5 @@
 <footer class="border-t border-[var(--c-border)] bg-[var(--c-bg-secondary)]">
-	<div class="mx-auto grid max-w-[var(--container)] gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(14rem,0.8fr)] lg:gap-16">
+	<div class="mx-auto grid max-w-[var(--container)] gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,1fr)] lg:gap-16">
 		<div class="grid gap-5 sm:grid-cols-[7rem_minmax(0,1fr)] sm:items-start">
 			<div
 				class="overflow-hidden rounded-[calc(var(--radius-card)*1.8)] border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-3 shadow-[var(--shadow-sm)]"
@@ -18,7 +18,7 @@
 					class="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--c-text-muted)]"
 					translate
 				>
-					About company
+					SpotSport Platform
 				</p>
 				@if (company().name) {
 					<p class="mt-3 text-xl font-semibold text-[var(--c-text-strong)]">
@@ -36,19 +36,18 @@
 				class="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--c-text-muted)]"
 				translate
 			>
-				Pages
+				MVP Pages Navigation
 			</p>
 			<nav [translate]="{ ariaLabel: 'Pages footer navigation' }">
-				<ul class="space-y-3">
-
+				<ul class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
 					@for (page of pageLinks(); track page.path) {
 						<li>
 							<a
-								class="theme-focus inline-flex rounded-md text-base font-medium text-[var(--c-text-strong)] transition-colors duration-150 hover:text-[var(--c-primary)]"
+								class="theme-focus inline-flex items-center gap-2 rounded-md text-sm font-medium text-[var(--c-text-strong)] transition-colors duration-150 hover:text-[var(--c-primary)]"
 								[routerLink]="page.path"
-								[translate]="page.label"
 							>
-								{{ page.label }}
+								<span class="font-mono text-xs text-[var(--c-text-muted)]">0{{ page.number }}</span>
+								<span>{{ page.label }}</span>
 							</a>
 						</li>
 					}

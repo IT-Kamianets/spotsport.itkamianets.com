@@ -1,0 +1,181 @@
+<section class="mx-auto max-w-[var(--container)] px-4 py-8 sm:px-6 sm:py-12">
+	<!-- Page Header -->
+	<header class="mb-8">
+		<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+			<div class="flex items-center gap-3">
+				<span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--c-primary)] text-white shadow-sm">
+					<span class="material-symbols-outlined text-[24px]">phishing</span>
+				</span>
+				<div>
+					<div class="flex items-center gap-2">
+						<span class="rounded bg-[var(--c-primary)]/10 px-2 py-0.5 text-xs font-semibold text-[var(--c-primary)]">
+							MVP Page 05
+						</span>
+						<span class="text-xs uppercase tracking-wider text-[var(--c-text-muted)]">Submissions</span>
+					</div>
+					<h1 class="text-2xl font-bold tracking-tight text-[var(--c-text-strong)] sm:text-3xl">
+						Catch Submission & Status
+					</h1>
+				</div>
+			</div>
+
+			<div class="flex items-center gap-2.5">
+				<button
+					type="button"
+					(click)="toggleCatchDetails()"
+					class="theme-interactive inline-flex items-center gap-2 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2.5 text-sm font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] shadow-sm"
+				>
+					<span class="material-symbols-outlined text-[20px] text-[var(--c-primary)]">visibility</span>
+					<span>Catch Details Modal</span>
+				</button>
+
+				<a
+					routerLink="/judging"
+					class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm"
+				>
+					<span class="material-symbols-outlined text-[20px]">gavel</span>
+					<span>Go to Judging</span>
+				</a>
+			</div>
+		</div>
+		<p class="mt-3 max-w-2xl text-base text-[var(--c-text)]">
+			Submit catches with photos and measurements, track approval status, offline support.
+		</p>
+	</header>
+
+	<!-- Additional UI: Catch Details Dialog Preview -->
+	@if (showCatchDetailsDialog()) {
+		<div class="mb-8 rounded-2xl border-2 border-[var(--c-primary)] bg-[var(--c-bg-secondary)] p-6 shadow-md">
+			<div class="flex items-center justify-between pb-3 border-b border-[var(--c-border)]">
+				<div class="flex items-center gap-2">
+					<span class="material-symbols-outlined text-[22px] text-[var(--c-primary)]">visibility</span>
+					<h3 class="text-base font-semibold text-[var(--c-text-strong)]">
+						Additional UI: Catch Details Dialog
+					</h3>
+					<span class="rounded bg-[var(--c-primary)]/10 px-2 py-0.5 text-[11px] font-semibold text-[var(--c-primary)]">
+						Dialog Placeholder
+					</span>
+				</div>
+				<button
+					type="button"
+					(click)="toggleCatchDetails()"
+					class="theme-interactive rounded-lg p-1 text-[var(--c-text-muted)] hover:bg-[var(--c-bg-primary)] hover:text-[var(--c-text-strong)]"
+				>
+					<span class="material-symbols-outlined text-[20px]">close</span>
+				</button>
+			</div>
+
+			<div class="mt-4 grid gap-4 sm:grid-cols-3">
+				<div class="flex h-36 items-center justify-center rounded-xl bg-[var(--c-bg-primary)] border border-dashed border-[var(--c-border)] text-center text-xs text-[var(--c-text-muted)]">
+					<div>
+						<span class="material-symbols-outlined text-[28px] text-[var(--c-primary)]">image</span>
+						<p class="mt-1">Fish Photo with Measuring Ruler</p>
+					</div>
+				</div>
+
+				<div class="sm:col-span-2 space-y-2 text-xs text-[var(--c-text)]">
+					<p><strong class="text-[var(--c-text-strong)]">Species:</strong> Northern Pike (Esox lucius)</p>
+					<p><strong class="text-[var(--c-text-strong)]">Length:</strong> 84.5 cm | <strong class="text-[var(--c-text-strong)]">Weight:</strong> 4.82 kg</p>
+					<p><strong class="text-[var(--c-text-strong)]">Submitted:</strong> 10:42 AM (Local offline queue synced)</p>
+					<p><strong class="text-[var(--c-text-strong)]">Judge Status:</strong> <span class="rounded bg-emerald-500/10 px-2 py-0.5 text-emerald-600 font-semibold">Approved (+84.5 pts)</span></p>
+				</div>
+			</div>
+		</div>
+	}
+
+	<!-- Main Empty Canvas Card -->
+	<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-6 shadow-[var(--shadow-sm)] sm:p-8">
+		<!-- Sub-navigation Tabs -->
+		<div class="flex flex-wrap items-center gap-2 border-b border-[var(--c-border)] pb-4">
+			<button
+				type="button"
+				(click)="setTab('submit')"
+				class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all"
+				[class]="activeTab() === 'submit' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
+			>
+				<span class="material-symbols-outlined text-[18px]">add_a_photo</span>
+				<span>1. Submit New Catch</span>
+			</button>
+
+			<button
+				type="button"
+				(click)="setTab('status')"
+				class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all"
+				[class]="activeTab() === 'status' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
+			>
+				<span class="material-symbols-outlined text-[18px]">fact_check</span>
+				<span>2. Approval Status</span>
+			</button>
+
+			<button
+				type="button"
+				(click)="setTab('offline')"
+				class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all"
+				[class]="activeTab() === 'offline' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
+			>
+				<span class="material-symbols-outlined text-[18px]">wifi_off</span>
+				<span>3. Offline Queue & Sync</span>
+			</button>
+		</div>
+
+		<!-- Empty Page Content Body -->
+		<div class="mt-8 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-16 text-center">
+			<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--c-bg-secondary)] shadow-sm">
+				@switch (activeTab()) {
+					@case ('submit') {
+						<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">camera_alt</span>
+					}
+					@case ('status') {
+						<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">pending_actions</span>
+					}
+					@case ('offline') {
+						<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">cloud_sync</span>
+					}
+				}
+			</div>
+
+			<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
+				@switch (activeTab()) {
+					@case ('submit') {
+						Photo & Measurement Submission Form (Empty State)
+					}
+					@case ('status') {
+						Catch Approval Status Tracker (Empty State)
+					}
+					@case ('offline') {
+						Offline Storage & Auto-Sync Engine (Empty State)
+					}
+				}
+			</h3>
+
+			<p class="mt-2 max-w-md text-sm text-[var(--c-text-muted)]">
+				@switch (activeTab()) {
+					@case ('submit') {
+						High-resolution photo upload with ruler alignment, fish length in mm/cm, scale weight, and GPS spot capture.
+					}
+					@case ('status') {
+						Tracks state across Pending Verification, Judge Accepted, Penalty Deduction, and Rejected.
+					}
+					@case ('offline') {
+						Catches saved in local IndexedDB when mobile network is weak on the water, with automatic background sync when reconnected.
+					}
+				}
+			</p>
+
+			<div class="mt-6 flex flex-wrap justify-center gap-2 text-xs text-[var(--c-text-muted)]">
+				<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+					IndexedDB Offline Cache Ready
+				</span>
+				<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+					Exif Timestamp & GPS Extractor Ready
+				</span>
+				<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+					Live Status Push Ready
+				</span>
+			</div>
+		</div>
+	</div>
+
+	<!-- Shared MVP Navigation Hub -->
+	<app-page-nav currentPageId="catch" />
+</section>
