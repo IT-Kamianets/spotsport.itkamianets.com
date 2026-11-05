@@ -11,7 +11,7 @@
 				</p>
 			</div>
 			<p class="mt-1 text-sm text-[var(--c-text)]">
-				Switch between the 7 core MVP pages or explore the upcoming UI specs:
+				Switch between the 6 core MVP pages or explore the upcoming UI specs:
 			</p>
 		</div>
 
@@ -51,8 +51,8 @@
 		</div>
 	</div>
 
-	<!-- All 7 MVP Pages Grid / Pills -->
-	<div class="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-7">
+	<!-- All 6 MVP Pages Grid / Pills -->
+	<div class="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
 		@for (page of pages; track page.id) {
 			<a
 				[routerLink]="page.path"

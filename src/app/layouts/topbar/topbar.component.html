@@ -26,8 +26,8 @@
 			}
 		</a>
 
-		<!-- Desktop Navigation Menu (All 7 MVP Pages) -->
-		<nav class="hidden xl:flex items-center gap-1" aria-label="Main Navigation">
+		<!-- Desktop Navigation Menu (All MVP Pages) -->
+		<nav class="hidden lg:flex items-center gap-1" aria-label="Main Navigation">
 			@for (page of navPages; track page.id) {
 				<a
 					[routerLink]="page.path"
@@ -114,7 +114,7 @@
 			<button
 				type="button"
 				(click)="toggleMobileNav()"
-				class="theme-interactive theme-focus inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--c-border)] bg-[var(--c-bg-primary)] text-[var(--c-text-strong)] xl:hidden hover:bg-[var(--c-bg-tertiary)]"
+				class="theme-interactive theme-focus inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--c-border)] bg-[var(--c-bg-primary)] text-[var(--c-text-strong)] lg:hidden hover:bg-[var(--c-bg-tertiary)]"
 				[attr.aria-expanded]="mobileNavOpen()"
 				aria-label="Toggle Navigation Menu"
 			>
@@ -128,7 +128,7 @@
 	<!-- Mobile / Compact Navigation Drawer -->
 	@if (mobileNavOpen()) {
 		<div
-			class="border-t border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-4 shadow-lg xl:hidden"
+			class="border-t border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-4 shadow-lg lg:hidden"
 		>
 			<p class="px-2 text-xs font-semibold uppercase tracking-wider text-[var(--c-text-muted)]">
 				SpotSport MVP Pages

@@ -31,15 +31,7 @@ export const routes: Routes = [
 	},
 	{
 		path: 'login',
-		loadComponent: () =>
-			import('./pages/login/login.component').then((m) => m.LoginComponent),
-		data: {
-			meta: {
-				...buildRouteMeta(companyProfile, '/login'),
-				title: 'Login — SpotSport',
-				description: 'Registration, login, and password recovery.',
-			},
-		},
+		redirectTo: 'profile',
 	},
 	{
 		path: 'tournament',
@@ -106,7 +98,8 @@ export const routes: Routes = [
 			meta: {
 				...buildRouteMeta(companyProfile, '/profile'),
 				title: 'Profile — SpotSport',
-				description: 'Personal information, tournament history, and account settings.',
+				description:
+					'Personal information, tournament history, account settings, registration, and login.',
 			},
 		},
 	},

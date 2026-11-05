@@ -23,22 +23,8 @@ export interface PostMvpFeature {
 
 export const MVP_PAGES: MvpPageInfo[] = [
 	{
-		id: 'login',
-		number: 1,
-		title: 'Login',
-		path: '/login',
-		icon: 'lock',
-		summary: 'Registration, login, and password recovery.',
-		features: [
-			'User Registration',
-			'Secure Sign In',
-			'Password Recovery',
-			'Session Management',
-		],
-	},
-	{
 		id: 'home',
-		number: 2,
+		number: 1,
 		title: 'Home',
 		path: '/home',
 		icon: 'home',
@@ -52,7 +38,7 @@ export const MVP_PAGES: MvpPageInfo[] = [
 	},
 	{
 		id: 'tournament',
-		number: 3,
+		number: 2,
 		title: 'Tournament',
 		path: '/tournament',
 		icon: 'emoji_events',
@@ -67,7 +53,7 @@ export const MVP_PAGES: MvpPageInfo[] = [
 	},
 	{
 		id: 'tournament-editor',
-		number: 4,
+		number: 3,
 		title: 'Tournament Editor',
 		path: '/tournament-editor',
 		icon: 'edit_note',
@@ -81,7 +67,7 @@ export const MVP_PAGES: MvpPageInfo[] = [
 	},
 	{
 		id: 'catch',
-		number: 5,
+		number: 4,
 		title: 'Catch',
 		path: '/catch',
 		icon: 'phishing',
@@ -95,7 +81,7 @@ export const MVP_PAGES: MvpPageInfo[] = [
 	},
 	{
 		id: 'judging',
-		number: 6,
+		number: 5,
 		title: 'Judging',
 		path: '/judging',
 		icon: 'gavel',
@@ -109,16 +95,17 @@ export const MVP_PAGES: MvpPageInfo[] = [
 	},
 	{
 		id: 'profile',
-		number: 7,
+		number: 6,
 		title: 'Profile',
 		path: '/profile',
 		icon: 'account_circle',
-		summary: 'Personal information, tournament history, and account settings.',
+		summary: 'Personal information, tournament history, account settings, registration & login.',
 		features: [
 			'Personal Information',
 			'Tournament History',
-			'Trophies & Badges',
 			'Account Settings',
+			'User Registration & Sign In',
+			'Password Recovery',
 		],
 	},
 ];
