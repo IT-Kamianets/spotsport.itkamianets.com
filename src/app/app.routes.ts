@@ -34,35 +34,31 @@ export const routes: Routes = [
 		redirectTo: 'profile',
 	},
 	{
-		path: 'tournament',
+		path: 'tournaments',
 		loadComponent: () =>
-			import('./pages/tournament/tournament.component').then((m) => m.TournamentComponent),
-		data: {
-			meta: {
-				...buildRouteMeta(companyProfile, '/tournament'),
-				title: 'Tournament — SpotSport',
-				description: 'Tournament overview, rules, participants, status, and results.',
-			},
-		},
-	},
-	{
-		path: 'tournament-editor',
-		loadComponent: () =>
-			import('./pages/tournament-editor/tournament-editor.component').then(
-				(m) => m.TournamentEditorComponent,
+			import('./pages/tournaments/tournaments.component').then(
+				(m) => m.TournamentsComponent,
 			),
 		data: {
 			meta: {
-				...buildRouteMeta(companyProfile, '/tournament-editor'),
-				title: 'Tournament Editor — SpotSport',
+				...buildRouteMeta(companyProfile, '/tournaments'),
+				title: 'Tournaments — SpotSport',
 				description:
-					'Create/edit tournament: name, type, dates, scoring rules, and penalties.',
+					'Tournament overview, rules, participants, status, results, and tournament editor.',
 			},
 		},
 	},
 	{
+		path: 'tournament',
+		redirectTo: 'tournaments',
+	},
+	{
+		path: 'tournament-editor',
+		redirectTo: 'tournaments',
+	},
+	{
 		path: 'tournament/editor',
-		redirectTo: 'tournament-editor',
+		redirectTo: 'tournaments',
 	},
 	{
 		path: 'catch',
