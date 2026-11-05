@@ -1,6 +1,7 @@
 import { NgOptimizedImage } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { filter } from 'rxjs';
 import { LanguageService, TranslateDirective, TranslateService } from '@wawjs/ngx-translate';
 import { ThemeService } from '@wawjs/ngx-ui';
 import type { Language } from '@wawjs/ngx-translate';
@@ -23,6 +24,7 @@ export class TopbarComponent {
 
 	protected readonly navPages = MVP_PAGES.filter((page) => page.id !== 'home');
 	protected readonly mobileNavOpen = signal(false);
+	protected readonly isProfilePage = signal(false);
 	protected readonly mode = computed(() => this._themeService.mode() ?? 'light');
 	protected readonly languageMenuOpen = signal(false);
 	protected readonly languages = computed(() =>
@@ -53,6 +55,14 @@ export class TopbarComponent {
 
 	constructor() {
 		this._themeService.init();
+
+		this._router.events
+			.pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+			.subscribe((event) => {
+				this.isProfilePage.set(event.urlAfterRedirects.startsWith('/profile'));
+			});
+
+		this.isProfilePage.set(this._router.url.startsWith('/profile'));
 	}
 
 	protected toggleMode() {

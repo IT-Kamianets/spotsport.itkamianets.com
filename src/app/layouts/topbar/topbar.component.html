@@ -114,12 +114,20 @@
 			<button
 				type="button"
 				(click)="toggleMobileNav()"
-				class="theme-interactive theme-focus inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--c-border)] bg-[var(--c-bg-primary)] text-[var(--c-text-strong)] lg:hidden hover:bg-[var(--c-bg-tertiary)]"
+				class="theme-interactive theme-focus inline-flex h-11 w-11 items-center justify-center lg:hidden"
+				[class]="isProfilePage() && !mobileNavOpen()
+					? 'rounded-2xl border border-[var(--c-primary)] bg-[var(--c-primary)] text-white shadow-sm hover:bg-[var(--c-primary-hover)]'
+					: (mobileNavOpen()
+						? 'rounded-2xl border border-[var(--c-primary)] bg-[var(--c-primary)] text-white shadow-sm'
+						: 'rounded-full border border-[var(--c-border)] bg-[var(--c-bg-primary)] text-[var(--c-text-strong)] hover:bg-[var(--c-bg-tertiary)]')"
 				[attr.aria-expanded]="mobileNavOpen()"
-				aria-label="Toggle Navigation Menu"
+				[attr.aria-label]="isProfilePage() ? 'Profile navigation menu' : 'Toggle navigation menu'"
 			>
-				<span class="material-symbols-outlined text-[22px]">
-					{{ mobileNavOpen() ? 'close' : 'menu' }}
+				<span
+					class="material-symbols-outlined"
+					[class]="isProfilePage() && !mobileNavOpen() ? 'text-[24px]' : 'text-[22px]'"
+				>
+					{{ mobileNavOpen() ? 'close' : (isProfilePage() ? 'account_circle' : 'menu') }}
 				</span>
 			</button>
 		</div>
