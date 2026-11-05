@@ -3,6 +3,7 @@ import { Component, effect, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CanonicalService } from '@wawjs/ngx-default';
 import { LanguageService } from '@wawjs/ngx-translate';
+import { ThemeService } from '@wawjs/ngx-ui';
 import { environment } from '../environments/environment';
 import { FooterComponent } from './layouts/footer/footer.component';
 import { TopbarComponent } from './layouts/topbar/topbar.component';
@@ -24,8 +25,10 @@ export class App {
 	private readonly _canonicalService = inject(CanonicalService);
 	private readonly _document = inject(DOCUMENT);
 	private readonly _languageService = inject(LanguageService);
+	private readonly _themeService = inject(ThemeService);
 
 	constructor() {
+		this._themeService.init();
 		this._canonicalService.initialize();
 
 		effect(() => {

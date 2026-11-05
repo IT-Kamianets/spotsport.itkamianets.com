@@ -19,7 +19,74 @@
 				</div>
 			</div>
 
-			<div class="flex items-center gap-2.5">
+			<div class="flex flex-wrap items-center gap-2.5">
+				<!-- Language Switcher -->
+				<div
+					class="relative flex items-center gap-1 rounded-full border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-1 shadow-[var(--shadow-sm)]"
+				>
+					<button
+						class="theme-interactive theme-focus inline-flex h-9 items-center gap-2 rounded-full px-3 text-sm font-medium text-[var(--c-text)] hover:bg-[var(--c-bg-tertiary)]"
+						[attr.aria-label]="languageCycleLabel()"
+						(click)="nextLanguage()"
+						type="button"
+					>
+						<img
+							class="h-5 w-7 rounded-[4px] border border-black/10 object-cover"
+							[alt]="currentLanguage().nativeName"
+							[ngSrc]="currentLanguage().flagSrc"
+							width="28"
+							height="20"
+						/>
+					</button>
+
+					<button
+						class="theme-interactive theme-focus inline-flex h-9 w-9 items-center justify-center rounded-full text-[var(--c-text-strong)] hover:bg-[var(--c-bg-tertiary)]"
+						[attr.aria-expanded]="languageMenuOpen()"
+						[attr.aria-label]="languageMenuLabel()"
+						(click)="toggleLanguageMenu()"
+						type="button"
+					>
+						<span class="material-symbols-outlined text-[20px]" aria-hidden="true">
+							arrow_drop_down
+						</span>
+					</button>
+
+					@if (languageMenuOpen()) {
+						<div
+							class="absolute right-0 top-[calc(100%+0.5rem)] z-50 min-w-48 overflow-hidden rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-1 shadow-[var(--shadow-md)]"
+						>
+							@for (language of languages(); track language.code) {
+								<button
+									class="theme-interactive theme-focus flex w-full items-center gap-3 rounded-[calc(var(--radius-btn)-0.25rem)] px-3 py-2 text-left text-sm text-[var(--c-text)] hover:bg-[var(--c-bg-tertiary)]"
+									(click)="setLanguage(language)"
+									type="button"
+								>
+									<img
+										class="h-5 w-7 rounded-[4px] border border-black/10 object-cover"
+										[alt]="language.nativeName"
+										[ngSrc]="language.flagSrc"
+										width="28"
+										height="20"
+									/>
+									<span>{{ language.nativeName }}</span>
+								</button>
+							}
+						</div>
+					}
+				</div>
+
+				<!-- Theme Toggle -->
+				<button
+					class="theme-interactive theme-focus inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--c-border)] bg-[var(--c-bg-primary)] text-[var(--c-text-strong)] hover:bg-[var(--c-bg-tertiary)] shadow-[var(--shadow-sm)]"
+					[attr.aria-label]="toggleLabel()"
+					(click)="toggleMode()"
+					type="button"
+				>
+					<span class="material-symbols-outlined text-[22px]" aria-hidden="true">
+						{{ toggleIcon() }}
+					</span>
+				</button>
+
 				@if (activeTab() !== 'auth') {
 					<button
 						type="button"
@@ -99,61 +166,151 @@
 
 		<!-- Content: Profile Information (Tabs 1, 2, 3) -->
 		@if (activeTab() !== 'auth') {
-			<div class="mt-8 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-16 text-center">
-				<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--c-bg-secondary)] shadow-sm">
-					@switch (activeTab()) {
-						@case ('personal') {
-							<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">person</span>
-						}
-						@case ('history') {
-							<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">military_tech</span>
-						}
-						@case ('settings') {
-							<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">manage_accounts</span>
-						}
-					}
-				</div>
+			<!-- If Tab 3: Account Settings, show interactive Language & Appearance controls -->
+			@if (activeTab() === 'settings') {
+				<div class="mt-8 space-y-6">
+					<!-- Preferences & Appearance Card -->
+					<div class="rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-6">
+						<h3 class="text-base font-semibold text-[var(--c-text-strong)]">
+							Preferences & Appearance
+						</h3>
+						<p class="mt-1 text-xs text-[var(--c-text-muted)]">
+							Customize language and interface theme for your SpotSport experience.
+						</p>
 
-				<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
-					@switch (activeTab()) {
-						@case ('personal') {
-							Angler Identity & Fishing License (Empty State)
-						}
-						@case ('history') {
-							Past Tournaments, Catches & Trophies (Empty State)
-						}
-						@case ('settings') {
-							Account Preferences, Units & Notifications (Empty State)
-						}
-					}
-				</h3>
+						<div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
+							<!-- Language Section -->
+							<div class="rounded-lg border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-4">
+								<div class="flex items-center gap-2">
+									<span class="material-symbols-outlined text-[20px] text-[var(--c-primary)]">translate</span>
+									<h4 class="text-sm font-semibold text-[var(--c-text-strong)]">Application Language</h4>
+								</div>
+								<p class="mt-1 text-xs text-[var(--c-text-muted)]">
+									Current: <span class="font-medium text-[var(--c-text-strong)]">{{ currentLanguage().nativeName }}</span>
+								</p>
+								<div class="mt-3 flex flex-wrap gap-2">
+									@for (lang of languages(); track lang.code) {
+										<button
+											type="button"
+											(click)="setLanguage(lang)"
+											class="theme-interactive inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold transition-all"
+											[class]="currentLanguage().code === lang.code
+												? 'border-[var(--c-primary)] bg-[var(--c-primary)]/10 text-[var(--c-primary)] shadow-xs'
+												: 'border-[var(--c-border)] bg-[var(--c-bg-primary)] text-[var(--c-text)] hover:border-[var(--c-primary)]'"
+										>
+											<img
+												class="h-4 w-6 rounded-[3px] border border-black/10 object-cover"
+												[alt]="lang.nativeName"
+												[ngSrc]="lang.flagSrc"
+												width="24"
+												height="16"
+											/>
+											<span>{{ lang.nativeName }}</span>
+										</button>
+									}
+								</div>
+							</div>
 
-				<p class="mt-2 max-w-md text-sm text-[var(--c-text-muted)]">
-					@switch (activeTab()) {
-						@case ('personal') {
-							Full name, display callsign, avatar photo, country/region, fishing federation ID, and sponsor affiliations.
-						}
-						@case ('history') {
-							Participated tournaments log, podium placements, personal best catch records, and earned badges.
-						}
-						@case ('settings') {
+							<!-- Theme Section -->
+							<div class="rounded-lg border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-4">
+								<div class="flex items-center gap-2">
+									<span class="material-symbols-outlined text-[20px] text-[var(--c-primary)]">palette</span>
+									<h4 class="text-sm font-semibold text-[var(--c-text-strong)]">Color Theme</h4>
+								</div>
+								<p class="mt-1 text-xs text-[var(--c-text-muted)]">
+									Current mode: <span class="font-medium capitalize text-[var(--c-text-strong)]">{{ mode() }}</span>
+								</p>
+								<div class="mt-3 flex items-center gap-2">
+									<button
+										type="button"
+										(click)="toggleMode()"
+										class="theme-interactive inline-flex items-center gap-2 rounded-lg border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-3.5 py-2 text-xs font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)]"
+									>
+										<span class="material-symbols-outlined text-[18px] text-[var(--c-primary)]">
+											{{ toggleIcon() }}
+										</span>
+										<span>{{ mode() === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode' }}</span>
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Other settings empty state -->
+					<div class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-10 text-center">
+						<div class="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--c-bg-secondary)] shadow-sm">
+							<span class="material-symbols-outlined text-[26px] text-[var(--c-primary)]">manage_accounts</span>
+						</div>
+						<h3 class="mt-3 text-base font-semibold text-[var(--c-text-strong)]">
+							Measurement Units & Notification Settings (Empty State)
+						</h3>
+						<p class="mt-1 max-w-md text-xs text-[var(--c-text-muted)]">
 							Measurement units (cm/mm vs inches, kg vs lbs), push notification settings, offline sync preferences, and password change.
-						}
-					}
-				</p>
-
-				<div class="mt-6 flex flex-wrap justify-center gap-2 text-xs text-[var(--c-text-muted)]">
-					<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
-						User Avatar Upload Ready
-					</span>
-					<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
-						Unit Conversion System Ready
-					</span>
-					<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
-						Offline Profile Cache Ready
-					</span>
+						</p>
+						<div class="mt-4 flex flex-wrap justify-center gap-2 text-xs text-[var(--c-text-muted)]">
+							<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+								Unit Conversion System Ready
+							</span>
+							<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+								Push Notifications Ready
+							</span>
+						</div>
+					</div>
 				</div>
-			</div>
+			} @else {
+				<div class="mt-8 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-16 text-center">
+					<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--c-bg-secondary)] shadow-sm">
+						@switch (activeTab()) {
+							@case ('personal') {
+								<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">person</span>
+							}
+							@case ('history') {
+								<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">military_tech</span>
+							}
+							@default {
+								<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">account_circle</span>
+							}
+						}
+					</div>
+
+					<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
+						@switch (activeTab()) {
+							@case ('personal') {
+								Angler Identity & Fishing License (Empty State)
+							}
+							@case ('history') {
+								Past Tournaments, Catches & Trophies (Empty State)
+							}
+							@default {
+								Profile Section
+							}
+						}
+					</h3>
+
+					<p class="mt-2 max-w-md text-sm text-[var(--c-text-muted)]">
+						@switch (activeTab()) {
+							@case ('personal') {
+								Full name, display callsign, avatar photo, country/region, fishing federation ID, and sponsor affiliations.
+							}
+							@case ('history') {
+								Participated tournaments log, podium placements, personal best catch records, and earned badges.
+							}
+							@default {
+								Profile settings and information.
+							}
+						}
+					</p>
+
+					<div class="mt-6 flex flex-wrap justify-center gap-2 text-xs text-[var(--c-text-muted)]">
+						<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+							User Avatar Upload Ready
+						</span>
+						<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+							Offline Profile Cache Ready
+						</span>
+					</div>
+				</div>
+			}
 		} @else {
 			<!-- Content: Login, Registration & Password Recovery (Tab 4) -->
 			<div class="mt-6">
