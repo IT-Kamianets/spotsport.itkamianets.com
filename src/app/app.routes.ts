@@ -61,30 +61,27 @@ export const routes: Routes = [
 		redirectTo: 'tournaments',
 	},
 	{
-		path: 'catch',
+		path: 'refereeing',
 		loadComponent: () =>
-			import('./pages/catch/catch.component').then((m) => m.CatchComponent),
+			import('./pages/refereeing/refereeing.component').then(
+				(m) => m.RefereeingComponent,
+			),
 		data: {
 			meta: {
-				...buildRouteMeta(companyProfile, '/catch'),
-				title: 'Catch — SpotSport',
+				...buildRouteMeta(companyProfile, '/refereeing'),
+				title: 'Refereeing — SpotSport',
 				description:
-					'Submit catches with photos and measurements, track approval status, offline support.',
+					'Submit and verify catches, review queue, approval status, penalties, and live leaderboard.',
 			},
 		},
 	},
 	{
+		path: 'catch',
+		redirectTo: 'refereeing',
+	},
+	{
 		path: 'judging',
-		loadComponent: () =>
-			import('./pages/judging/judging.component').then((m) => m.JudgingComponent),
-		data: {
-			meta: {
-				...buildRouteMeta(companyProfile, '/judging'),
-				title: 'Judging — SpotSport',
-				description:
-					'Review catches, approve/reject, manage penalties, and view live leaderboard.',
-			},
-		},
+		redirectTo: 'refereeing',
 	},
 	{
 		path: 'profile',

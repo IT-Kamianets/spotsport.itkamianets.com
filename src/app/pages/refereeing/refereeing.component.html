@@ -1,0 +1,314 @@
+<section class="mx-auto max-w-[var(--container)] px-4 py-8 sm:px-6 sm:py-12">
+	<!-- Page Header -->
+	<header class="mb-8">
+		<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+			<div class="flex items-center gap-3">
+				<span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--c-primary)] text-white shadow-sm">
+					<span class="material-symbols-outlined text-[24px]">gavel</span>
+				</span>
+				<div>
+					<div class="flex items-center gap-2">
+						<span class="rounded bg-[var(--c-primary)]/10 px-2 py-0.5 text-xs font-semibold text-[var(--c-primary)]">
+							MVP Page 03
+						</span>
+						<span class="text-xs uppercase tracking-wider text-[var(--c-text-muted)]">Arbiter & Catches</span>
+					</div>
+					<h1 class="text-2xl font-bold tracking-tight text-[var(--c-text-strong)] sm:text-3xl">
+						Refereeing & Catch Verification
+					</h1>
+				</div>
+			</div>
+
+			<div class="flex flex-wrap items-center gap-2.5">
+				<button
+					type="button"
+					(click)="toggleCatchDetails()"
+					class="theme-interactive inline-flex items-center gap-2 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2.5 text-sm font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] shadow-sm"
+				>
+					<span class="material-symbols-outlined text-[20px] text-[var(--c-primary)]">visibility</span>
+					<span>Catch Details Modal</span>
+				</button>
+
+				@if (mode() === 'catch') {
+					<button
+						type="button"
+						(click)="setMode('judging')"
+						class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm"
+					>
+						<span class="material-symbols-outlined text-[20px]">gavel</span>
+						<span>Switch to Judging</span>
+					</button>
+				} @else {
+					<button
+						type="button"
+						(click)="setMode('catch')"
+						class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm"
+					>
+						<span class="material-symbols-outlined text-[20px]">phishing</span>
+						<span>Switch to Catch Submission</span>
+					</button>
+				}
+			</div>
+		</div>
+		<p class="mt-3 max-w-2xl text-base text-[var(--c-text)]">
+			Submit catches with photos and measurements, track approval status, review catches, manage penalties, and view live leaderboard.
+		</p>
+	</header>
+
+	<!-- Additional UI: Catch Details Dialog Preview -->
+	@if (showCatchDetailsDialog()) {
+		<div class="mb-8 rounded-2xl border-2 border-[var(--c-primary)] bg-[var(--c-bg-secondary)] p-6 shadow-md">
+			<div class="flex items-center justify-between pb-3 border-b border-[var(--c-border)]">
+				<div class="flex items-center gap-2">
+					<span class="material-symbols-outlined text-[22px] text-[var(--c-primary)]">visibility</span>
+					<h3 class="text-base font-semibold text-[var(--c-text-strong)]">
+						Additional UI: Catch Details Dialog
+					</h3>
+					<span class="rounded bg-[var(--c-primary)]/10 px-2 py-0.5 text-[11px] font-semibold text-[var(--c-primary)]">
+						Dialog Placeholder
+					</span>
+				</div>
+				<button
+					type="button"
+					(click)="toggleCatchDetails()"
+					class="theme-interactive rounded-lg p-1 text-[var(--c-text-muted)] hover:bg-[var(--c-bg-primary)] hover:text-[var(--c-text-strong)]"
+				>
+					<span class="material-symbols-outlined text-[20px]">close</span>
+				</button>
+			</div>
+
+			<div class="mt-4 grid gap-4 sm:grid-cols-3">
+				<div class="flex h-36 items-center justify-center rounded-xl bg-[var(--c-bg-primary)] border border-dashed border-[var(--c-border)] text-center text-xs text-[var(--c-text-muted)]">
+					<div>
+						<span class="material-symbols-outlined text-[28px] text-[var(--c-primary)]">image</span>
+						<p class="mt-1">Fish Photo with Measuring Ruler</p>
+					</div>
+				</div>
+
+				<div class="sm:col-span-2 space-y-2 text-xs text-[var(--c-text)]">
+					<p><strong class="text-[var(--c-text-strong)]">Species:</strong> Northern Pike (Esox lucius)</p>
+					<p><strong class="text-[var(--c-text-strong)]">Length:</strong> 84.5 cm | <strong class="text-[var(--c-text-strong)]">Weight:</strong> 4.82 kg</p>
+					<p><strong class="text-[var(--c-text-strong)]">Submitted:</strong> 10:42 AM (Local offline queue synced)</p>
+					<p><strong class="text-[var(--c-text-strong)]">Judge Status:</strong> <span class="rounded bg-emerald-500/10 px-2 py-0.5 text-emerald-600 font-semibold">Approved (+84.5 pts)</span></p>
+				</div>
+			</div>
+		</div>
+	}
+
+	<!-- Main Canvas Card -->
+	<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-6 shadow-[var(--shadow-sm)] sm:p-8">
+		<!-- Main Mode Navigation (Catch Submission vs Judging Control) -->
+		<div class="flex flex-wrap items-center gap-2 border-b border-[var(--c-border)] pb-4">
+			<button
+				type="button"
+				(click)="setMode('catch')"
+				class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all"
+				[class]="mode() === 'catch' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
+			>
+				<span class="material-symbols-outlined text-[18px]">phishing</span>
+				<span>1. Catch Submissions (Angler View)</span>
+			</button>
+
+			<button
+				type="button"
+				(click)="setMode('judging')"
+				class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all"
+				[class]="mode() === 'judging' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
+			>
+				<span class="material-symbols-outlined text-[18px]">gavel</span>
+				<span>2. Judging & Arbiter Review</span>
+			</button>
+		</div>
+
+		<!-- Catch Submissions Mode -->
+		@if (mode() === 'catch') {
+			<div class="mt-6">
+				<!-- Sub-tabs for Catch -->
+				<div class="flex flex-wrap items-center gap-2 rounded-xl bg-[var(--c-bg-primary)] p-1.5">
+					<button
+						type="button"
+						(click)="setCatchTab('submit')"
+						class="theme-interactive inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all"
+						[class]="activeCatchTab() === 'submit' ? 'bg-[var(--c-bg-secondary)] text-[var(--c-primary)] shadow-xs' : 'text-[var(--c-text)] hover:text-[var(--c-text-strong)]'"
+					>
+						<span class="material-symbols-outlined text-[16px]">add_a_photo</span>
+						<span>Submit New Catch</span>
+					</button>
+
+					<button
+						type="button"
+						(click)="setCatchTab('status')"
+						class="theme-interactive inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all"
+						[class]="activeCatchTab() === 'status' ? 'bg-[var(--c-bg-secondary)] text-[var(--c-primary)] shadow-xs' : 'text-[var(--c-text)] hover:text-[var(--c-text-strong)]'"
+					>
+						<span class="material-symbols-outlined text-[16px]">fact_check</span>
+						<span>Approval Status</span>
+					</button>
+
+					<button
+						type="button"
+						(click)="setCatchTab('offline')"
+						class="theme-interactive inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all"
+						[class]="activeCatchTab() === 'offline' ? 'bg-[var(--c-bg-secondary)] text-[var(--c-primary)] shadow-xs' : 'text-[var(--c-text)] hover:text-[var(--c-text-strong)]'"
+					>
+						<span class="material-symbols-outlined text-[16px]">wifi_off</span>
+						<span>Offline Queue & Sync</span>
+					</button>
+				</div>
+
+				<!-- Catch Empty State Body -->
+				<div class="mt-6 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-16 text-center">
+					<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--c-bg-secondary)] shadow-sm">
+						@switch (activeCatchTab()) {
+							@case ('submit') {
+								<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">camera_alt</span>
+							}
+							@case ('status') {
+								<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">pending_actions</span>
+							}
+							@case ('offline') {
+								<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">cloud_sync</span>
+							}
+						}
+					</div>
+
+					<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
+						@switch (activeCatchTab()) {
+							@case ('submit') {
+								Photo & Measurement Submission Form (Empty State)
+							}
+							@case ('status') {
+								Catch Approval Status Tracker (Empty State)
+							}
+							@case ('offline') {
+								Offline Storage & Auto-Sync Engine (Empty State)
+							}
+						}
+					</h3>
+
+					<p class="mt-2 max-w-md text-sm text-[var(--c-text-muted)]">
+						@switch (activeCatchTab()) {
+							@case ('submit') {
+								High-resolution photo upload with ruler alignment, fish length in mm/cm, scale weight, and GPS spot capture.
+							}
+							@case ('status') {
+								Tracks state across Pending Verification, Judge Accepted, Penalty Deduction, and Rejected.
+							}
+							@case ('offline') {
+								Catches saved in local IndexedDB when mobile network is weak on the water, with automatic background sync when reconnected.
+							}
+						}
+					</p>
+
+					<div class="mt-6 flex flex-wrap justify-center gap-2 text-xs text-[var(--c-text-muted)]">
+						<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+							IndexedDB Offline Cache Ready
+						</span>
+						<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+							Exif Timestamp & GPS Extractor Ready
+						</span>
+						<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+							Live Status Push Ready
+						</span>
+					</div>
+				</div>
+			</div>
+		} @else {
+			<!-- Judging Mode -->
+			<div class="mt-6">
+				<!-- Sub-tabs for Judging -->
+				<div class="flex flex-wrap items-center gap-2 rounded-xl bg-[var(--c-bg-primary)] p-1.5">
+					<button
+						type="button"
+						(click)="setJudgingTab('review')"
+						class="theme-interactive inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all"
+						[class]="activeJudgingTab() === 'review' ? 'bg-[var(--c-bg-secondary)] text-[var(--c-primary)] shadow-xs' : 'text-[var(--c-text)] hover:text-[var(--c-text-strong)]'"
+					>
+						<span class="material-symbols-outlined text-[16px]">rate_review</span>
+						<span>1. Catch Review Queue</span>
+					</button>
+
+					<button
+						type="button"
+						(click)="setJudgingTab('penalties')"
+						class="theme-interactive inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all"
+						[class]="activeJudgingTab() === 'penalties' ? 'bg-[var(--c-bg-secondary)] text-[var(--c-primary)] shadow-xs' : 'text-[var(--c-text)] hover:text-[var(--c-text-strong)]'"
+					>
+						<span class="material-symbols-outlined text-[16px]">balance</span>
+						<span>2. Manage Penalties</span>
+					</button>
+
+					<button
+						type="button"
+						(click)="setJudgingTab('leaderboard')"
+						class="theme-interactive inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all"
+						[class]="activeJudgingTab() === 'leaderboard' ? 'bg-[var(--c-bg-secondary)] text-[var(--c-primary)] shadow-xs' : 'text-[var(--c-text)] hover:text-[var(--c-text-strong)]'"
+					>
+						<span class="material-symbols-outlined text-[16px]">monitoring</span>
+						<span>3. Live Leaderboard Monitor</span>
+					</button>
+				</div>
+
+				<!-- Judging Empty State Body -->
+				<div class="mt-6 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-16 text-center">
+					<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--c-bg-secondary)] shadow-sm">
+						@switch (activeJudgingTab()) {
+							@case ('review') {
+								<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">checklist</span>
+							}
+							@case ('penalties') {
+								<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">warning_amber</span>
+							}
+							@case ('leaderboard') {
+								<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">trending_up</span>
+							}
+						}
+					</div>
+
+					<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
+						@switch (activeJudgingTab()) {
+							@case ('review') {
+								Catches Verification Queue (Empty State)
+							}
+							@case ('penalties') {
+								Participant Penalty Manager (Empty State)
+							}
+							@case ('leaderboard') {
+								Live Arbiter Leaderboard Control (Empty State)
+							}
+						}
+					</h3>
+
+					<p class="mt-2 max-w-md text-sm text-[var(--c-text-muted)]">
+						@switch (activeJudgingTab()) {
+							@case ('review') {
+								Incoming catch queue: photo measurement ruler check, side-by-side verification, quick Approve (green) / Reject (red) buttons with rejection reason picker.
+							}
+							@case ('penalties') {
+								Assign yellow cards, points deduction, boundary violation sanctions, or disqualifications with judge notes.
+							}
+							@case ('leaderboard') {
+								Arbiter view of real-time point distribution, instant recalculation, freeze board toggle, and audit history.
+							}
+						}
+					</p>
+
+					<div class="mt-6 flex flex-wrap justify-center gap-2 text-xs text-[var(--c-text-muted)]">
+						<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+							Two-Judge Audit Ready
+						</span>
+						<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+							Dispute Resolution Protocol Ready
+						</span>
+						<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+							Real-Time Socket Sync Ready
+						</span>
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+
+	<!-- Shared MVP Navigation Hub -->
+	<app-page-nav currentPageId="refereeing" />
+</section>
