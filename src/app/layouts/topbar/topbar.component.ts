@@ -21,7 +21,7 @@ export class TopbarComponent {
 	private readonly _companyService = inject(CompanyService);
 	private readonly _router = inject(Router);
 
-	protected readonly navPages = MVP_PAGES;
+	protected readonly navPages = MVP_PAGES.filter((page) => page.id !== 'home');
 	protected readonly mobileNavOpen = signal(false);
 	protected readonly mode = computed(() => this._themeService.mode() ?? 'light');
 	protected readonly languageMenuOpen = signal(false);
