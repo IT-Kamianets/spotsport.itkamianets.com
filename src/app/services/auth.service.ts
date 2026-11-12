@@ -5,6 +5,7 @@ import {
 	createUserWithEmailAndPassword,
 	GoogleAuthProvider,
 	sendEmailVerification,
+	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
 	signInWithPopup,
 	signOut,
@@ -91,6 +92,13 @@ export class AuthService {
 	 */
 	async signInWithEmailAndPassword(email: string, password: string): Promise<UserCredential> {
 		return this.signInWithEmail(email, password);
+	}
+
+	/**
+	 * Send password reset email.
+	 */
+	async resetPassword(email: string): Promise<void> {
+		return sendPasswordResetEmail(this._auth, email);
 	}
 
 	/**
