@@ -184,9 +184,10 @@ export class ProfileComponent {
 
 		try {
 			await this._authService.signIn(email, password);
-			this.authSuccess.set('Successfully authenticated!');
+			this.authSuccess.set('Successfully authenticated! Redirecting to dashboard...');
 			this.loginForm.reset();
-			this.activeTab.set('personal');
+			const returnUrl = this._route.snapshot.queryParams['returnUrl'] || '/home';
+			await this._router.navigateByUrl(returnUrl);
 		} catch (error: unknown) {
 			this.authError.set(this._parseFirebaseError(error));
 		} finally {
@@ -209,10 +210,13 @@ export class ProfileComponent {
 		try {
 			await this._authService.signUp(email, password);
 			this.authSuccess.set(
-				'Account created successfully! Verification link sent to your email.',
+				'Account created successfully! Verification link sent to your email. Redirecting...',
 			);
 			this.registerForm.reset();
-			this.activeTab.set('personal');
+			const returnUrl = this._route.snapshot.queryParams['returnUrl'] || '/home';
+			setTimeout(async () => {
+				await this._router.navigateByUrl(returnUrl);
+			}, 1000);
 		} catch (error: unknown) {
 			this.authError.set(this._parseFirebaseError(error));
 		} finally {
@@ -252,8 +256,9 @@ export class ProfileComponent {
 
 		try {
 			await this._authService.loginWithGoogle();
-			this.authSuccess.set('Signed in successfully with Google!');
-			this.activeTab.set('personal');
+			this.authSuccess.set('Signed in successfully with Google! Redirecting...');
+			const returnUrl = this._route.snapshot.queryParams['returnUrl'] || '/home';
+			await this._router.navigateByUrl(returnUrl);
 		} catch (error: unknown) {
 			this.authError.set(this._parseFirebaseError(error));
 		} finally {
