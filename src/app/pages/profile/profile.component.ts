@@ -1,18 +1,17 @@
 import { NgOptimizedImage } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { LanguageService, TranslateDirective, TranslateService } from '@wawjs/ngx-translate';
+import { ActivatedRoute, Router } from '@angular/router';
+import { LanguageService, TranslateService } from '@wawjs/ngx-translate';
 import { ThemeService } from '@wawjs/ngx-ui';
 import type { Language } from '@wawjs/ngx-translate';
 import type { AppLanguage } from '../../../environments/environment.prod';
-import { PageNavComponent } from '../../feature/navigation/page-nav.component';
 
 export type ProfileTab = 'personal' | 'history' | 'settings' | 'auth';
 export type AuthSubTab = 'login' | 'register' | 'recovery';
 
 @Component({
 	selector: 'app-profile',
-	imports: [NgOptimizedImage, RouterLink, PageNavComponent, TranslateDirective],
+	imports: [NgOptimizedImage],
 	templateUrl: './profile.component.html',
 })
 export class ProfileComponent {

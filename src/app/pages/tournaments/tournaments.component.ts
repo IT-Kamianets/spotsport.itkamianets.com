@@ -1,6 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { PageNavComponent } from '../../feature/navigation/page-nav.component';
 
 export type TournamentMainMode = 'view' | 'editor';
 export type TournamentTab = 'overview' | 'rules' | 'participants' | 'status' | 'leaderboard';
@@ -8,7 +7,7 @@ export type EditorSection = 'general' | 'schedule' | 'scoring' | 'penalties';
 
 @Component({
 	selector: 'app-tournaments',
-	imports: [RouterLink, PageNavComponent],
+	imports: [RouterLink],
 	templateUrl: './tournaments.component.html',
 })
 export class TournamentsComponent {

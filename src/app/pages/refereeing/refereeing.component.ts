@@ -1,6 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { PageNavComponent } from '../../feature/navigation/page-nav.component';
+import { ActivatedRoute } from '@angular/router';
 
 export type RefereeingMode = 'catch' | 'judging';
 export type CatchTab = 'submit' | 'status' | 'offline';
@@ -8,7 +7,6 @@ export type JudgingTab = 'review' | 'penalties' | 'leaderboard';
 
 @Component({
 	selector: 'app-refereeing',
-	imports: [RouterLink, PageNavComponent],
 	templateUrl: './refereeing.component.html',
 })
 export class RefereeingComponent {

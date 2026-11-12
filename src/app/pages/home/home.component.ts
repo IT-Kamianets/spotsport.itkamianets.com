@@ -1,12 +1,11 @@
 import { Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { PageNavComponent } from '../../feature/navigation/page-nav.component';
 
 type HomeTab = 'active' | 'previous' | 'join-create';
 
 @Component({
 	selector: 'app-home',
-	imports: [RouterLink, PageNavComponent],
+	imports: [RouterLink],
 	templateUrl: './home.component.html',
 })
 export class HomeComponent {
