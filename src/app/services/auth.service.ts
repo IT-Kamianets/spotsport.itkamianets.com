@@ -41,6 +41,13 @@ export class AuthService {
 	}
 
 	/**
+	 * Alias for signInWithGoogle.
+	 */
+	async loginWithGoogle(): Promise<UserCredential> {
+		return this.signInWithGoogle();
+	}
+
+	/**
 	 * Register a new user using email and password and dispatch an email verification.
 	 */
 	async registerWithEmail(email: string, password: string): Promise<UserCredential> {
@@ -49,6 +56,13 @@ export class AuthService {
 			await sendEmailVerification(credential.user);
 		}
 		return credential;
+	}
+
+	/**
+	 * Alias for registerWithEmail.
+	 */
+	async signUp(email: string, password: string): Promise<UserCredential> {
+		return this.registerWithEmail(email, password);
 	}
 
 	/**
@@ -68,6 +82,13 @@ export class AuthService {
 	/**
 	 * Alias for signInWithEmail.
 	 */
+	async signIn(email: string, password: string): Promise<UserCredential> {
+		return this.signInWithEmail(email, password);
+	}
+
+	/**
+	 * Alias for signInWithEmail.
+	 */
 	async signInWithEmailAndPassword(email: string, password: string): Promise<UserCredential> {
 		return this.signInWithEmail(email, password);
 	}
@@ -77,5 +98,12 @@ export class AuthService {
 	 */
 	async signOut(): Promise<void> {
 		return signOut(this._auth);
+	}
+
+	/**
+	 * Alias for signOut.
+	 */
+	async logout(): Promise<void> {
+		return this.signOut();
 	}
 }

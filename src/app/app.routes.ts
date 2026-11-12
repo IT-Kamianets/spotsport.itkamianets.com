@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { buildRouteMeta } from '@wawjs/ngx-default';
 import { companyProfile } from './feature/company/company.data';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
 	{
@@ -31,7 +32,29 @@ export const routes: Routes = [
 	},
 	{
 		path: 'login',
-		redirectTo: 'profile',
+		loadComponent: () =>
+			import('./pages/auth/login/login.component').then((m) => m.LoginComponent),
+		data: {
+			meta: {
+				...buildRouteMeta(companyProfile, '/login'),
+				title: 'Sign In — SpotSport',
+				description: 'Sign in to your SpotSport angler account.',
+			},
+		},
+	},
+	{
+		path: 'register',
+		loadComponent: () =>
+			import('./pages/auth/register/register.component').then(
+				(m) => m.RegisterComponent,
+			),
+		data: {
+			meta: {
+				...buildRouteMeta(companyProfile, '/register'),
+				title: 'Register — SpotSport',
+				description: 'Create a new SpotSport angler account.',
+			},
+		},
 	},
 	{
 		path: 'tournaments',
@@ -98,6 +121,7 @@ export const routes: Routes = [
 	},
 	{
 		path: 'profile',
+		canActivate: [authGuard],
 		loadComponent: () =>
 			import('./pages/profile/profile.component').then((m) => m.ProfileComponent),
 		data: {

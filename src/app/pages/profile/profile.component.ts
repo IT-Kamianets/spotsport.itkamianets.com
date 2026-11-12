@@ -1,17 +1,19 @@
 import { NgOptimizedImage } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LanguageService, TranslateService } from '@wawjs/ngx-translate';
 import { ThemeService } from '@wawjs/ngx-ui';
 import type { Language } from '@wawjs/ngx-translate';
 import type { AppLanguage } from '../../../environments/environment.prod';
+import { AuthService } from '../../services/auth.service';
 
 export type ProfileTab = 'personal' | 'history' | 'settings' | 'auth';
 export type AuthSubTab = 'login' | 'register' | 'recovery';
 
 @Component({
 	selector: 'app-profile',
-	imports: [NgOptimizedImage],
+	imports: [NgOptimizedImage, RouterLink],
 	templateUrl: './profile.component.html',
 })
 export class ProfileComponent {
@@ -20,6 +22,9 @@ export class ProfileComponent {
 	private readonly _translateService = inject(TranslateService);
 	private readonly _themeService = inject(ThemeService);
 	private readonly _languageService = inject(LanguageService);
+	private readonly _authService = inject(AuthService);
+
+	protected readonly currentUser = toSignal(this._authService.authState$, { initialValue: null });
 
 	protected readonly activeTab = signal<ProfileTab>('personal');
 	protected readonly activeAuthTab = signal<AuthSubTab>('login');
@@ -82,6 +87,11 @@ export class ProfileComponent {
 	protected toggleMode(): void {
 		const nextMode = this.mode() === 'dark' ? 'light' : 'dark';
 		this._themeService.setMode(nextMode);
+	}
+
+	protected async signOut(): Promise<void> {
+		await this._authService.signOut();
+		await this._router.navigateByUrl('/login');
 	}
 
 	protected async nextLanguage(): Promise<void> {
