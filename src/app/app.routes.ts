@@ -84,6 +84,19 @@ export const routes: Routes = [
 		redirectTo: 'refereeing',
 	},
 	{
+		path: 'about',
+		loadComponent: () =>
+			import('./pages/about/about.component').then((m) => m.AboutComponent),
+		data: {
+			meta: {
+				...buildRouteMeta(companyProfile, '/about'),
+				title: 'About - SpotSport',
+				description:
+					'About SpotSport platform, mission, sport fishing tournament technology, and the creator.',
+			},
+		},
+	},
+	{
 		path: 'profile',
 		loadComponent: () =>
 			import('./pages/profile/profile.component').then((m) => m.ProfileComponent),

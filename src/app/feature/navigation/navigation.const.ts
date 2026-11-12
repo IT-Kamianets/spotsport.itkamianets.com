@@ -69,8 +69,22 @@ export const MVP_PAGES: MvpPageInfo[] = [
 		],
 	},
 	{
-		id: 'profile',
+		id: 'about',
 		number: 4,
+		title: 'About',
+		path: '/about',
+		icon: 'info',
+		summary: 'Platform overview, creator profile, mission, and architecture.',
+		features: [
+			'Project Mission & Capabilities',
+			'Creator & Lead Developer',
+			'University & Academic Context',
+			'Technology Stack',
+		],
+	},
+	{
+		id: 'profile',
+		number: 5,
 		title: 'Profile',
 		path: '/profile',
 		icon: 'account_circle',
