@@ -261,56 +261,141 @@
 						</div>
 					</div>
 				</div>
+			} @else if (activeTab() === 'personal') {
+				@if (currentUser(); as user) {
+					<!-- Authenticated Angler Identity Card -->
+					<div class="mt-8 rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-6 sm:p-8 shadow-xs">
+						<div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+							<div class="flex items-center gap-5">
+								<div class="relative">
+									@if (user.photoURL) {
+										<img [src]="user.photoURL" [alt]="user.displayName || 'Angler'" class="h-20 w-20 rounded-2xl border-2 border-[var(--c-primary)] object-cover shadow-sm" />
+									} @else {
+										<div class="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--c-primary)] to-sky-600 text-white shadow-sm">
+											<span class="text-2xl font-bold">{{ (user.displayName || user.email || 'A').substring(0, 2).toUpperCase() }}</span>
+										</div>
+									}
+									<span class="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white" title="Verified via Google / Firebase">
+										<span class="material-symbols-outlined text-[14px]">verified</span>
+									</span>
+								</div>
+
+								<div>
+									<div class="flex flex-wrap items-center gap-2">
+										<h3 class="text-xl font-bold text-[var(--c-text-strong)] sm:text-2xl">
+											{{ user.displayName || user.email?.split('@')?.[0] || 'SpotSport Angler' }}
+										</h3>
+										<span class="rounded bg-[var(--c-primary)]/10 px-2.5 py-0.5 text-xs font-semibold text-[var(--c-primary)]">
+											Sport Angler
+										</span>
+									</div>
+									<p class="mt-1 flex items-center gap-1.5 text-xs text-[var(--c-text-muted)]">
+										<span class="material-symbols-outlined text-[16px] text-[var(--c-primary)]">mail</span>
+										<span>{{ user.email }}</span>
+									</p>
+									<p class="mt-1 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
+										<span class="material-symbols-outlined text-[16px]">cloud_done</span>
+										<span>Firestore Document: <code class="font-mono text-[11px]">users/{{ user.uid.substring(0, 10) }}...</code></span>
+									</p>
+								</div>
+							</div>
+
+							<div class="flex flex-wrap items-center gap-2.5">
+								<button
+									type="button"
+									(click)="signOut()"
+									class="theme-interactive inline-flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-500/20 shadow-xs"
+								>
+									<span class="material-symbols-outlined text-[16px]">logout</span>
+									<span>Sign Out</span>
+								</button>
+							</div>
+						</div>
+
+						<div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3 border-t border-[var(--c-border)] pt-6">
+							<div class="rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-4">
+								<p class="text-xs text-[var(--c-text-muted)]">Auth Provider</p>
+								<p class="mt-1 text-sm font-semibold text-[var(--c-text-strong)] flex items-center gap-1.5">
+									<span class="material-symbols-outlined text-[18px] text-[var(--c-primary)]">security</span>
+									<span>{{ user.providerData[0]?.providerId === 'google.com' ? 'Google Account' : 'Email & Password' }}</span>
+								</p>
+							</div>
+							<div class="rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-4">
+								<p class="text-xs text-[var(--c-text-muted)]">Email Status</p>
+								<p class="mt-1 text-sm font-semibold" [class]="user.emailVerified ? 'text-emerald-600' : 'text-amber-600'">
+									{{ user.emailVerified ? 'Verified' : 'Verification Pending' }}
+								</p>
+							</div>
+							<div class="rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-4">
+								<p class="text-xs text-[var(--c-text-muted)]">Database Sync</p>
+								<p class="mt-1 text-sm font-semibold text-[var(--c-text-strong)] flex items-center gap-1.5">
+									<span class="material-symbols-outlined text-[18px] text-emerald-500">database</span>
+									<span>Firestore Active</span>
+								</p>
+							</div>
+						</div>
+					</div>
+				} @else {
+					<!-- Unauthenticated Angler Identity Callout with Google Sign-in -->
+					<div class="mt-8 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-14 text-center">
+						<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--c-bg-secondary)] shadow-sm">
+							<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">person</span>
+						</div>
+						<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
+							Angler Identity & Fishing License
+						</h3>
+						<p class="mt-2 max-w-md text-xs text-[var(--c-text-muted)]">
+							Sign in with your Google account or email to link your angler profile, tournament results, and catches.
+						</p>
+						<div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+							<button
+								type="button"
+								(click)="onGoogleSignIn()"
+								[disabled]="authLoading() || googleLoading()"
+								class="theme-interactive inline-flex items-center gap-2.5 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2.5 text-xs font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] shadow-xs transition-all"
+							>
+								@if (googleLoading()) {
+									<span class="material-symbols-outlined animate-spin text-[16px] text-[var(--c-primary)]">progress_activity</span>
+									<span>Signing in...</span>
+								} @else {
+									<svg class="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
+										<path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z" />
+										<path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24Z" />
+										<path fill="#FBBC05" d="M5.28 14.27a7.19 7.19 0 0 1 0-4.54V6.58H1.25a11.96 11.96 0 0 0 0 10.84l4.03-3.15Z" />
+										<path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z" />
+									</svg>
+									<span>Sign in with Google</span>
+								}
+							</button>
+							<button
+								type="button"
+								(click)="setTab('auth')"
+								class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-xs"
+							>
+								<span class="material-symbols-outlined text-[16px]">lock_open</span>
+								<span>Open Auth Hub</span>
+							</button>
+						</div>
+					</div>
+				}
 			} @else {
+				<!-- History / other tabs -->
 				<div class="mt-8 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-16 text-center">
 					<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--c-bg-secondary)] shadow-sm">
-						@switch (activeTab()) {
-							@case ('personal') {
-								<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">person</span>
-							}
-							@case ('history') {
-								<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">military_tech</span>
-							}
-							@default {
-								<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">account_circle</span>
-							}
-						}
+						<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">military_tech</span>
 					</div>
-
 					<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
-						@switch (activeTab()) {
-							@case ('personal') {
-								Angler Identity & Fishing License (Empty State)
-							}
-							@case ('history') {
-								Past Tournaments, Catches & Trophies (Empty State)
-							}
-							@default {
-								Profile Section
-							}
-						}
+						Past Tournaments, Catches & Trophies (Empty State)
 					</h3>
-
 					<p class="mt-2 max-w-md text-sm text-[var(--c-text-muted)]">
-						@switch (activeTab()) {
-							@case ('personal') {
-								Full name, display callsign, avatar photo, country/region, fishing federation ID, and sponsor affiliations.
-							}
-							@case ('history') {
-								Participated tournaments log, podium placements, personal best catch records, and earned badges.
-							}
-							@default {
-								Profile settings and information.
-							}
-						}
+						Participated tournaments log, podium placements, personal best catch records, and earned badges.
 					</p>
-
 					<div class="mt-6 flex flex-wrap justify-center gap-2 text-xs text-[var(--c-text-muted)]">
 						<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
-							User Avatar Upload Ready
+							Past Tournaments Log Ready
 						</span>
 						<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
-							Offline Profile Cache Ready
+							Catch Trophies Ready
 						</span>
 					</div>
 				</div>
@@ -321,11 +406,17 @@
 				@if (currentUser(); as user) {
 					<!-- Authenticated State Card -->
 					<div class="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-6 text-center sm:p-8">
-						<div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 shadow-sm">
-							<span class="material-symbols-outlined text-[32px]">verified_user</span>
-						</div>
+						@if (user.photoURL) {
+							<div class="mx-auto flex h-20 w-20 overflow-hidden rounded-full border-2 border-[var(--c-primary)] shadow-md">
+								<img [src]="user.photoURL" [alt]="user.displayName || 'Google Angler'" class="h-full w-full object-cover" />
+							</div>
+						} @else {
+							<div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 shadow-sm">
+								<span class="material-symbols-outlined text-[32px]">verified_user</span>
+							</div>
+						}
 						<h3 class="mt-4 text-lg font-bold text-[var(--c-text-strong)]">
-							Authenticated Session Active
+							{{ user.displayName || 'Authenticated Angler' }}
 						</h3>
 						<p class="mt-1 text-xs text-[var(--c-text-muted)]">
 							Signed in as <span class="font-semibold text-[var(--c-text-strong)]">{{ user.email }}</span>
@@ -335,7 +426,10 @@
 								{{ user.emailVerified ? 'Email Verified' : 'Email Unverified' }}
 							</span>
 							<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-3 py-1 text-[var(--c-text-muted)]">
-								UID: {{ user.uid.substring(0, 12) }}...
+								Provider: {{ user.providerData[0]?.providerId || 'google.com' }}
+							</span>
+							<span class="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-emerald-600 font-medium">
+								Firestore Synced (spotsport-64708)
 							</span>
 						</div>
 						<div class="mt-6 flex flex-wrap justify-center gap-3">
@@ -345,7 +439,7 @@
 								class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-5 py-2.5 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm"
 							>
 								<span class="material-symbols-outlined text-[16px]">person</span>
-								<span>Go to Personal Info</span>
+								<span>View Angler Identity</span>
 							</button>
 							<button
 								type="button"

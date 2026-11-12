@@ -49,7 +49,7 @@ export class ProfileComponent {
 	protected readonly activeTab = signal<ProfileTab>('personal');
 	protected readonly activeAuthTab = signal<AuthSubTab>('login');
 
-	// Reactive Forms for in-page Login, Registration & Recovery
+	// Reactive Forms for Auth Sub-Tabs
 	protected readonly loginForm = new FormGroup({
 		email: new FormControl('', {
 			nonNullable: true,
@@ -154,20 +154,30 @@ export class ProfileComponent {
 		this.authSuccess.set(null);
 	}
 
-	protected toggleLoginPassword(): void {
+	protected toggleLoginPasswordVisibility(): void {
 		this.showLoginPassword.update((visible) => !visible);
 	}
 
-	protected toggleLoginPasswordVisibility(): void {
-		this.toggleLoginPassword();
-	}
-
-	protected toggleRegisterPassword(): void {
+	protected toggleRegisterPasswordVisibility(): void {
 		this.showRegisterPassword.update((visible) => !visible);
 	}
 
-	protected toggleRegisterPasswordVisibility(): void {
-		this.toggleRegisterPassword();
+	protected async onGoogleSignIn(): Promise<void> {
+		this.googleLoading.set(true);
+		this.authError.set(null);
+		this.authSuccess.set(null);
+
+		try {
+			await this._authService.signInWithGoogle();
+			this.authSuccess.set(
+				'Signed in successfully with Google! Account synchronized with Firestore database.',
+			);
+			this.activeTab.set('personal');
+		} catch (error: unknown) {
+			this.authError.set(this._parseFirebaseError(error));
+		} finally {
+			this.googleLoading.set(false);
+		}
 	}
 
 	protected async onLoginSubmit(): Promise<void> {
@@ -184,10 +194,9 @@ export class ProfileComponent {
 
 		try {
 			await this._authService.signIn(email, password);
-			this.authSuccess.set('Successfully authenticated! Redirecting to dashboard...');
+			this.authSuccess.set('Successfully signed in! Account synchronized.');
 			this.loginForm.reset();
-			const returnUrl = this._route.snapshot.queryParams['returnUrl'] || '/home';
-			await this._router.navigateByUrl(returnUrl);
+			this.activeTab.set('personal');
 		} catch (error: unknown) {
 			this.authError.set(this._parseFirebaseError(error));
 		} finally {
@@ -210,13 +219,12 @@ export class ProfileComponent {
 		try {
 			await this._authService.signUp(email, password);
 			this.authSuccess.set(
-				'Account created successfully! Verification link sent to your email. Redirecting...',
+				'Account created successfully! Verification email dispatched and profile synced in Firestore.',
 			);
 			this.registerForm.reset();
-			const returnUrl = this._route.snapshot.queryParams['returnUrl'] || '/home';
-			setTimeout(async () => {
-				await this._router.navigateByUrl(returnUrl);
-			}, 1000);
+			setTimeout(() => {
+				this.activeTab.set('personal');
+			}, 1200);
 		} catch (error: unknown) {
 			this.authError.set(this._parseFirebaseError(error));
 		} finally {
@@ -249,33 +257,16 @@ export class ProfileComponent {
 		}
 	}
 
-	protected async onGoogleSignIn(): Promise<void> {
-		this.googleLoading.set(true);
-		this.authError.set(null);
-		this.authSuccess.set(null);
-
-		try {
-			await this._authService.loginWithGoogle();
-			this.authSuccess.set('Signed in successfully with Google! Redirecting...');
-			const returnUrl = this._route.snapshot.queryParams['returnUrl'] || '/home';
-			await this._router.navigateByUrl(returnUrl);
-		} catch (error: unknown) {
-			this.authError.set(this._parseFirebaseError(error));
-		} finally {
-			this.googleLoading.set(false);
-		}
+	protected toggleMode(): void {
+		const nextMode = this.mode() === 'dark' ? 'light' : 'dark';
+		this._themeService.setMode(nextMode);
 	}
 
 	protected async signOut(): Promise<void> {
 		await this._authService.signOut();
-		this.authSuccess.set('You have been signed out.');
+		this.authSuccess.set('Signed out successfully.');
 		this.activeTab.set('auth');
 		this.activeAuthTab.set('login');
-	}
-
-	protected toggleMode(): void {
-		const nextMode = this.mode() === 'dark' ? 'light' : 'dark';
-		this._themeService.setMode(nextMode);
 	}
 
 	protected async nextLanguage(): Promise<void> {
