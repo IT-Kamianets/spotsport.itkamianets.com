@@ -12,25 +12,20 @@ import {
 	User,
 	UserCredential,
 } from '@angular/fire/auth';
-import {
-	doc,
-	docData,
-	Firestore,
-	getDoc,
-	serverTimestamp,
-	setDoc,
-} from '@angular/fire/firestore';
+import { doc, Firestore, serverTimestamp, setDoc } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
-export interface UserProfile {
+export interface UserProfileData {
 	uid: string;
-	email: string;
-	displayName: string;
-	photoURL: string;
-	role: 'angler' | 'judge' | 'admin';
-	providerId: string;
+	email: string | null;
+	displayName?: string | null;
+	fullName?: string | null;
+	photoURL?: string | null;
+	emailVerified: boolean;
+	authProvider: string;
 	createdAt?: unknown;
-	lastLoginAt?: unknown;
+	updatedAt?: unknown;
+	role?: 'angler' | 'judge' | 'organizer';
 }
 
 @Injectable({
@@ -54,14 +49,17 @@ export class AuthService {
 	}
 
 	/**
-	 * Sign in using Google with popup and sync profile to Firestore database.
+	 * Functional Google Authentication method using popup and syncs user to Cloud Firestore.
 	 */
 	async signInWithGoogle(): Promise<UserCredential> {
 		const provider = new GoogleAuthProvider();
-		provider.setCustomParameters({ prompt: 'select_account' });
 		const credential = await signInWithPopup(this._auth, provider);
 		if (credential.user) {
-			await this.syncUserToFirestore(credential.user);
+			await this.syncUserToFirestore(credential.user, {
+				displayName: credential.user.displayName,
+				photoURL: credential.user.photoURL,
+				role: 'angler',
+			});
 		}
 		return credential;
 	}
@@ -74,13 +72,21 @@ export class AuthService {
 	}
 
 	/**
-	 * Register a new user using email and password, dispatch verification, and store in Firestore.
+	 * Register a new user using email and password, send verification, and save profile in Firestore.
 	 */
-	async registerWithEmail(email: string, password: string): Promise<UserCredential> {
+	async registerWithEmail(
+		email: string,
+		password: string,
+		additionalData?: { fullName?: string; role?: 'angler' | 'judge' | 'organizer' },
+	): Promise<UserCredential> {
 		const credential = await createUserWithEmailAndPassword(this._auth, email, password);
 		if (credential.user) {
 			await sendEmailVerification(credential.user);
-			await this.syncUserToFirestore(credential.user);
+			await this.syncUserToFirestore(credential.user, {
+				displayName: additionalData?.fullName || '',
+				fullName: additionalData?.fullName || '',
+				role: additionalData?.role || 'angler',
+			});
 		}
 		return credential;
 	}
@@ -88,8 +94,12 @@ export class AuthService {
 	/**
 	 * Alias for registerWithEmail.
 	 */
-	async signUp(email: string, password: string): Promise<UserCredential> {
-		return this.registerWithEmail(email, password);
+	async signUp(
+		email: string,
+		password: string,
+		additionalData?: { fullName?: string; role?: 'angler' | 'judge' | 'organizer' },
+	): Promise<UserCredential> {
+		return this.registerWithEmail(email, password, additionalData);
 	}
 
 	/**
@@ -100,7 +110,7 @@ export class AuthService {
 	}
 
 	/**
-	 * Sign in an existing user with email and password and sync Firestore.
+	 * Sign in an existing user with email and password and touch Firestore record.
 	 */
 	async signInWithEmail(email: string, password: string): Promise<UserCredential> {
 		const credential = await signInWithEmailAndPassword(this._auth, email, password);
@@ -125,9 +135,9 @@ export class AuthService {
 	}
 
 	/**
-	 * Send password reset email instructions.
+	 * Dispatch password reset email.
 	 */
-	async resetPassword(email: string): Promise<void> {
+	async sendPasswordReset(email: string): Promise<void> {
 		return sendPasswordResetEmail(this._auth, email);
 	}
 
@@ -146,46 +156,28 @@ export class AuthService {
 	}
 
 	/**
-	 * Synchronize user profile into Firestore collection `users` at document `users/{uid}`.
+	 * Synchronize user profile into Cloud Firestore at collection 'users' / 'anglers'.
+	 * Target database: spotsport-64708 (default)
 	 */
-	async syncUserToFirestore(user: User): Promise<void> {
+	async syncUserToFirestore(user: User, customData?: Record<string, unknown>): Promise<void> {
 		try {
-			const userRef = doc(this._firestore, 'users', user.uid);
-			const userSnap = await getDoc(userRef);
-
-			if (!userSnap.exists()) {
-				await setDoc(userRef, {
-					uid: user.uid,
-					email: user.email ?? '',
-					displayName: user.displayName ?? '',
-					photoURL: user.photoURL ?? '',
-					providerId: user.providerData?.[0]?.providerId ?? 'google.com',
-					role: 'angler',
-					createdAt: serverTimestamp(),
-					lastLoginAt: serverTimestamp(),
-				});
-			} else {
-				await setDoc(
-					userRef,
-					{
-						lastLoginAt: serverTimestamp(),
-						email: user.email ?? userSnap.data()['email'] ?? '',
-						displayName: user.displayName ?? userSnap.data()['displayName'] ?? '',
-						photoURL: user.photoURL ?? userSnap.data()['photoURL'] ?? '',
-					},
-					{ merge: true },
-				);
-			}
-		} catch (err) {
-			console.warn('Firestore user profile sync notice:', err);
+			const userDocRef = doc(this._firestore, 'users', user.uid);
+			const payload: UserProfileData & Record<string, unknown> = {
+				uid: user.uid,
+				email: user.email,
+				displayName: user.displayName || (customData?.['displayName'] as string) || (customData?.['fullName'] as string) || '',
+				fullName: (customData?.['fullName'] as string) || user.displayName || '',
+				photoURL: user.photoURL || '',
+				emailVerified: user.emailVerified,
+				authProvider: user.providerData[0]?.providerId || 'password',
+				updatedAt: serverTimestamp(),
+				createdAt: serverTimestamp(),
+				role: (customData?.['role'] as 'angler') || 'angler',
+				...customData,
+			};
+			await setDoc(userDocRef, payload, { merge: true });
+		} catch (error) {
+			console.warn('Firestore user profile sync error (ignored for offline resilience):', error);
 		}
-	}
-
-	/**
-	 * Stream Firestore user profile data by UID.
-	 */
-	getUserProfile(uid: string): Observable<UserProfile | undefined> {
-		const userRef = doc(this._firestore, 'users', uid);
-		return docData(userRef) as Observable<UserProfile | undefined>;
 	}
 }
