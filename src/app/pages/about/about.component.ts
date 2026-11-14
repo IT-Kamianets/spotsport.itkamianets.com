@@ -13,6 +13,7 @@ export class AboutComponent {
 		role: 'Creator & Lead Developer',
 		roleUa: 'Автор та головний розробник',
 		email: 'kn1b24.oliinyk@kpnu.edu.ua',
+		resumeUrl: 'https://kostia-oliinyk.itkamianets.com/',
 		university: "Кам'янець-Подільський національний університет імені Івана Огієнка",
 		project: 'Гібридні мобільні додатки: SpotSport',
 		organization: 'IT-Kamianets',
