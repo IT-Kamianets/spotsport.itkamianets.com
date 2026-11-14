@@ -17,6 +17,7 @@ export class TopbarComponent {
 	private readonly _router = inject(Router);
 
 	protected readonly navPages = MVP_PAGES.filter((page) => page.id !== 'home');
+	protected readonly githubRepoUrl = 'https://github.com/IT-Kamianets/spotsport.itkamianets.com';
 	protected readonly mobileNavOpen = signal(false);
 	protected readonly isProfilePage = signal(false);
 	protected readonly company = this._companyService.company;
