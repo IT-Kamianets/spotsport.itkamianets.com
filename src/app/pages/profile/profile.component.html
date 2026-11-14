@@ -614,165 +614,135 @@
 
 					<!-- Sub-Tab 2: Registration -->
 					@if (activeAuthTab() === 'register') {
-						<div class="mt-6 rounded-2xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/60 p-6 sm:p-8 shadow-xs">
-							<!-- Header matching screenshot -->
-							<div class="flex flex-col items-center justify-center text-center">
-								<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--c-bg-secondary)] shadow-sm">
-									<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">badge</span>
-								</div>
+						<div class="mt-6 rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-6 sm:p-7 shadow-xs">
+							<!-- Authentification with Google Button -->
+							<button
+								type="button"
+								(click)="onGoogleSignIn()"
+								[disabled]="authLoading() || googleLoading()"
+								class="theme-interactive inline-flex w-full items-center justify-center gap-3 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2.5 text-xs font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] shadow-xs transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+							>
+								@if (googleLoading()) {
+									<span class="material-symbols-outlined animate-spin text-[18px] text-[var(--c-primary)]">progress_activity</span>
+									<span>Authentification with Google...</span>
+								} @else {
+									<svg class="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
+										<path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z" />
+										<path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24Z" />
+										<path fill="#FBBC05" d="M5.28 14.27a7.19 7.19 0 0 1 0-4.54V6.58H1.25a11.96 11.96 0 0 0 0 10.84l4.03-3.15Z" />
+										<path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z" />
+									</svg>
+									<span>Authentification with Google</span>
+								}
+							</button>
 
-								<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
-									Angler & Organizer Registration (Empty State)
-								</h3>
-
-								<p class="mt-2 max-w-md text-sm text-[var(--c-text-muted)]">
-									Full name, email, phone number, angler club affiliation, and password setup will be placed here.
-								</p>
-
-								<div class="mt-4 flex flex-wrap justify-center gap-2 text-xs text-[var(--c-text-muted)]">
-									<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
-										Form Validation Ready
-									</span>
-									<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
-										JWT Session Ready
-									</span>
-									<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
-										Role-based Redirect Ready
-									</span>
-								</div>
+							<div class="relative my-5 flex items-center justify-center">
+								<div class="w-full border-t border-[var(--c-border)]"></div>
+								<span class="absolute bg-[var(--c-bg-primary)] px-3 text-[10px] font-semibold uppercase tracking-wider text-[var(--c-text-muted)]">
+									or register with email
+								</span>
 							</div>
 
-							<!-- Form & Google Auth Box -->
-							<div class="mx-auto mt-8 max-w-md rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-6 shadow-sm">
-								<!-- Authentification with Google Button -->
+							<form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" class="space-y-4 text-left" novalidate>
+								<div>
+									<label for="prof-reg-email" class="block text-xs font-semibold text-[var(--c-text-strong)]">
+										Registration with Email
+									</label>
+									<div class="relative mt-1">
+										<input
+											id="prof-reg-email"
+											type="email"
+											formControlName="email"
+											autocomplete="email"
+											placeholder="angler@example.com"
+											class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3.5 py-2.5 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
+											[class.border-red-500]="registerForm.controls.email.invalid && registerForm.controls.email.touched"
+										/>
+									</div>
+									@if (registerForm.controls.email.invalid && registerForm.controls.email.touched) {
+										<p class="mt-1 text-[11px] text-red-500">
+											@if (registerForm.controls.email.errors?.['required']) {
+												Email is required.
+											} @else if (registerForm.controls.email.errors?.['email']) {
+												Please enter a valid email format.
+											}
+										</p>
+									}
+								</div>
+
+								<div>
+									<label for="prof-reg-password" class="block text-xs font-semibold text-[var(--c-text-strong)]">
+										Password
+									</label>
+									<div class="relative mt-1">
+										<input
+											id="prof-reg-password"
+											[type]="showRegisterPassword() ? 'text' : 'password'"
+											formControlName="password"
+											autocomplete="new-password"
+											placeholder="••••••••"
+											class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3.5 py-2.5 pr-10 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
+											[class.border-red-500]="registerForm.controls.password.invalid && registerForm.controls.password.touched"
+										/>
+										<button
+											type="button"
+											(click)="toggleRegisterPasswordVisibility()"
+											class="absolute right-2.5 top-2 text-[var(--c-text-muted)] hover:text-[var(--c-text-strong)]"
+										>
+											<span class="material-symbols-outlined text-[18px]">
+												{{ showRegisterPassword() ? 'visibility_off' : 'visibility' }}
+											</span>
+										</button>
+									</div>
+									@if (registerForm.controls.password.invalid && registerForm.controls.password.touched) {
+										<p class="mt-1 text-[11px] text-red-500">
+											@if (registerForm.controls.password.errors?.['required']) {
+												Password is required.
+											} @else if (registerForm.controls.password.errors?.['minlength']) {
+												Minimum 6 characters.
+											}
+										</p>
+									}
+								</div>
+
+								<div>
+									<label for="prof-reg-confirm" class="block text-xs font-semibold text-[var(--c-text-strong)]">
+										Confirm password
+									</label>
+									<div class="relative mt-1">
+										<input
+											id="prof-reg-confirm"
+											[type]="showRegisterPassword() ? 'text' : 'password'"
+											formControlName="confirmPassword"
+											autocomplete="new-password"
+											placeholder="••••••••"
+											class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3.5 py-2.5 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
+											[class.border-red-500]="(registerForm.controls.confirmPassword.invalid || registerForm.errors?.['passwordMismatch']) && registerForm.controls.confirmPassword.touched"
+										/>
+									</div>
+									@if (registerForm.controls.confirmPassword.touched) {
+										@if (registerForm.controls.confirmPassword.errors?.['required']) {
+											<p class="mt-1 text-[11px] text-red-500">Please confirm your password.</p>
+										} @else if (registerForm.errors?.['passwordMismatch']) {
+											<p class="mt-1 text-[11px] text-red-500">Passwords do not match.</p>
+										}
+									}
+								</div>
+
 								<button
-									type="button"
-									(click)="onGoogleSignIn()"
+									type="submit"
 									[disabled]="authLoading() || googleLoading()"
-									class="theme-interactive inline-flex w-full items-center justify-center gap-3 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-4 py-2.5 text-xs font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] shadow-xs transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+									class="theme-interactive inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
 								>
-									@if (googleLoading()) {
-										<span class="material-symbols-outlined animate-spin text-[18px] text-[var(--c-primary)]">progress_activity</span>
-										<span>Authentification with Google...</span>
+									@if (authLoading()) {
+										<span class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
+										<span>Registering...</span>
 									} @else {
-										<svg class="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
-											<path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z" />
-											<path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24Z" />
-											<path fill="#FBBC05" d="M5.28 14.27a7.19 7.19 0 0 1 0-4.54V6.58H1.25a11.96 11.96 0 0 0 0 10.84l4.03-3.15Z" />
-											<path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z" />
-										</svg>
-										<span>Authentification with Google</span>
+										<span class="material-symbols-outlined text-[16px]">how_to_reg</span>
+										<span>Register with Email</span>
 									}
 								</button>
-
-								<div class="relative my-5 flex items-center justify-center">
-									<div class="w-full border-t border-[var(--c-border)]"></div>
-									<span class="absolute bg-[var(--c-bg-secondary)] px-3 text-[10px] font-semibold uppercase tracking-wider text-[var(--c-text-muted)]">
-										or register with email
-									</span>
-								</div>
-
-								<form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" class="space-y-4 text-left" novalidate>
-									<div>
-										<label for="prof-reg-email" class="block text-xs font-semibold text-[var(--c-text-strong)]">
-											Registration with Email
-										</label>
-										<div class="relative mt-1">
-											<input
-												id="prof-reg-email"
-												type="email"
-												formControlName="email"
-												autocomplete="email"
-												placeholder="angler@example.com"
-												class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-3.5 py-2.5 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
-												[class.border-red-500]="registerForm.controls.email.invalid && registerForm.controls.email.touched"
-											/>
-										</div>
-										@if (registerForm.controls.email.invalid && registerForm.controls.email.touched) {
-											<p class="mt-1 text-[11px] text-red-500">
-												@if (registerForm.controls.email.errors?.['required']) {
-													Email is required.
-												} @else if (registerForm.controls.email.errors?.['email']) {
-													Please enter a valid email format.
-												}
-											</p>
-										}
-									</div>
-
-									<div>
-										<label for="prof-reg-password" class="block text-xs font-semibold text-[var(--c-text-strong)]">
-											Password
-										</label>
-										<div class="relative mt-1">
-											<input
-												id="prof-reg-password"
-												[type]="showRegisterPassword() ? 'text' : 'password'"
-												formControlName="password"
-												autocomplete="new-password"
-												placeholder="••••••••"
-												class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-3.5 py-2.5 pr-10 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
-												[class.border-red-500]="registerForm.controls.password.invalid && registerForm.controls.password.touched"
-											/>
-											<button
-												type="button"
-												(click)="toggleRegisterPasswordVisibility()"
-												class="absolute right-2.5 top-2 text-[var(--c-text-muted)] hover:text-[var(--c-text-strong)]"
-											>
-												<span class="material-symbols-outlined text-[18px]">
-													{{ showRegisterPassword() ? 'visibility_off' : 'visibility' }}
-												</span>
-											</button>
-										</div>
-										@if (registerForm.controls.password.invalid && registerForm.controls.password.touched) {
-											<p class="mt-1 text-[11px] text-red-500">
-												@if (registerForm.controls.password.errors?.['required']) {
-													Password is required.
-												} @else if (registerForm.controls.password.errors?.['minlength']) {
-													Minimum 6 characters.
-												}
-											</p>
-										}
-									</div>
-
-									<div>
-										<label for="prof-reg-confirm" class="block text-xs font-semibold text-[var(--c-text-strong)]">
-											Confirm password
-										</label>
-										<div class="relative mt-1">
-											<input
-												id="prof-reg-confirm"
-												[type]="showRegisterPassword() ? 'text' : 'password'"
-												formControlName="confirmPassword"
-												autocomplete="new-password"
-												placeholder="••••••••"
-												class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-3.5 py-2.5 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
-												[class.border-red-500]="(registerForm.controls.confirmPassword.invalid || registerForm.errors?.['passwordMismatch']) && registerForm.controls.confirmPassword.touched"
-											/>
-										</div>
-										@if (registerForm.controls.confirmPassword.touched) {
-											@if (registerForm.controls.confirmPassword.errors?.['required']) {
-												<p class="mt-1 text-[11px] text-red-500">Please confirm your password.</p>
-											} @else if (registerForm.errors?.['passwordMismatch']) {
-												<p class="mt-1 text-[11px] text-red-500">Passwords do not match.</p>
-											}
-										}
-									</div>
-
-									<button
-										type="submit"
-										[disabled]="authLoading() || googleLoading()"
-										class="theme-interactive inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
-									>
-										@if (authLoading()) {
-											<span class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
-											<span>Registering...</span>
-										} @else {
-											<span class="material-symbols-outlined text-[16px]">how_to_reg</span>
-											<span>Register with Email</span>
-										}
-									</button>
-								</form>
-							</div>
+							</form>
 						</div>
 					}
 
