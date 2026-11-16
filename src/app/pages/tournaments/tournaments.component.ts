@@ -10,6 +10,7 @@ import {
 	serverTimestamp,
 } from '@angular/fire/firestore';
 import { catchError, Observable, of } from 'rxjs';
+import { TranslationService } from '../../services/translation.service';
 
 export type TournamentMainMode = 'view' | 'editor';
 export type TournamentTab = 'overview' | 'rules' | 'participants' | 'status' | 'leaderboard';
@@ -36,6 +37,7 @@ export interface TournamentItem {
 export class TournamentsComponent {
 	private readonly _route = inject(ActivatedRoute);
 	private readonly _firestore = inject(Firestore);
+	public readonly ts = inject(TranslationService);
 
 	// Navigation & view signals
 	protected readonly mode = signal<TournamentMainMode>('view');

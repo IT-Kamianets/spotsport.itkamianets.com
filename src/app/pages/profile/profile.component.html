@@ -9,12 +9,14 @@
 				<div>
 					<div class="flex items-center gap-2">
 						<span class="rounded bg-[var(--c-primary)]/10 px-2 py-0.5 text-xs font-semibold text-[var(--c-primary)]">
-							MVP Page 06
+							{{ ts.t('profile.badge') }}
 						</span>
-						<span class="text-xs uppercase tracking-wider text-[var(--c-text-muted)]">User Account & Auth</span>
+						<span class="text-xs uppercase tracking-wider text-[var(--c-text-muted)]">
+							{{ ts.t('profile.category') }}
+						</span>
 					</div>
 					<h1 class="text-2xl font-bold tracking-tight text-[var(--c-text-strong)] sm:text-3xl">
-						Angler Profile & Authentication
+						{{ ts.t('profile.title') }}
 					</h1>
 				</div>
 			</div>
@@ -25,7 +27,7 @@
 					class="relative flex items-center gap-1 rounded-full border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-1 shadow-[var(--shadow-sm)]"
 				>
 					<button
-						class="theme-interactive theme-focus inline-flex h-9 items-center gap-2 rounded-full px-3 text-sm font-medium text-[var(--c-text)] hover:bg-[var(--c-bg-tertiary)]"
+						class="theme-interactive theme-focus inline-flex h-9 items-center gap-2 rounded-full px-3 text-sm font-medium text-[var(--c-text)] hover:bg-[var(--c-bg-tertiary)] cursor-pointer"
 						[attr.aria-label]="languageCycleLabel()"
 						(click)="nextLanguage()"
 						type="button"
@@ -33,21 +35,21 @@
 						<img
 							class="h-5 w-7 rounded-[4px] border border-black/10 object-cover"
 							[alt]="currentLanguage().nativeName"
-							[ngSrc]="currentLanguage().flagSrc"
+							[src]="currentLanguage().flagSrc"
 							width="28"
 							height="20"
 						/>
 					</button>
 
 					<button
-						class="theme-interactive theme-focus inline-flex h-9 w-9 items-center justify-center rounded-full text-[var(--c-text-strong)] hover:bg-[var(--c-bg-tertiary)]"
+						class="theme-interactive theme-focus inline-flex h-9 w-9 items-center justify-center rounded-full text-[var(--c-text-strong)] hover:bg-[var(--c-bg-tertiary)] cursor-pointer"
 						[attr.aria-expanded]="languageMenuOpen()"
 						[attr.aria-label]="languageMenuLabel()"
 						(click)="toggleLanguageMenu()"
 						type="button"
 					>
 						<span class="material-symbols-outlined text-[20px]" aria-hidden="true">
-							arrow_drop_down
+							{{ languageMenuOpen() ? 'arrow_drop_up' : 'arrow_drop_down' }}
 						</span>
 					</button>
 
@@ -57,18 +59,22 @@
 						>
 							@for (language of languages(); track language.code) {
 								<button
-									class="theme-interactive theme-focus flex w-full items-center gap-3 rounded-[calc(var(--radius-btn)-0.25rem)] px-3 py-2 text-left text-sm text-[var(--c-text)] hover:bg-[var(--c-bg-tertiary)]"
+									class="theme-interactive theme-focus flex w-full items-center gap-3 rounded-[calc(var(--radius-btn)-0.25rem)] px-3 py-2 text-left text-sm transition-colors cursor-pointer"
+									[class]="ts.currentLang() === language.code ? 'bg-[var(--c-primary)]/10 text-[var(--c-primary)] font-semibold' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-tertiary)]'"
 									(click)="setLanguage(language)"
 									type="button"
 								>
 									<img
 										class="h-5 w-7 rounded-[4px] border border-black/10 object-cover"
 										[alt]="language.nativeName"
-										[ngSrc]="language.flagSrc"
+										[src]="language.flagSrc"
 										width="28"
 										height="20"
 									/>
 									<span>{{ language.nativeName }}</span>
+									@if (ts.currentLang() === language.code) {
+										<span class="material-symbols-outlined ml-auto text-[18px] text-[var(--c-primary)]">check</span>
+									}
 								</button>
 							}
 						</div>
@@ -77,7 +83,7 @@
 
 				<!-- Theme Toggle -->
 				<button
-					class="theme-interactive theme-focus inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--c-border)] bg-[var(--c-bg-primary)] text-[var(--c-text-strong)] hover:bg-[var(--c-bg-tertiary)] shadow-[var(--shadow-sm)]"
+					class="theme-interactive theme-focus inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--c-border)] bg-[var(--c-bg-primary)] text-[var(--c-text-strong)] hover:bg-[var(--c-bg-tertiary)] shadow-[var(--shadow-sm)] cursor-pointer"
 					[attr.aria-label]="toggleLabel()"
 					(click)="toggleMode()"
 					type="button"
@@ -98,7 +104,7 @@
 							class="theme-interactive inline-flex items-center gap-1.5 rounded-xl border border-red-500/20 bg-red-500/10 px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-500/20 transition-all shadow-xs cursor-pointer"
 						>
 							<span class="material-symbols-outlined text-[16px]">logout</span>
-							<span>Sign Out</span>
+							<span>{{ ts.t('profile.signOut') }}</span>
 						</button>
 					</div>
 				} @else {
@@ -108,13 +114,13 @@
 						class="theme-interactive inline-flex items-center gap-2 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2.5 text-sm font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] hover:text-[var(--c-primary)] shadow-sm cursor-pointer"
 					>
 						<span class="material-symbols-outlined text-[20px] text-[var(--c-primary)]">lock</span>
-						<span>Sign In / Register</span>
+						<span>{{ ts.t('profile.signInRegister') }}</span>
 					</button>
 				}
 			</div>
 		</div>
 		<p class="mt-3 max-w-2xl text-base text-[var(--c-text)]">
-			Personal information, tournament history, account settings, registration, login, and password recovery.
+			{{ ts.t('profile.desc') }}
 		</p>
 	</header>
 
@@ -125,41 +131,41 @@
 			<button
 				type="button"
 				(click)="setTab('personal')"
-				class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all"
+				class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all cursor-pointer"
 				[class]="activeTab() === 'personal' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
 			>
 				<span class="material-symbols-outlined text-[18px]">person</span>
-				<span>1. Personal Information</span>
+				<span>{{ ts.t('tab.personal') }}</span>
 			</button>
 
 			<button
 				type="button"
 				(click)="setTab('history')"
-				class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all"
+				class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all cursor-pointer"
 				[class]="activeTab() === 'history' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
 			>
 				<span class="material-symbols-outlined text-[18px]">workspace_premium</span>
-				<span>2. Tournament History</span>
+				<span>{{ ts.t('tab.history') }}</span>
 			</button>
 
 			<button
 				type="button"
 				(click)="setTab('settings')"
-				class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all"
+				class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all cursor-pointer"
 				[class]="activeTab() === 'settings' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
 			>
 				<span class="material-symbols-outlined text-[18px]">settings</span>
-				<span>3. Account Settings</span>
+				<span>{{ ts.t('tab.settings') }}</span>
 			</button>
 
 			<button
 				type="button"
 				(click)="setTab('auth')"
-				class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all"
+				class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all cursor-pointer"
 				[class]="activeTab() === 'auth' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
 			>
 				<span class="material-symbols-outlined text-[18px]">lock</span>
-				<span>4. Login & Registration</span>
+				<span>{{ ts.t('tab.auth') }}</span>
 				<span
 					class="rounded px-1.5 py-0.2 text-[10px] font-semibold"
 					[class]="activeTab() === 'auth' ? 'bg-white/20 text-white' : 'bg-[var(--c-primary)]/10 text-[var(--c-primary)]'"
@@ -177,10 +183,10 @@
 					<!-- Preferences & Appearance Card -->
 					<div class="rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-6">
 						<h3 class="text-base font-semibold text-[var(--c-text-strong)]">
-							Preferences & Appearance
+							{{ ts.t('settings.appearanceTitle') }}
 						</h3>
 						<p class="mt-1 text-xs text-[var(--c-text-muted)]">
-							Customize language and interface theme for your SpotSport experience.
+							{{ ts.t('settings.appearanceDesc') }}
 						</p>
 
 						<div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -188,17 +194,19 @@
 							<div class="rounded-lg border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-4">
 								<div class="flex items-center gap-2">
 									<span class="material-symbols-outlined text-[20px] text-[var(--c-primary)]">translate</span>
-									<h4 class="text-sm font-semibold text-[var(--c-text-strong)]">Application Language</h4>
+									<h4 class="text-sm font-semibold text-[var(--c-text-strong)]">
+										{{ ts.t('settings.appLanguage') }}
+									</h4>
 								</div>
 								<p class="mt-1 text-xs text-[var(--c-text-muted)]">
-									Current: <span class="font-medium text-[var(--c-text-strong)]">{{ currentLanguage().nativeName }}</span>
+									{{ ts.t('settings.current') }} <span class="font-medium text-[var(--c-text-strong)]">{{ currentLanguage().nativeName }}</span>
 								</p>
 								<div class="mt-3 flex flex-wrap gap-2">
 									@for (lang of languages(); track lang.code) {
 										<button
 											type="button"
 											(click)="setLanguage(lang)"
-											class="theme-interactive inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold transition-all"
+											class="theme-interactive inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold transition-all cursor-pointer"
 											[class]="currentLanguage().code === lang.code
 												? 'border-[var(--c-primary)] bg-[var(--c-primary)]/10 text-[var(--c-primary)] shadow-xs'
 												: 'border-[var(--c-border)] bg-[var(--c-bg-primary)] text-[var(--c-text)] hover:border-[var(--c-primary)]'"
@@ -206,7 +214,7 @@
 											<img
 												class="h-4 w-6 rounded-[3px] border border-black/10 object-cover"
 												[alt]="lang.nativeName"
-												[ngSrc]="lang.flagSrc"
+												[src]="lang.flagSrc"
 												width="24"
 												height="16"
 											/>
@@ -220,21 +228,23 @@
 							<div class="rounded-lg border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-4">
 								<div class="flex items-center gap-2">
 									<span class="material-symbols-outlined text-[20px] text-[var(--c-primary)]">palette</span>
-									<h4 class="text-sm font-semibold text-[var(--c-text-strong)]">Color Theme</h4>
+									<h4 class="text-sm font-semibold text-[var(--c-text-strong)]">
+										{{ ts.t('settings.colorTheme') }}
+									</h4>
 								</div>
 								<p class="mt-1 text-xs text-[var(--c-text-muted)]">
-									Current mode: <span class="font-medium capitalize text-[var(--c-text-strong)]">{{ mode() }}</span>
+									{{ ts.t('settings.currentMode') }} <span class="font-medium capitalize text-[var(--c-text-strong)]">{{ mode() }}</span>
 								</p>
 								<div class="mt-3 flex items-center gap-2">
 									<button
 										type="button"
 										(click)="toggleMode()"
-										class="theme-interactive inline-flex items-center gap-2 rounded-lg border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-3.5 py-2 text-xs font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)]"
+										class="theme-interactive inline-flex items-center gap-2 rounded-lg border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-3.5 py-2 text-xs font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] cursor-pointer"
 									>
 										<span class="material-symbols-outlined text-[18px] text-[var(--c-primary)]">
 											{{ toggleIcon() }}
 										</span>
-										<span>{{ mode() === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode' }}</span>
+										<span>{{ mode() === 'dark' ? ts.t('settings.switchToLight') : ts.t('settings.switchToDark') }}</span>
 									</button>
 								</div>
 							</div>
@@ -247,17 +257,17 @@
 							<span class="material-symbols-outlined text-[26px] text-[var(--c-primary)]">manage_accounts</span>
 						</div>
 						<h3 class="mt-3 text-base font-semibold text-[var(--c-text-strong)]">
-							Measurement Units & Notification Settings (Empty State)
+							{{ ts.t('settings.unitsTitle') }}
 						</h3>
 						<p class="mt-1 max-w-md text-xs text-[var(--c-text-muted)]">
-							Measurement units (cm/mm vs inches, kg vs lbs), push notification settings, offline sync preferences, and password change.
+							{{ ts.t('settings.unitsDesc') }}
 						</p>
 						<div class="mt-4 flex flex-wrap justify-center gap-2 text-xs text-[var(--c-text-muted)]">
 							<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
-								Unit Conversion System Ready
+								{{ ts.t('settings.badgeUnits') }}
 							</span>
 							<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
-								Push Notifications Ready
+								{{ ts.t('settings.badgePush') }}
 							</span>
 						</div>
 					</div>
@@ -276,7 +286,7 @@
 											<span class="text-2xl font-bold">{{ (user.displayName || user.email || 'A').substring(0, 2).toUpperCase() }}</span>
 										</div>
 									}
-									<span class="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white" title="Verified via Google / Firebase">
+									<span class="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white" [title]="ts.t('profile.verifiedBadge')">
 										<span class="material-symbols-outlined text-[14px]">verified</span>
 									</span>
 								</div>
@@ -287,7 +297,7 @@
 											{{ user.displayName || user.email?.split('@')?.[0] || 'SpotSport Angler' }}
 										</h3>
 										<span class="rounded bg-[var(--c-primary)]/10 px-2.5 py-0.5 text-xs font-semibold text-[var(--c-primary)]">
-											Sport Angler
+											{{ ts.t('profile.sportAngler') }}
 										</span>
 									</div>
 									<p class="mt-1 flex items-center gap-1.5 text-xs text-[var(--c-text-muted)]">
@@ -296,7 +306,7 @@
 									</p>
 									<p class="mt-1 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
 										<span class="material-symbols-outlined text-[16px]">cloud_done</span>
-										<span>Firestore Document: <code class="font-mono text-[11px]">users/{{ user.uid.substring(0, 10) }}...</code></span>
+										<span>{{ ts.t('profile.firestoreDoc') }} <code class="font-mono text-[11px]">users/{{ user.uid.substring(0, 10) }}...</code></span>
 									</p>
 								</div>
 							</div>
@@ -305,33 +315,33 @@
 								<button
 									type="button"
 									(click)="signOut()"
-									class="theme-interactive inline-flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-500/20 shadow-xs"
+									class="theme-interactive inline-flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-500/20 shadow-xs cursor-pointer"
 								>
 									<span class="material-symbols-outlined text-[16px]">logout</span>
-									<span>Sign Out</span>
+									<span>{{ ts.t('profile.signOut') }}</span>
 								</button>
 							</div>
 						</div>
 
 						<div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3 border-t border-[var(--c-border)] pt-6">
 							<div class="rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-4">
-								<p class="text-xs text-[var(--c-text-muted)]">Auth Provider</p>
+								<p class="text-xs text-[var(--c-text-muted)]">{{ ts.t('profile.authProvider') }}</p>
 								<p class="mt-1 text-sm font-semibold text-[var(--c-text-strong)] flex items-center gap-1.5">
 									<span class="material-symbols-outlined text-[18px] text-[var(--c-primary)]">security</span>
-									<span>{{ user.providerData[0]?.providerId === 'google.com' ? 'Google Account' : 'Email & Password' }}</span>
+									<span>{{ user.providerData[0]?.providerId === 'google.com' ? ts.t('profile.googleAccount') : ts.t('profile.emailPassword') }}</span>
 								</p>
 							</div>
 							<div class="rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-4">
-								<p class="text-xs text-[var(--c-text-muted)]">Email Status</p>
+								<p class="text-xs text-[var(--c-text-muted)]">{{ ts.t('profile.emailStatus') }}</p>
 								<p class="mt-1 text-sm font-semibold" [class]="user.emailVerified ? 'text-emerald-600' : 'text-amber-600'">
-									{{ user.emailVerified ? 'Verified' : 'Verification Pending' }}
+									{{ user.emailVerified ? ts.t('profile.verified') : ts.t('profile.verificationPending') }}
 								</p>
 							</div>
 							<div class="rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-4">
-								<p class="text-xs text-[var(--c-text-muted)]">Database Sync</p>
+								<p class="text-xs text-[var(--c-text-muted)]">{{ ts.t('profile.databaseSync') }}</p>
 								<p class="mt-1 text-sm font-semibold text-[var(--c-text-strong)] flex items-center gap-1.5">
 									<span class="material-symbols-outlined text-[18px] text-emerald-500">database</span>
-									<span>Firestore Active</span>
+									<span>{{ ts.t('profile.firestoreActive') }}</span>
 								</p>
 							</div>
 						</div>
@@ -343,21 +353,21 @@
 							<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">person</span>
 						</div>
 						<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
-							Angler Identity & Fishing License
+							{{ ts.t('personal.unauthTitle') }}
 						</h3>
 						<p class="mt-2 max-w-md text-xs text-[var(--c-text-muted)]">
-							Sign in with your Google account or email to link your angler profile, tournament results, and catches.
+							{{ ts.t('personal.unauthDesc') }}
 						</p>
 						<div class="mt-6 flex flex-wrap items-center justify-center gap-3">
 							<button
 								type="button"
 								(click)="onGoogleSignIn()"
 								[disabled]="authLoading() || googleLoading()"
-								class="theme-interactive inline-flex items-center gap-2.5 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2.5 text-xs font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] shadow-xs transition-all"
+								class="theme-interactive inline-flex items-center gap-2.5 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2.5 text-xs font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] shadow-xs transition-all cursor-pointer"
 							>
 								@if (googleLoading()) {
 									<span class="material-symbols-outlined animate-spin text-[16px] text-[var(--c-primary)]">progress_activity</span>
-									<span>Signing in...</span>
+									<span>{{ ts.t('personal.signingIn') }}</span>
 								} @else {
 									<svg class="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
 										<path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z" />
@@ -365,16 +375,16 @@
 										<path fill="#FBBC05" d="M5.28 14.27a7.19 7.19 0 0 1 0-4.54V6.58H1.25a11.96 11.96 0 0 0 0 10.84l4.03-3.15Z" />
 										<path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z" />
 									</svg>
-									<span>Sign in with Google</span>
+									<span>{{ ts.t('personal.signInGoogle') }}</span>
 								}
 							</button>
 							<button
 								type="button"
 								(click)="setTab('auth')"
-								class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-xs"
+								class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-xs cursor-pointer"
 							>
 								<span class="material-symbols-outlined text-[16px]">lock_open</span>
-								<span>Open Auth Hub</span>
+								<span>{{ ts.t('personal.openAuthHub') }}</span>
 							</button>
 						</div>
 					</div>
@@ -386,17 +396,17 @@
 						<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">military_tech</span>
 					</div>
 					<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
-						Past Tournaments, Catches & Trophies (Empty State)
+						{{ ts.t('history.title') }}
 					</h3>
 					<p class="mt-2 max-w-md text-sm text-[var(--c-text-muted)]">
-						Participated tournaments log, podium placements, personal best catch records, and earned badges.
+						{{ ts.t('history.desc') }}
 					</p>
 					<div class="mt-6 flex flex-wrap justify-center gap-2 text-xs text-[var(--c-text-muted)]">
 						<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
-							Past Tournaments Log Ready
+							{{ ts.t('history.badgeLog') }}
 						</span>
 						<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
-							Catch Trophies Ready
+							{{ ts.t('history.badgeTrophies') }}
 						</span>
 					</div>
 				</div>
@@ -417,38 +427,38 @@
 							</div>
 						}
 						<h3 class="mt-4 text-lg font-bold text-[var(--c-text-strong)]">
-							{{ user.displayName || 'Authenticated Angler' }}
+							{{ user.displayName || ts.t('auth.signedInTitle') }}
 						</h3>
 						<p class="mt-1 text-xs text-[var(--c-text-muted)]">
-							Signed in as <span class="font-semibold text-[var(--c-text-strong)]">{{ user.email }}</span>
+							{{ ts.t('auth.signedInAs') }} <span class="font-semibold text-[var(--c-text-strong)]">{{ user.email }}</span>
 						</p>
 						<div class="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs">
 							<span class="rounded-full px-3 py-1 font-semibold" [class]="user.emailVerified ? 'bg-emerald-500/20 text-emerald-600' : 'bg-amber-500/20 text-amber-600'">
-								{{ user.emailVerified ? 'Email Verified' : 'Email Unverified' }}
+								{{ user.emailVerified ? ts.t('auth.emailVerified') : ts.t('auth.emailUnverified') }}
 							</span>
 							<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-3 py-1 text-[var(--c-text-muted)]">
-								Provider: {{ user.providerData[0]?.providerId || 'google.com' }}
+								{{ ts.t('auth.providerLabel') }} {{ user.providerData[0]?.providerId || 'google.com' }}
 							</span>
 							<span class="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-emerald-600 font-medium">
-								Firestore Synced (spotsport-64708)
+								{{ ts.t('auth.firestoreSynced') }}
 							</span>
 						</div>
 						<div class="mt-6 flex flex-wrap justify-center gap-3">
 							<button
 								type="button"
 								(click)="setTab('personal')"
-								class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-5 py-2.5 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm"
+								class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-5 py-2.5 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm cursor-pointer"
 							>
 								<span class="material-symbols-outlined text-[16px]">person</span>
-								<span>View Angler Identity</span>
+								<span>{{ ts.t('auth.viewIdentity') }}</span>
 							</button>
 							<button
 								type="button"
 								(click)="signOut()"
-								class="theme-interactive inline-flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-500/20 shadow-sm transition-all"
+								class="theme-interactive inline-flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-500/20 shadow-sm transition-all cursor-pointer"
 							>
 								<span class="material-symbols-outlined text-[16px]">logout</span>
-								<span>Sign Out</span>
+								<span>{{ ts.t('profile.signOut') }}</span>
 							</button>
 						</div>
 					</div>
@@ -458,31 +468,31 @@
 						<button
 							type="button"
 							(click)="setAuthTab('login')"
-							class="theme-interactive inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all"
+							class="theme-interactive inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer"
 							[class]="activeAuthTab() === 'login' ? 'bg-[var(--c-bg-secondary)] text-[var(--c-primary)] shadow-xs' : 'text-[var(--c-text)] hover:text-[var(--c-text-strong)]'"
 						>
 							<span class="material-symbols-outlined text-[16px]">login</span>
-							<span>Sign In</span>
+							<span>{{ ts.t('auth.subtabLogin') }}</span>
 						</button>
 
 						<button
 							type="button"
 							(click)="setAuthTab('register')"
-							class="theme-interactive inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all"
+							class="theme-interactive inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer"
 							[class]="activeAuthTab() === 'register' ? 'bg-[var(--c-bg-secondary)] text-[var(--c-primary)] shadow-xs' : 'text-[var(--c-text)] hover:text-[var(--c-text-strong)]'"
 						>
 							<span class="material-symbols-outlined text-[16px]">person_add</span>
-							<span>Registration</span>
+							<span>{{ ts.t('auth.subtabRegister') }}</span>
 						</button>
 
 						<button
 							type="button"
 							(click)="setAuthTab('recovery')"
-							class="theme-interactive inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all"
+							class="theme-interactive inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer"
 							[class]="activeAuthTab() === 'recovery' ? 'bg-[var(--c-bg-secondary)] text-[var(--c-primary)] shadow-xs' : 'text-[var(--c-text)] hover:text-[var(--c-text-strong)]'"
 						>
 							<span class="material-symbols-outlined text-[16px]">password</span>
-							<span>Password Recovery</span>
+							<span>{{ ts.t('auth.subtabRecovery') }}</span>
 						</button>
 					</div>
 
@@ -514,7 +524,7 @@
 							>
 								@if (googleLoading()) {
 									<span class="material-symbols-outlined animate-spin text-[18px] text-[var(--c-primary)]">progress_activity</span>
-									<span>Authentification with Google...</span>
+									<span>{{ ts.t('auth.googleLoading') }}</span>
 								} @else {
 									<svg class="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
 										<path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z" />
@@ -522,21 +532,21 @@
 										<path fill="#FBBC05" d="M5.28 14.27a7.19 7.19 0 0 1 0-4.54V6.58H1.25a11.96 11.96 0 0 0 0 10.84l4.03-3.15Z" />
 										<path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z" />
 									</svg>
-									<span>Authentification with Google</span>
+									<span>{{ ts.t('auth.googleBtn') }}</span>
 								}
 							</button>
 
 							<div class="relative my-5 flex items-center justify-center">
 								<div class="w-full border-t border-[var(--c-border)]"></div>
 								<span class="absolute bg-[var(--c-bg-primary)] px-3 text-[10px] font-semibold uppercase tracking-wider text-[var(--c-text-muted)]">
-									or with email
+									{{ ts.t('auth.orEmail') }}
 								</span>
 							</div>
 
 							<form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()" class="space-y-4" novalidate>
 								<div>
 									<label for="prof-login-email" class="block text-xs font-semibold text-[var(--c-text-strong)]">
-										Email address
+										{{ ts.t('form.email') }}
 									</label>
 									<div class="relative mt-1">
 										<input
@@ -552,9 +562,9 @@
 									@if (loginForm.controls.email.invalid && loginForm.controls.email.touched) {
 										<p class="mt-1 text-[11px] text-red-500">
 											@if (loginForm.controls.email.errors?.['required']) {
-												Email is required.
+												{{ ts.t('val.emailRequired') }}
 											} @else if (loginForm.controls.email.errors?.['email']) {
-												Please enter a valid email format.
+												{{ ts.t('val.emailFormat') }}
 											}
 										</p>
 									}
@@ -562,7 +572,7 @@
 
 								<div>
 									<label for="prof-login-password" class="block text-xs font-semibold text-[var(--c-text-strong)]">
-										Password
+										{{ ts.t('form.password') }}
 									</label>
 									<div class="relative mt-1">
 										<input
@@ -577,7 +587,7 @@
 										<button
 											type="button"
 											(click)="toggleLoginPasswordVisibility()"
-											class="absolute right-2.5 top-2 text-[var(--c-text-muted)] hover:text-[var(--c-text-strong)]"
+											class="absolute right-2.5 top-2 text-[var(--c-text-muted)] hover:text-[var(--c-text-strong)] cursor-pointer"
 										>
 											<span class="material-symbols-outlined text-[18px]">
 												{{ showLoginPassword() ? 'visibility_off' : 'visibility' }}
@@ -587,9 +597,9 @@
 									@if (loginForm.controls.password.invalid && loginForm.controls.password.touched) {
 										<p class="mt-1 text-[11px] text-red-500">
 											@if (loginForm.controls.password.errors?.['required']) {
-												Password is required.
+												{{ ts.t('val.passwordRequired') }}
 											} @else if (loginForm.controls.password.errors?.['minlength']) {
-												Minimum 6 characters.
+												{{ ts.t('val.passwordMinLength') }}
 											}
 										</p>
 									}
@@ -598,14 +608,14 @@
 								<button
 									type="submit"
 									[disabled]="authLoading() || googleLoading()"
-									class="theme-interactive inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+									class="theme-interactive inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
 								>
 									@if (authLoading()) {
 										<span class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
-										<span>Signing In...</span>
+										<span>{{ ts.t('form.signingInBtn') }}</span>
 									} @else {
 										<span class="material-symbols-outlined text-[16px]">login</span>
-										<span>Sign In to Account</span>
+										<span>{{ ts.t('form.signInBtn') }}</span>
 									}
 								</button>
 							</form>
@@ -624,7 +634,7 @@
 							>
 								@if (googleLoading()) {
 									<span class="material-symbols-outlined animate-spin text-[18px] text-[var(--c-primary)]">progress_activity</span>
-									<span>Authentification with Google...</span>
+									<span>{{ ts.t('auth.googleLoading') }}</span>
 								} @else {
 									<svg class="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
 										<path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z" />
@@ -632,21 +642,21 @@
 										<path fill="#FBBC05" d="M5.28 14.27a7.19 7.19 0 0 1 0-4.54V6.58H1.25a11.96 11.96 0 0 0 0 10.84l4.03-3.15Z" />
 										<path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z" />
 									</svg>
-									<span>Authentification with Google</span>
+									<span>{{ ts.t('auth.googleBtn') }}</span>
 								}
 							</button>
 
 							<div class="relative my-5 flex items-center justify-center">
 								<div class="w-full border-t border-[var(--c-border)]"></div>
 								<span class="absolute bg-[var(--c-bg-primary)] px-3 text-[10px] font-semibold uppercase tracking-wider text-[var(--c-text-muted)]">
-									or register with email
+									{{ ts.t('auth.orRegisterEmail') }}
 								</span>
 							</div>
 
 							<form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" class="space-y-4 text-left" novalidate>
 								<div>
 									<label for="prof-reg-email" class="block text-xs font-semibold text-[var(--c-text-strong)]">
-										Registration with Email
+										{{ ts.t('form.regEmailLabel') }}
 									</label>
 									<div class="relative mt-1">
 										<input
@@ -662,9 +672,9 @@
 									@if (registerForm.controls.email.invalid && registerForm.controls.email.touched) {
 										<p class="mt-1 text-[11px] text-red-500">
 											@if (registerForm.controls.email.errors?.['required']) {
-												Email is required.
+												{{ ts.t('val.emailRequired') }}
 											} @else if (registerForm.controls.email.errors?.['email']) {
-												Please enter a valid email format.
+												{{ ts.t('val.emailFormat') }}
 											}
 										</p>
 									}
@@ -672,7 +682,7 @@
 
 								<div>
 									<label for="prof-reg-password" class="block text-xs font-semibold text-[var(--c-text-strong)]">
-										Password
+										{{ ts.t('form.password') }}
 									</label>
 									<div class="relative mt-1">
 										<input
@@ -687,7 +697,7 @@
 										<button
 											type="button"
 											(click)="toggleRegisterPasswordVisibility()"
-											class="absolute right-2.5 top-2 text-[var(--c-text-muted)] hover:text-[var(--c-text-strong)]"
+											class="absolute right-2.5 top-2 text-[var(--c-text-muted)] hover:text-[var(--c-text-strong)] cursor-pointer"
 										>
 											<span class="material-symbols-outlined text-[18px]">
 												{{ showRegisterPassword() ? 'visibility_off' : 'visibility' }}
@@ -697,9 +707,9 @@
 									@if (registerForm.controls.password.invalid && registerForm.controls.password.touched) {
 										<p class="mt-1 text-[11px] text-red-500">
 											@if (registerForm.controls.password.errors?.['required']) {
-												Password is required.
+												{{ ts.t('val.passwordRequired') }}
 											} @else if (registerForm.controls.password.errors?.['minlength']) {
-												Minimum 6 characters.
+												{{ ts.t('val.passwordMinLength') }}
 											}
 										</p>
 									}
@@ -707,7 +717,7 @@
 
 								<div>
 									<label for="prof-reg-confirm" class="block text-xs font-semibold text-[var(--c-text-strong)]">
-										Confirm password
+										{{ ts.t('form.confirmPassword') }}
 									</label>
 									<div class="relative mt-1">
 										<input
@@ -722,9 +732,9 @@
 									</div>
 									@if (registerForm.controls.confirmPassword.touched) {
 										@if (registerForm.controls.confirmPassword.errors?.['required']) {
-											<p class="mt-1 text-[11px] text-red-500">Please confirm your password.</p>
+											<p class="mt-1 text-[11px] text-red-500">{{ ts.t('val.confirmRequired') }}</p>
 										} @else if (registerForm.errors?.['passwordMismatch']) {
-											<p class="mt-1 text-[11px] text-red-500">Passwords do not match.</p>
+											<p class="mt-1 text-[11px] text-red-500">{{ ts.t('val.passwordMismatch') }}</p>
 										}
 									}
 								</div>
@@ -736,10 +746,10 @@
 								>
 									@if (authLoading()) {
 										<span class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
-										<span>Registering...</span>
+										<span>{{ ts.t('form.registeringBtn') }}</span>
 									} @else {
 										<span class="material-symbols-outlined text-[16px]">how_to_reg</span>
-										<span>Register with Email</span>
+										<span>{{ ts.t('form.registerBtn') }}</span>
 									}
 								</button>
 							</form>
@@ -750,16 +760,18 @@
 					@if (activeAuthTab() === 'recovery') {
 						<div class="mt-6 rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-6 sm:p-7 shadow-xs">
 							<div class="mb-4 text-center">
-								<h4 class="text-sm font-semibold text-[var(--c-text-strong)]">Reset Password</h4>
+								<h4 class="text-sm font-semibold text-[var(--c-text-strong)]">
+									{{ ts.t('form.resetTitle') }}
+								</h4>
 								<p class="mt-1 text-xs text-[var(--c-text-muted)]">
-									Enter your registered email address to receive a secure password recovery link.
+									{{ ts.t('form.resetDesc') }}
 								</p>
 							</div>
 
 							<form [formGroup]="recoveryForm" (ngSubmit)="onRecoverySubmit()" class="space-y-4" novalidate>
 								<div>
 									<label for="prof-rec-email" class="block text-xs font-semibold text-[var(--c-text-strong)]">
-										Email address
+										{{ ts.t('form.email') }}
 									</label>
 									<div class="relative mt-1">
 										<input
@@ -774,7 +786,7 @@
 									</div>
 									@if (recoveryForm.controls.email.invalid && recoveryForm.controls.email.touched) {
 										<p class="mt-1 text-[11px] text-red-500">
-											Please enter a valid email address.
+											{{ ts.t('val.emailFormat') }}
 										</p>
 									}
 								</div>
@@ -782,14 +794,14 @@
 								<button
 									type="submit"
 									[disabled]="authLoading()"
-									class="theme-interactive inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+									class="theme-interactive inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
 								>
 									@if (authLoading()) {
 										<span class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
-										<span>Sending Link...</span>
+										<span>{{ ts.t('form.sendingResetBtn') }}</span>
 									} @else {
 										<span class="material-symbols-outlined text-[16px]">mail</span>
-										<span>Send Password Reset Link</span>
+										<span>{{ ts.t('form.sendResetBtn') }}</span>
 									}
 								</button>
 							</form>

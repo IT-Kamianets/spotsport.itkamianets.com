@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { TranslationService } from '../../services/translation.service';
 
 export type RefereeingMode = 'catch' | 'judging';
 export type CatchTab = 'submit' | 'status' | 'offline';
@@ -11,6 +12,7 @@ export type JudgingTab = 'review' | 'penalties' | 'leaderboard';
 })
 export class RefereeingComponent {
 	private readonly _route = inject(ActivatedRoute);
+	public readonly ts = inject(TranslationService);
 
 	protected readonly mode = signal<RefereeingMode>('catch');
 	protected readonly activeCatchTab = signal<CatchTab>('submit');

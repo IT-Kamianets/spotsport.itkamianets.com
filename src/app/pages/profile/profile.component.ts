@@ -1,4 +1,3 @@
-import { NgOptimizedImage } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
@@ -9,28 +8,24 @@ import {
 	ValidationErrors,
 	Validators,
 } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { LanguageService, TranslateService } from '@wawjs/ngx-translate';
+import { ActivatedRoute } from '@angular/router';
 import { ThemeService } from '@wawjs/ngx-ui';
-import type { Language } from '@wawjs/ngx-translate';
-import type { AppLanguage } from '../../../environments/environment.prod';
 import { AuthService } from '../../services/auth.service';
+import { AppLang, TranslationService } from '../../services/translation.service';
 
 export type ProfileTab = 'personal' | 'history' | 'settings' | 'auth';
 export type AuthSubTab = 'register' | 'login' | 'recovery';
 
 @Component({
 	selector: 'app-profile',
-	imports: [NgOptimizedImage, ReactiveFormsModule],
+	imports: [ReactiveFormsModule],
 	templateUrl: './profile.component.html',
 })
 export class ProfileComponent {
 	private readonly _route = inject(ActivatedRoute);
-	private readonly _router = inject(Router);
-	private readonly _translateService = inject(TranslateService);
 	private readonly _themeService = inject(ThemeService);
-	private readonly _languageService = inject(LanguageService);
 	private readonly _authService = inject(AuthService);
+	public readonly ts = inject(TranslationService);
 
 	protected readonly currentUser = toSignal(this._authService.authState$, { initialValue: null });
 
@@ -39,29 +34,22 @@ export class ProfileComponent {
 
 	protected readonly mode = computed(() => this._themeService.mode() ?? 'light');
 	protected readonly languageMenuOpen = signal(false);
-	protected readonly languages = computed(() =>
-		this._languageService.languages().map((language) => _toAppLanguage(language)),
-	);
-	protected readonly activeLanguage = this._languageService.language;
-	protected readonly currentLanguage = computed(() =>
-		_toAppLanguage(this._languageService.getLanguage(this.activeLanguage())),
-	);
+	protected readonly languages = computed(() => this.ts.availableLanguages);
+	protected readonly currentLanguage = computed(() => this.ts.currentLangOption());
+
 	protected readonly toggleIcon = computed(() =>
 		this.mode() === 'dark' ? 'light_mode' : 'dark_mode',
 	);
 	protected readonly toggleLabel = computed(() => {
-		this.activeLanguage();
 		return this.mode() === 'dark'
-			? this._translateService.translate('Switch to light mode')()
-			: this._translateService.translate('Switch to dark mode')();
+			? this.ts.t('settings.switchToLight')
+			: this.ts.t('settings.switchToDark');
 	});
 	protected readonly languageMenuLabel = computed(() => {
-		this.activeLanguage();
-		return this._translateService.translate('Open language menu')();
+		return this.ts.t('lang.openMenu');
 	});
 	protected readonly languageCycleLabel = computed(() => {
-		this.activeLanguage();
-		return `${this._translateService.translate('Switch language to')()} ${this.getNextLanguage().nativeName}`;
+		return `${this.ts.t('lang.switch')} ${this.getNextLanguage().nativeName}`;
 	});
 
 	// Registration form fields
@@ -186,9 +174,7 @@ export class ProfileComponent {
 
 		try {
 			await this._authService.registerWithEmail(email, password, { fullName });
-			this.authSuccess.set(
-				'Registration successful! Verification email sent and angler profile saved to Firestore database.',
-			);
+			this.authSuccess.set(this.ts.t('msg.registerSuccess'));
 			this.registerForm.reset();
 		} catch (error: unknown) {
 			this.authError.set(this._parseFirebaseError(error));
@@ -212,7 +198,7 @@ export class ProfileComponent {
 
 		try {
 			await this._authService.signInWithEmail(email, password);
-			this.authSuccess.set('Successfully signed in! Angler profile loaded from Firestore.');
+			this.authSuccess.set(this.ts.t('msg.signInSuccess'));
 			this.loginForm.reset();
 		} catch (error: unknown) {
 			this.authError.set(this._parseFirebaseError(error));
@@ -229,9 +215,7 @@ export class ProfileComponent {
 
 		try {
 			await this._authService.loginWithGoogle();
-			this.authSuccess.set(
-				'Successfully authenticated with Google! Angler profile synced to Cloud Firestore database.',
-			);
+			this.authSuccess.set(this.ts.t('msg.googleSuccess'));
 		} catch (error: unknown) {
 			this.authError.set(this._parseFirebaseError(error));
 		} finally {
@@ -252,7 +236,7 @@ export class ProfileComponent {
 
 		try {
 			await this._authService.sendPasswordReset(this.recoveryEmail.value);
-			this.authSuccess.set('Password reset link sent to your email.');
+			this.authSuccess.set(this.ts.t('msg.recoverySuccess'));
 			this.recoveryForm.reset();
 		} catch (error: unknown) {
 			this.authError.set(this._parseFirebaseError(error));
@@ -263,40 +247,54 @@ export class ProfileComponent {
 
 	protected async signOut(): Promise<void> {
 		await this._authService.signOut();
-		this.authSuccess.set('Signed out successfully.');
+		this.authSuccess.set(this.ts.t('msg.signOutSuccess'));
 	}
 
 	private _parseFirebaseError(error: unknown): string {
+		const isUk = this.ts.currentLang() === 'uk';
 		if (typeof error === 'object' && error !== null && 'code' in error) {
 			const code = (error as { code: string }).code;
 			switch (code) {
 				case 'auth/email-already-in-use':
-					return 'This email is already registered. Please sign in instead.';
+					return isUk
+						? 'Ця електронна пошта вже зареєстрована. Будь ласка, здійсніть вхід.'
+						: 'This email is already registered. Please sign in instead.';
 				case 'auth/invalid-email':
-					return 'Please enter a valid email address.';
+					return isUk
+						? 'Будь ласка, введіть коректну адресу електронної пошти.'
+						: 'Please enter a valid email address.';
 				case 'auth/weak-password':
-					return 'Password is too weak. Please use at least 6 characters.';
+					return isUk
+						? 'Занадто слабкий пароль. Використовуйте щонайменше 6 символів.'
+						: 'Password is too weak. Please use at least 6 characters.';
 				case 'auth/invalid-credential':
 				case 'auth/wrong-password':
 				case 'auth/user-not-found':
-					return 'Invalid email or password. Please verify your credentials.';
+					return isUk
+						? 'Невірний email або пароль. Будь ласка, перевірте ваші дані.'
+						: 'Invalid email or password. Please verify your credentials.';
 				case 'auth/popup-closed-by-user':
-					return 'Google Sign-In popup was closed before completion.';
+					return isUk
+						? 'Вікно авторизації Google було закрито до завершення.'
+						: 'Google Sign-In popup was closed before completion.';
 				case 'auth/network-request-failed':
-					return 'Network error. Please check your internet connection.';
+					return isUk
+						? 'Помилка мережі. Будь ласка, перевірте зʼєднання з Інтернетом.'
+						: 'Network error. Please check your internet connection.';
 				default:
 					if ('message' in error && typeof (error as { message: unknown }).message === 'string') {
 						return (error as { message: string }).message;
 					}
 			}
 		}
-		return 'Authentication request failed. Please try again.';
+		return isUk
+			? 'Запит на автентифікацію не вдався. Будь ласка, спробуйте знову.'
+			: 'Authentication request failed. Please try again.';
 	}
 
-	protected async nextLanguage(): Promise<void> {
-		const nextLanguage = this.getNextLanguage();
-		await this._translateService.setLanguage(nextLanguage.code);
-		await this._router.navigateByUrl(this._router.url);
+	protected nextLanguage(): void {
+		const next = this.ts.getNextLanguage();
+		this.ts.setLanguage(next.code);
 		this.languageMenuOpen.set(false);
 	}
 
@@ -304,30 +302,13 @@ export class ProfileComponent {
 		this.languageMenuOpen.update((open) => !open);
 	}
 
-	protected async setLanguage(language: AppLanguage): Promise<void> {
-		await this._translateService.setLanguage(language.code);
-		await this._router.navigateByUrl(this._router.url);
+	protected setLanguage(language: { code: string }): void {
+		const code: AppLang = language.code === 'uk' || language.code === 'ua' ? 'uk' : 'en';
+		this.ts.setLanguage(code);
 		this.languageMenuOpen.set(false);
 	}
 
-	protected getNextLanguage(): AppLanguage {
-		const languages = this.languages();
-		const currentCode = this.currentLanguage().code;
-		const currentIndex = languages.findIndex((language) => language.code === currentCode);
-
-		return languages[(currentIndex + 1) % languages.length] ?? languages[0]!;
+	protected getNextLanguage() {
+		return this.ts.getNextLanguage();
 	}
-}
-
-function _toAppLanguage(language: Language | undefined): AppLanguage {
-	const fallback: AppLanguage = {
-		code: 'en',
-		name: 'English',
-		nativeName: 'English',
-		flagSrc: 'flags/united-kingdom.svg',
-		htmlLang: 'en',
-		population: 0,
-	};
-
-	return { ...fallback, ...(language as Partial<AppLanguage> | undefined) };
 }
