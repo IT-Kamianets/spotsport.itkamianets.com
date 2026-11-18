@@ -13,6 +13,7 @@ import { catchError, Observable, of } from 'rxjs';
 import { TranslationService } from '../../services/translation.service';
 
 export type TournamentMainMode = 'view' | 'editor';
+export type TournamentTab = 'overview' | 'participants' | 'status' | 'leaderboard';
 export type TournamentDetailTab = 'overview' | 'rules' | 'participants' | 'status' | 'leaderboard';
 export type EditorSection = 'general' | 'schedule' | 'scoring' | 'penalties';
 
@@ -41,6 +42,7 @@ export class TournamentsComponent {
 
 	// Navigation & view signals
 	protected readonly mode = signal<TournamentMainMode>('view');
+	protected readonly activeTab = signal<TournamentTab>('overview');
 	protected readonly activeDetailTab = signal<TournamentDetailTab>('overview');
 	protected readonly activeSection = signal<EditorSection>('general');
 	protected readonly settingsMenuOpen = signal(false);
@@ -117,6 +119,15 @@ export class TournamentsComponent {
 			}
 
 			if (
+				tab === 'overview' ||
+				tab === 'participants' ||
+				tab === 'status' ||
+				tab === 'leaderboard'
+			) {
+				this.activeTab.set(tab as TournamentTab);
+			}
+
+			if (
 				tab === 'rules' ||
 				tab === 'participants' ||
 				tab === 'status' ||
@@ -144,6 +155,10 @@ export class TournamentsComponent {
 		this.settingsMenuOpen.set(false);
 		this.saveError.set(null);
 		this.saveSuccess.set(null);
+	}
+
+	protected setTab(tab: TournamentTab): void {
+		this.activeTab.set(tab);
 	}
 
 	protected setDetailTab(tab: TournamentDetailTab): void {

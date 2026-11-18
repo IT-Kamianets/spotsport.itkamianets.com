@@ -117,17 +117,7 @@
 					[class]="activeDetailTab() === 'participants' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
 				>
 					<span class="material-symbols-outlined text-[18px]">groups</span>
-					<span>{{ ts.t('tourn.subtabParticipants') }}</span>
-				</button>
-
-				<button
-					type="button"
-					(click)="setDetailTab('status')"
-					class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all cursor-pointer"
-					[class]="activeDetailTab() === 'status' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
-				>
-					<span class="material-symbols-outlined text-[18px]">schedule</span>
-					<span>{{ ts.t('tourn.subtabStatus') }}</span>
+					<span>{{ ts.t('tourn.tabParticipants') }}</span>
 				</button>
 
 				<button
@@ -137,7 +127,7 @@
 					[class]="activeDetailTab() === 'leaderboard' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
 				>
 					<span class="material-symbols-outlined text-[18px]">leaderboard</span>
-					<span>{{ ts.t('tourn.subtabLeaderboard') }}</span>
+					<span>{{ ts.t('tourn.tabLeaderboard') }}</span>
 				</button>
 			</div>
 
@@ -528,7 +518,7 @@
 				</button>
 			</div>
 
-			<!-- View Mode: Tournaments List / Grid (Detail tabs removed) -->
+			<!-- View Mode: Tournaments List / Grid -->
 			@if (mode() === 'view') {
 				<div class="mt-6 space-y-6">
 					@if (tournaments().length > 0) {
