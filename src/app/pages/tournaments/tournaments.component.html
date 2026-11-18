@@ -1,622 +1,829 @@
 <section class="mx-auto max-w-[var(--container)] px-4 py-8 sm:px-6 sm:py-12">
-	<!-- Page Header -->
-	<header class="mb-8">
-		<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-			<div class="flex items-center gap-3">
-				<span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--c-primary)] text-white shadow-sm">
-					<span class="material-symbols-outlined text-[24px]">emoji_events</span>
-				</span>
-				<div>
-					<div class="flex items-center gap-2">
-						<span class="rounded bg-[var(--c-primary)]/10 px-2 py-0.5 text-xs font-semibold text-[var(--c-primary)]">
-							{{ ts.t('tourn.badge') }}
-						</span>
-						<span class="text-xs uppercase tracking-wider text-[var(--c-text-muted)]">
-							{{ ts.t('tourn.category') }}
-						</span>
+	@if (selectedTournament(); as tourn) {
+		<!-- DEDICATED FULL-PAGE VIEW FOR SELECTED TOURNAMENT (matching Profile page layout style) -->
+		<!-- Page Header -->
+		<header class="mb-8">
+			<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+				<div class="flex items-center gap-3">
+					<span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--c-primary)] text-white shadow-sm">
+						<span class="material-symbols-outlined text-[24px]">emoji_events</span>
+					</span>
+					<div>
+						<div class="flex items-center gap-2">
+							<span class="inline-flex items-center gap-1 rounded bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-600">
+								<span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+								{{ tourn.status || ts.t('tourn.statusActive') }}
+							</span>
+							<span class="text-xs uppercase tracking-wider text-[var(--c-text-muted)]">
+								{{ ts.t('tourn.detailsCategory') }}
+							</span>
+						</div>
+						<h1 class="text-2xl font-bold tracking-tight text-[var(--c-text-strong)] sm:text-3xl">
+							{{ tourn.title }}
+						</h1>
 					</div>
-					<h1 class="text-2xl font-bold tracking-tight text-[var(--c-text-strong)] sm:text-3xl">
-						{{ ts.t('tourn.title') }}
-					</h1>
 				</div>
-			</div>
 
-			<div class="flex flex-wrap items-center gap-2.5">
-				@if (mode() === 'view') {
+				<div class="flex flex-wrap items-center gap-2.5">
+					<!-- Section Navigation Dropdown (Gear Icon) -->
+					<div class="relative flex items-center">
+						<button
+							type="button"
+							(click)="toggleSettingsMenu()"
+							class="theme-interactive theme-focus inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 text-xs font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] hover:text-[var(--c-primary)] shadow-sm transition-colors cursor-pointer"
+							[attr.aria-expanded]="settingsMenuOpen()"
+							aria-label="Tournament navigation menu"
+						>
+							<span class="material-symbols-outlined text-[20px]" aria-hidden="true">settings</span>
+							<span class="material-symbols-outlined text-[16px] text-[var(--c-text-muted)]" aria-hidden="true">
+								{{ settingsMenuOpen() ? 'expand_less' : 'expand_more' }}
+							</span>
+						</button>
+
+						@if (settingsMenuOpen()) {
+							<div
+								class="absolute right-0 top-[calc(100%+0.5rem)] z-50 min-w-56 overflow-hidden rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-1.5 shadow-[var(--shadow-md)]"
+							>
+								@for (item of tournamentMenuOptions; track item.id) {
+									<button
+										type="button"
+										(click)="selectSection(item.id)"
+										class="theme-interactive theme-focus flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-semibold transition-colors cursor-pointer"
+										[class]="activeDetailTab() === item.id ? 'bg-[var(--c-primary)]/10 text-[var(--c-primary)]' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-secondary)]'"
+									>
+										<span class="material-symbols-outlined text-[16px]">{{ item.icon }}</span>
+										<span>{{ ts.t(item.labelKey) }}</span>
+										@if (activeDetailTab() === item.id) {
+											<span class="material-symbols-outlined ml-auto text-[16px] text-[var(--c-primary)]">check</span>
+										}
+									</button>
+								}
+							</div>
+						}
+					</div>
+
 					<button
 						type="button"
-						(click)="setMode('editor')"
-						class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm cursor-pointer transition-all"
-					>
-						<span class="material-symbols-outlined text-[20px]">add</span>
-						<span>{{ ts.t('tourn.createBtn') }}</span>
-					</button>
-
-					<a
-						routerLink="/refereeing"
-						class="theme-interactive inline-flex items-center gap-2 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2.5 text-sm font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] shadow-sm"
-					>
-						<span class="material-symbols-outlined text-[20px] text-[var(--c-primary)]">phishing</span>
-						<span>{{ ts.t('tourn.submitCatchBtn') }}</span>
-					</a>
-				} @else {
-					<button
-						type="button"
-						(click)="setMode('view')"
+						(click)="selectTournament(null)"
 						class="theme-interactive inline-flex items-center gap-2 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2.5 text-sm font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] shadow-sm cursor-pointer"
 					>
 						<span class="material-symbols-outlined text-[20px] text-[var(--c-primary)]">arrow_back</span>
 						<span>{{ ts.t('tourn.backToTournaments') }}</span>
 					</button>
 
-					<button
-						type="button"
-						(click)="saveTournament()"
-						[disabled]="isSaving() || tournamentForm.invalid"
-						class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
-					>
-						@if (isSaving()) {
-							<span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>
-							<span>{{ ts.t('tourn.saving') }}</span>
-						} @else {
-							<span class="material-symbols-outlined text-[20px]">save</span>
-							<span>{{ ts.t('tourn.saveTournament') }}</span>
-						}
-					</button>
-				}
-			</div>
-		</div>
-		<p class="mt-3 max-w-2xl text-base text-[var(--c-text)]">
-			{{ ts.t('tourn.desc') }}
-		</p>
-	</header>
-
-	<!-- Main Canvas Card -->
-	<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-6 shadow-[var(--shadow-sm)] sm:p-8">
-		<!-- Main Mode Navigation (Tournament Details vs Create Tournament) -->
-		<div class="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--c-border)] pb-4">
-			<div class="flex flex-wrap items-center gap-2">
-				<button
-					type="button"
-					(click)="setMode('view')"
-					class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all cursor-pointer"
-					[class]="mode() === 'view' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
-				>
-					<span class="material-symbols-outlined text-[18px]">emoji_events</span>
-					<span>{{ ts.t('tourn.tournamentsTab') }}</span>
-					@if (tournaments().length > 0) {
-						<span class="rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold text-white">
-							{{ tournaments().length }}
-						</span>
-					}
-				</button>
-			</div>
-
-			<button
-				type="button"
-				(click)="setMode('editor')"
-				class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm transition-all cursor-pointer"
-			>
-				<span class="material-symbols-outlined text-[18px]">add</span>
-				<span>{{ ts.t('tourn.createBtn') }}</span>
-			</button>
-		</div>
-
-		<!-- View Mode: Tournaments List / Grid -->
-		@if (mode() === 'view') {
-			<div class="mt-6">
-				<!-- Sub-tabs for Tournament Perspectives -->
-				<div class="flex flex-wrap items-center gap-2 rounded-xl bg-[var(--c-bg-primary)] p-1.5 shadow-xs">
-					<button
-						type="button"
-						(click)="setTab('overview')"
-						class="theme-interactive inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer"
-						[class]="activeTab() === 'overview' ? 'bg-[var(--c-bg-secondary)] text-[var(--c-primary)] shadow-xs' : 'text-[var(--c-text)] hover:text-[var(--c-text-strong)]'"
-					>
-						<span class="material-symbols-outlined text-[16px]">overview</span>
-						<span>{{ ts.t('tourn.subtabList') }}</span>
-					</button>
-
-					<button
-						type="button"
-						(click)="setTab('rules')"
-						class="theme-interactive inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer"
-						[class]="activeTab() === 'rules' ? 'bg-[var(--c-bg-secondary)] text-[var(--c-primary)] shadow-xs' : 'text-[var(--c-text)] hover:text-[var(--c-text-strong)]'"
-					>
-						<span class="material-symbols-outlined text-[16px]">gavel</span>
-						<span>{{ ts.t('tourn.subtabRules') }}</span>
-					</button>
-
-					<button
-						type="button"
-						(click)="setTab('participants')"
-						class="theme-interactive inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer"
-						[class]="activeTab() === 'participants' ? 'bg-[var(--c-bg-secondary)] text-[var(--c-primary)] shadow-xs' : 'text-[var(--c-text)] hover:text-[var(--c-text-strong)]'"
-					>
-						<span class="material-symbols-outlined text-[16px]">groups</span>
-						<span>{{ ts.t('tourn.subtabParticipants') }}</span>
-					</button>
-
-					<button
-						type="button"
-						(click)="setTab('status')"
-						class="theme-interactive inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer"
-						[class]="activeTab() === 'status' ? 'bg-[var(--c-bg-secondary)] text-[var(--c-primary)] shadow-xs' : 'text-[var(--c-text)] hover:text-[var(--c-text-strong)]'"
-					>
-						<span class="material-symbols-outlined text-[16px]">hourglass_top</span>
-						<span>{{ ts.t('tourn.subtabStatus') }}</span>
-					</button>
-
-					<button
-						type="button"
-						(click)="setTab('leaderboard')"
-						class="theme-interactive inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer"
-						[class]="activeTab() === 'leaderboard' ? 'bg-[var(--c-bg-secondary)] text-[var(--c-primary)] shadow-xs' : 'text-[var(--c-text)] hover:text-[var(--c-text-strong)]'"
-					>
-						<span class="material-symbols-outlined text-[16px]">leaderboard</span>
-						<span>{{ ts.t('tourn.subtabLeaderboard') }}</span>
-					</button>
-				</div>
-
-				<!-- Tab 1: Overview & Grid of Firestore Tournaments -->
-				@if (activeTab() === 'overview') {
-					<div class="mt-6 space-y-6">
-						@if (tournaments().length > 0) {
-							<!-- Firestore Tournaments Grid -->
-							<div>
-								<div class="mb-4 flex items-center justify-between">
-									<h3 class="text-xs font-semibold uppercase tracking-wider text-[var(--c-text-muted)]">
-										{{ ts.t('tourn.publishedHeading') }} ({{ tournaments().length }})
-									</h3>
-									<span class="inline-flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
-										<span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-										{{ ts.t('tourn.cloudLive') }}
-									</span>
-								</div>
-
-								<div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-									@for (t of tournaments(); track t.id || t.title) {
-										<div
-											(click)="selectTournament(t)"
-											class="flex flex-col justify-between rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs hover:border-[var(--c-primary)] hover:shadow-md transition-all cursor-pointer"
-										>
-											<div>
-												<div class="flex items-start justify-between gap-2">
-													<span class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-600">
-														<span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-														{{ t.status || ts.t('tourn.statusActive') }}
-													</span>
-													<span class="text-[11px] font-medium text-[var(--c-text-muted)] flex items-center gap-1">
-														<span class="material-symbols-outlined text-[14px]">calendar_month</span>
-														{{ t.date }}
-													</span>
-												</div>
-
-												<h4 class="mt-3 text-base font-bold text-[var(--c-text-strong)] leading-snug">
-													{{ t.title }}
-												</h4>
-
-												<p class="mt-1 text-xs text-[var(--c-text-muted)] line-clamp-2 leading-relaxed">
-													{{ t.description }}
-												</p>
-
-												<div class="mt-4 space-y-1.5 text-xs border-t border-[var(--c-border)] pt-3 text-[var(--c-text)]">
-													<div class="flex items-center gap-2">
-														<span class="material-symbols-outlined text-[16px] text-[var(--c-primary)] shrink-0">location_on</span>
-														<span class="truncate font-medium">{{ t.waterBody }}</span>
-													</div>
-													<div class="flex items-center gap-2">
-														<span class="material-symbols-outlined text-[16px] text-[var(--c-primary)] shrink-0">groups</span>
-														<span class="truncate font-medium">{{ t.hostClub }}</span>
-													</div>
-													<div class="flex items-center gap-2">
-														<span class="material-symbols-outlined text-[16px] text-[var(--c-primary)] shrink-0">phishing</span>
-														<span class="truncate font-medium text-[var(--c-primary)]">{{ ts.t('tourn.targetLabel') }} {{ t.targetSpecies }}</span>
-													</div>
-												</div>
-
-												@if (t.rules) {
-													<div class="mt-3 rounded-xl bg-[var(--c-bg-secondary)] p-2.5 text-[11px] text-[var(--c-text-muted)]">
-														<span class="font-semibold text-[var(--c-text-strong)]">{{ ts.t('tourn.rulesLabel') }} </span>
-														<span class="line-clamp-2">{{ t.rules }}</span>
-													</div>
-												}
-											</div>
-
-											<div class="mt-5 flex items-center justify-between border-t border-[var(--c-border)] pt-3.5">
-												<a
-													routerLink="/refereeing"
-													(click)="$event.stopPropagation()"
-													class="theme-interactive inline-flex items-center gap-1.5 rounded-lg bg-[var(--c-primary)]/10 px-3 py-1.5 text-xs font-semibold text-[var(--c-primary)] hover:bg-[var(--c-primary)] hover:text-white transition-all"
-												>
-													<span class="material-symbols-outlined text-[16px]">gavel</span>
-													<span>{{ ts.t('tourn.refereeingBtn') }}</span>
-												</a>
-
-												<button
-													type="button"
-													(click)="selectTournament(t)"
-													class="theme-interactive inline-flex items-center gap-1 text-xs font-semibold text-[var(--c-text-muted)] hover:text-[var(--c-primary)] transition-colors cursor-pointer"
-												>
-													<span>{{ ts.t('tourn.detailsBtn') }}</span>
-													<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
-												</button>
-											</div>
-										</div>
-									}
-								</div>
-							</div>
-						} @else {
-							<!-- Empty State when no tournaments in Firestore -->
-							<div class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-14 text-center">
-								<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--c-bg-secondary)] shadow-sm text-[var(--c-primary)]">
-									<span class="material-symbols-outlined text-[32px]">emoji_events</span>
-								</div>
-								<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
-									{{ ts.t('tourn.emptyTitle') }}
-								</h3>
-								<p class="mt-2 max-w-md text-xs text-[var(--c-text-muted)]">
-									{{ ts.t('tourn.emptyDesc') }}
-								</p>
-								<button
-									type="button"
-									(click)="setMode('editor')"
-									class="mt-6 theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-5 py-2.5 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm cursor-pointer transition-all"
-								>
-									<span class="material-symbols-outlined text-[18px]">add</span>
-									<span>{{ ts.t('tourn.createBtn') }}</span>
-								</button>
-							</div>
-						}
-					</div>
-				} @else {
-					<!-- Details Content for other tabs -->
-					<div class="mt-6 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-16 text-center">
-						<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--c-bg-secondary)] shadow-sm">
-							@switch (activeTab()) {
-								@case ('rules') {
-									<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">menu_book</span>
-								}
-								@case ('participants') {
-									<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">badge</span>
-								}
-								@case ('status') {
-									<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">schedule</span>
-								}
-								@case ('leaderboard') {
-									<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">trophy</span>
-								}
-							}
-						</div>
-
-						<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
-							@switch (activeTab()) {
-								@case ('rules') {
-									{{ ts.t('tourn.phRulesTitle') }}
-								}
-								@case ('participants') {
-									{{ ts.t('tourn.phPartTitle') }}
-								}
-								@case ('status') {
-									{{ ts.t('tourn.phStatusTitle') }}
-								}
-								@case ('leaderboard') {
-									{{ ts.t('tourn.phLeadTitle') }}
-								}
-							}
-						</h3>
-
-						<p class="mt-2 max-w-md text-sm text-[var(--c-text-muted)]">
-							@switch (activeTab()) {
-								@case ('rules') {
-									{{ ts.t('tourn.phRulesDesc') }}
-								}
-								@case ('participants') {
-									{{ ts.t('tourn.phPartDesc') }}
-								}
-								@case ('status') {
-									{{ ts.t('tourn.phStatusDesc') }}
-								}
-								@case ('leaderboard') {
-									{{ ts.t('tourn.phLeadDesc') }}
-								}
-							}
-						</p>
-					</div>
-				}
-			</div>
-		} @else {
-			<!-- Editor Mode: Tournament Editor & Setup Form -->
-			<div class="mt-6">
-				<!-- Header info -->
-				<div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs">
-					<div>
-						<h3 class="text-base font-bold text-[var(--c-text-strong)]">
-							{{ ts.t('tourn.editorTitle') }}
-						</h3>
-						<p class="mt-1 text-xs text-[var(--c-text-muted)]">
-							{{ ts.t('tourn.editorDesc') }}
-						</p>
-					</div>
-					<button
-						type="button"
-						(click)="setMode('view')"
-						class="theme-interactive inline-flex items-center gap-1.5 self-start sm:self-center rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3.5 py-2 text-xs font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] cursor-pointer"
-					>
-						<span class="material-symbols-outlined text-[16px]">close</span>
-						<span>{{ ts.t('tourn.cancel') }}</span>
-					</button>
-				</div>
-
-				<!-- Alerts -->
-				@if (saveSuccess()) {
-					<div class="mb-5 flex items-start gap-2.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3.5 text-xs text-emerald-600 dark:text-emerald-400">
-						<span class="material-symbols-outlined shrink-0 text-[18px]">check_circle</span>
-						<span class="leading-relaxed font-semibold">{{ saveSuccess() }}</span>
-					</div>
-				}
-
-				@if (saveError()) {
-					<div class="mb-5 flex items-start gap-2.5 rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-xs text-red-600 dark:text-red-400">
-						<span class="material-symbols-outlined shrink-0 text-[18px]">error</span>
-						<span class="leading-relaxed">{{ saveError() }}</span>
-					</div>
-				}
-
-				<!-- Reactive Form -->
-				<form [formGroup]="tournamentForm" (ngSubmit)="saveTournament()" class="space-y-5" novalidate>
-					<div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-						<!-- Title -->
-						<div class="md:col-span-2">
-							<label for="tourn-title" class="block text-xs font-semibold text-[var(--c-text-strong)]">
-								{{ ts.t('tourn.fieldTitle') }}
-							</label>
-							<div class="relative mt-1">
-								<input
-									id="tourn-title"
-									type="text"
-									formControlName="title"
-									[placeholder]="ts.t('tourn.phTitle')"
-									class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-3.5 py-2.5 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
-									[class.border-red-500]="tournamentForm.controls.title.invalid && tournamentForm.controls.title.touched"
-								/>
-							</div>
-							@if (tournamentForm.controls.title.invalid && tournamentForm.controls.title.touched) {
-								<p class="mt-1 text-[11px] text-red-500">{{ ts.t('tourn.valTitle') }}</p>
-							}
-						</div>
-
-						<!-- Host Club -->
-						<div>
-							<label for="tourn-host" class="block text-xs font-semibold text-[var(--c-text-strong)]">
-								{{ ts.t('tourn.fieldHost') }}
-							</label>
-							<div class="relative mt-1">
-								<input
-									id="tourn-host"
-									type="text"
-									formControlName="hostClub"
-									[placeholder]="ts.t('tourn.phHost')"
-									class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-3.5 py-2.5 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
-									[class.border-red-500]="tournamentForm.controls.hostClub.invalid && tournamentForm.controls.hostClub.touched"
-								/>
-							</div>
-							@if (tournamentForm.controls.hostClub.invalid && tournamentForm.controls.hostClub.touched) {
-								<p class="mt-1 text-[11px] text-red-500">{{ ts.t('tourn.valHost') }}</p>
-							}
-						</div>
-
-						<!-- Water Body -->
-						<div>
-							<label for="tourn-water" class="block text-xs font-semibold text-[var(--c-text-strong)]">
-								{{ ts.t('tourn.fieldWater') }}
-							</label>
-							<div class="relative mt-1">
-								<input
-									id="tourn-water"
-									type="text"
-									formControlName="waterBody"
-									[placeholder]="ts.t('tourn.phWater')"
-									class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-3.5 py-2.5 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
-									[class.border-red-500]="tournamentForm.controls.waterBody.invalid && tournamentForm.controls.waterBody.touched"
-								/>
-							</div>
-							@if (tournamentForm.controls.waterBody.invalid && tournamentForm.controls.waterBody.touched) {
-								<p class="mt-1 text-[11px] text-red-500">{{ ts.t('tourn.valWater') }}</p>
-							}
-						</div>
-
-						<!-- Date -->
-						<div>
-							<label for="tourn-date" class="block text-xs font-semibold text-[var(--c-text-strong)]">
-								{{ ts.t('tourn.fieldDate') }}
-							</label>
-							<div class="relative mt-1">
-								<input
-									id="tourn-date"
-									type="date"
-									formControlName="date"
-									class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-3.5 py-2.5 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
-									[class.border-red-500]="tournamentForm.controls.date.invalid && tournamentForm.controls.date.touched"
-								/>
-							</div>
-							@if (tournamentForm.controls.date.invalid && tournamentForm.controls.date.touched) {
-								<p class="mt-1 text-[11px] text-red-500">{{ ts.t('tourn.valDate') }}</p>
-							}
-						</div>
-
-						<!-- Target Species -->
-						<div>
-							<label for="tourn-species" class="block text-xs font-semibold text-[var(--c-text-strong)]">
-								{{ ts.t('tourn.fieldSpecies') }}
-							</label>
-							<div class="relative mt-1">
-								<input
-									id="tourn-species"
-									type="text"
-									formControlName="targetSpecies"
-									[placeholder]="ts.t('tourn.phSpecies')"
-									class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-3.5 py-2.5 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
-									[class.border-red-500]="tournamentForm.controls.targetSpecies.invalid && tournamentForm.controls.targetSpecies.touched"
-								/>
-							</div>
-							@if (tournamentForm.controls.targetSpecies.invalid && tournamentForm.controls.targetSpecies.touched) {
-								<p class="mt-1 text-[11px] text-red-500">{{ ts.t('tourn.valSpecies') }}</p>
-							}
-						</div>
-
-						<!-- Description -->
-						<div class="md:col-span-2">
-							<label for="tourn-desc" class="block text-xs font-semibold text-[var(--c-text-strong)]">
-								{{ ts.t('tourn.fieldDesc') }}
-							</label>
-							<div class="relative mt-1">
-								<textarea
-									id="tourn-desc"
-									rows="3"
-									formControlName="description"
-									[placeholder]="ts.t('tourn.phDesc')"
-									class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-3.5 py-2.5 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
-									[class.border-red-500]="tournamentForm.controls.description.invalid && tournamentForm.controls.description.touched"
-								></textarea>
-							</div>
-							@if (tournamentForm.controls.description.invalid && tournamentForm.controls.description.touched) {
-								<p class="mt-1 text-[11px] text-red-500">{{ ts.t('tourn.valDesc') }}</p>
-							}
-						</div>
-
-						<!-- Rules -->
-						<div class="md:col-span-2">
-							<label for="tourn-rules" class="block text-xs font-semibold text-[var(--c-text-strong)]">
-								{{ ts.t('tourn.fieldRules') }}
-							</label>
-							<div class="relative mt-1">
-								<textarea
-									id="tourn-rules"
-									rows="3"
-									formControlName="rules"
-									[placeholder]="ts.t('tourn.phRules')"
-									class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-3.5 py-2.5 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
-									[class.border-red-500]="tournamentForm.controls.rules.invalid && tournamentForm.controls.rules.touched"
-								></textarea>
-							</div>
-							@if (tournamentForm.controls.rules.invalid && tournamentForm.controls.rules.touched) {
-								<p class="mt-1 text-[11px] text-red-500">{{ ts.t('tourn.valRules') }}</p>
-							}
-						</div>
-					</div>
-
-					<div class="flex flex-wrap items-center justify-end gap-3 pt-3 border-t border-[var(--c-border)]">
-						<button
-							type="button"
-							(click)="setMode('view')"
-							class="theme-interactive inline-flex items-center gap-2 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2.5 text-xs font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] cursor-pointer"
-						>
-							<span>{{ ts.t('tourn.cancel') }}</span>
-						</button>
-
-						<button
-							type="submit"
-							[disabled]="isSaving() || tournamentForm.invalid"
-							class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-5 py-2.5 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
-						>
-							@if (isSaving()) {
-								<span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
-								<span>{{ ts.t('tourn.savingToFirestore') }}</span>
-							} @else {
-								<span class="material-symbols-outlined text-[16px]">save</span>
-								<span>{{ ts.t('tourn.saveTournament') }}</span>
-							}
-						</button>
-					</div>
-				</form>
-			</div>
-		}
-	</div>
-
-	<!-- Selected Tournament Modal / Details Overlay -->
-	@if (selectedTournament(); as tourn) {
-		<div
-			class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto"
-			(click)="selectTournament(null)"
-		>
-			<div
-				class="w-full max-w-xl rounded-3xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-6 sm:p-7 shadow-2xl"
-				(click)="$event.stopPropagation()"
-			>
-				<div class="flex items-start justify-between gap-4">
-					<div>
-						<span class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600">
-							<span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-							{{ tourn.status || ts.t('tourn.statusActive') }}
-						</span>
-						<h3 class="mt-2 text-xl font-bold text-[var(--c-text-strong)]">
-							{{ tourn.title }}
-						</h3>
-					</div>
-					<button
-						type="button"
-						(click)="selectTournament(null)"
-						class="theme-interactive flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] text-[var(--c-text-muted)] hover:text-[var(--c-text-strong)] cursor-pointer"
-					>
-						<span class="material-symbols-outlined text-[20px]">close</span>
-					</button>
-				</div>
-
-				<p class="mt-3 text-xs leading-relaxed text-[var(--c-text)]">
-					{{ tourn.description }}
-				</p>
-
-				<div class="mt-5 space-y-2.5 rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-4 text-xs text-[var(--c-text-strong)]">
-					<div class="flex items-center gap-2">
-						<span class="material-symbols-outlined text-[18px] text-[var(--c-primary)]">location_on</span>
-						<span class="font-semibold">{{ ts.t('tourn.modalWater') }}</span>
-						<span>{{ tourn.waterBody }}</span>
-					</div>
-					<div class="flex items-center gap-2">
-						<span class="material-symbols-outlined text-[18px] text-[var(--c-primary)]">groups</span>
-						<span class="font-semibold">{{ ts.t('tourn.modalHost') }}</span>
-						<span>{{ tourn.hostClub }}</span>
-					</div>
-					<div class="flex items-center gap-2">
-						<span class="material-symbols-outlined text-[18px] text-[var(--c-primary)]">calendar_month</span>
-						<span class="font-semibold">{{ ts.t('tourn.modalDate') }}</span>
-						<span>{{ tourn.date }}</span>
-					</div>
-					<div class="flex items-center gap-2">
-						<span class="material-symbols-outlined text-[18px] text-[var(--c-primary)]">phishing</span>
-						<span class="font-semibold">{{ ts.t('tourn.modalSpecies') }}</span>
-						<span class="text-[var(--c-primary)] font-semibold">{{ tourn.targetSpecies }}</span>
-					</div>
-				</div>
-
-				<div class="mt-4 rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-4 text-xs text-[var(--c-text)]">
-					<h4 class="font-bold text-[var(--c-text-strong)] mb-1 flex items-center gap-1.5">
-						<span class="material-symbols-outlined text-[16px] text-[var(--c-primary)]">gavel</span>
-						<span>{{ ts.t('tourn.modalRules') }}</span>
-					</h4>
-					<p class="leading-relaxed text-[var(--c-text-muted)]">{{ tourn.rules }}</p>
-				</div>
-
-				<div class="mt-6 flex items-center justify-end gap-3">
 					<a
 						[routerLink]="['/refereeing']"
 						[queryParams]="{ mode: 'catch', tab: 'submit', tournamentId: tourn.id || tourn.title }"
-						(click)="selectTournament(null)"
-						class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm cursor-pointer"
+						class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm transition-all cursor-pointer"
 					>
-						<span class="material-symbols-outlined text-[16px]">add_a_photo</span>
+						<span class="material-symbols-outlined text-[20px]">add_a_photo</span>
 						<span>{{ ts.t('tourn.modalSubmitCatch') }}</span>
 					</a>
-					<button
-						type="button"
-						(click)="selectTournament(null)"
-						class="theme-interactive rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-4 py-2 text-xs font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] cursor-pointer"
-					>
-						{{ ts.t('tourn.modalClose') }}
-					</button>
 				</div>
 			</div>
+			<p class="mt-3 max-w-3xl text-base text-[var(--c-text)]">
+				{{ tourn.description }}
+			</p>
+		</header>
+
+		<!-- Main Canvas Card for Tournament Details -->
+		<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-6 shadow-[var(--shadow-sm)] sm:p-8">
+			<!-- Sub-navigation Tabs (matching Profile page layout style) -->
+			<div class="flex flex-wrap items-center gap-2 border-b border-[var(--c-border)] pb-4">
+				<button
+					type="button"
+					(click)="setDetailTab('overview')"
+					class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all cursor-pointer"
+					[class]="activeDetailTab() === 'overview' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
+				>
+					<span class="material-symbols-outlined text-[18px]">info</span>
+					<span>{{ ts.t('tourn.tabOverview') }}</span>
+				</button>
+
+				<button
+					type="button"
+					(click)="setDetailTab('rules')"
+					class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all cursor-pointer"
+					[class]="activeDetailTab() === 'rules' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
+				>
+					<span class="material-symbols-outlined text-[18px]">gavel</span>
+					<span>{{ ts.t('tourn.tabRules') }}</span>
+				</button>
+
+				<button
+					type="button"
+					(click)="setDetailTab('participants')"
+					class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all cursor-pointer"
+					[class]="activeDetailTab() === 'participants' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
+				>
+					<span class="material-symbols-outlined text-[18px]">groups</span>
+					<span>{{ ts.t('tourn.subtabParticipants') }}</span>
+				</button>
+
+				<button
+					type="button"
+					(click)="setDetailTab('status')"
+					class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all cursor-pointer"
+					[class]="activeDetailTab() === 'status' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
+				>
+					<span class="material-symbols-outlined text-[18px]">schedule</span>
+					<span>{{ ts.t('tourn.subtabStatus') }}</span>
+				</button>
+
+				<button
+					type="button"
+					(click)="setDetailTab('leaderboard')"
+					class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all cursor-pointer"
+					[class]="activeDetailTab() === 'leaderboard' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
+				>
+					<span class="material-symbols-outlined text-[18px]">leaderboard</span>
+					<span>{{ ts.t('tourn.subtabLeaderboard') }}</span>
+				</button>
+			</div>
+
+			<!-- Tab 1: Overview & Info -->
+			@if (activeDetailTab() === 'overview') {
+				<div class="mt-6 space-y-6">
+					<!-- 4 Key Metadata Cards -->
+					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+						<div class="flex items-start gap-3 rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-4 shadow-xs">
+							<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--c-primary)]/10 text-[var(--c-primary)]">
+								<span class="material-symbols-outlined text-[20px]">location_on</span>
+							</span>
+							<div class="min-w-0">
+								<p class="text-xs font-semibold uppercase tracking-wider text-[var(--c-text-muted)]">
+									{{ ts.t('tourn.venueInfo') }}
+								</p>
+								<p class="mt-1 font-bold text-sm text-[var(--c-text-strong)] truncate">
+									{{ tourn.waterBody }}
+								</p>
+							</div>
+						</div>
+
+						<div class="flex items-start gap-3 rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-4 shadow-xs">
+							<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--c-primary)]/10 text-[var(--c-primary)]">
+								<span class="material-symbols-outlined text-[20px]">groups</span>
+							</span>
+							<div class="min-w-0">
+								<p class="text-xs font-semibold uppercase tracking-wider text-[var(--c-text-muted)]">
+									{{ ts.t('tourn.organizer') }}
+								</p>
+								<p class="mt-1 font-bold text-sm text-[var(--c-text-strong)] truncate">
+									{{ tourn.hostClub }}
+								</p>
+							</div>
+						</div>
+
+						<div class="flex items-start gap-3 rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-4 shadow-xs">
+							<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--c-primary)]/10 text-[var(--c-primary)]">
+								<span class="material-symbols-outlined text-[20px]">calendar_month</span>
+							</span>
+							<div class="min-w-0">
+								<p class="text-xs font-semibold uppercase tracking-wider text-[var(--c-text-muted)]">
+									{{ ts.t('tourn.modalDate') }}
+								</p>
+								<p class="mt-1 font-bold text-sm text-[var(--c-text-strong)] truncate">
+									{{ tourn.date }}
+								</p>
+							</div>
+						</div>
+
+						<div class="flex items-start gap-3 rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-4 shadow-xs">
+							<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--c-primary)]/10 text-[var(--c-primary)]">
+								<span class="material-symbols-outlined text-[20px]">phishing</span>
+							</span>
+							<div class="min-w-0">
+								<p class="text-xs font-semibold uppercase tracking-wider text-[var(--c-text-muted)]">
+									{{ ts.t('tourn.targetSpeciesLabel') }}
+								</p>
+								<p class="mt-1 font-bold text-sm text-[var(--c-primary)] truncate">
+									{{ tourn.targetSpecies }}
+								</p>
+							</div>
+						</div>
+					</div>
+
+					<!-- Tournament Details Card -->
+					<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-6 shadow-xs">
+						<h3 class="text-base font-bold text-[var(--c-text-strong)] flex items-center gap-2">
+							<span class="material-symbols-outlined text-[20px] text-[var(--c-primary)]">description</span>
+							<span>{{ ts.t('tourn.tournamentFormat') }}</span>
+						</h3>
+						<p class="mt-3 text-sm leading-relaxed text-[var(--c-text)]">
+							{{ tourn.description }}
+						</p>
+
+						<div class="mt-5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-xs text-emerald-800 dark:text-emerald-200">
+							<div class="flex items-start gap-2.5">
+								<span class="material-symbols-outlined text-[20px] text-emerald-600 shrink-0">verified</span>
+								<div>
+									<p class="font-semibold text-emerald-700 dark:text-emerald-300">
+										{{ ts.t('tourn.cprGuarantee') }}
+									</p>
+									<p class="mt-1 text-emerald-600/90 dark:text-emerald-400">
+										{{ tourn.rules }}
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Action Banner: Submit Catch for this tournament -->
+					<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-[var(--c-primary)]/30 bg-[var(--c-primary)]/5 p-6 shadow-xs">
+						<div class="flex items-center gap-3">
+							<span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--c-primary)] text-white shadow-xs">
+								<span class="material-symbols-outlined text-[22px]">add_a_photo</span>
+							</span>
+							<div>
+								<h4 class="text-sm font-bold text-[var(--c-text-strong)]">
+									{{ ts.t('tourn.modalSubmitCatch') }}
+								</h4>
+								<p class="text-xs text-[var(--c-text-muted)]">
+									{{ ts.t('ref.desc') }}
+								</p>
+							</div>
+						</div>
+
+						<a
+							[routerLink]="['/refereeing']"
+							[queryParams]="{ mode: 'catch', tab: 'submit', tournamentId: tourn.id || tourn.title }"
+							class="theme-interactive inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--c-primary)] px-5 py-2.5 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm shrink-0 transition-all cursor-pointer"
+						>
+							<span class="material-symbols-outlined text-[18px]">add_a_photo</span>
+							<span>{{ ts.t('tourn.modalSubmitCatch') }}</span>
+						</a>
+					</div>
+				</div>
+			}
+
+			<!-- Tab 2: Rules & Regulations -->
+			@if (activeDetailTab() === 'rules') {
+				<div class="mt-6 space-y-6">
+					<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-6 shadow-xs">
+						<h3 class="text-base font-bold text-[var(--c-text-strong)] flex items-center gap-2">
+							<span class="material-symbols-outlined text-[20px] text-[var(--c-primary)]">gavel</span>
+							<span>{{ ts.t('tourn.rulesOverview') }}</span>
+						</h3>
+						<p class="mt-3 text-sm leading-relaxed text-[var(--c-text)]">
+							{{ tourn.rules }}
+						</p>
+					</div>
+
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+						<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs">
+							<span class="material-symbols-outlined text-[24px] text-[var(--c-primary)]">straighten</span>
+							<h4 class="mt-2 text-sm font-bold text-[var(--c-text-strong)]">1. Ruler Visibility</h4>
+							<p class="mt-1 text-xs text-[var(--c-text-muted)] leading-relaxed">
+								Official SpotSport measuring ruler must be completely visible beneath fish snout to tail fin tip.
+							</p>
+						</div>
+
+						<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs">
+							<span class="material-symbols-outlined text-[24px] text-[var(--c-primary)]">schedule</span>
+							<h4 class="mt-2 text-sm font-bold text-[var(--c-text-strong)]">2. Time Stamp</h4>
+							<p class="mt-1 text-xs text-[var(--c-text-muted)] leading-relaxed">
+								Catches must be photographed immediately upon landing and submitted within active round timeframes.
+							</p>
+						</div>
+
+						<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs">
+							<span class="material-symbols-outlined text-[24px] text-[var(--c-primary)]">water</span>
+							<h4 class="mt-2 text-sm font-bold text-[var(--c-text-strong)]">3. Catch & Release</h4>
+							<p class="mt-1 text-xs text-[var(--c-text-muted)] leading-relaxed">
+								Fish must be returned safely into the water alive and unharmed. Any mortally injured fish is disqualified.
+							</p>
+						</div>
+					</div>
+				</div>
+			}
+
+			<!-- Tab 3: Participants Roster -->
+			@if (activeDetailTab() === 'participants') {
+				<div class="mt-6 space-y-6">
+					<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-6 shadow-xs">
+						<div class="flex items-center justify-between">
+							<div class="flex items-center gap-3">
+								<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--c-primary)]/10 text-[var(--c-primary)]">
+									<span class="material-symbols-outlined text-[22px]">badge</span>
+								</span>
+								<div>
+									<h3 class="text-base font-bold text-[var(--c-text-strong)]">
+										{{ ts.t('tourn.phPartTitle') }}
+									</h3>
+									<p class="text-xs text-[var(--c-text-muted)]">
+										{{ ts.t('tourn.organizer') }}: {{ tourn.hostClub }}
+									</p>
+								</div>
+							</div>
+
+							<span class="rounded-full bg-[var(--c-primary)]/10 px-3 py-1 text-xs font-semibold text-[var(--c-primary)]">
+								{{ tourn.status || ts.t('tourn.statusActive') }}
+							</span>
+						</div>
+
+						<p class="mt-4 text-xs leading-relaxed text-[var(--c-text-muted)]">
+							{{ ts.t('tourn.phPartDesc') }}
+						</p>
+					</div>
+				</div>
+			}
+
+			<!-- Tab: Status & Schedule -->
+			@if (activeDetailTab() === 'status') {
+				<div class="mt-6 space-y-6">
+					<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-6 shadow-xs">
+						<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+							<div class="flex items-center gap-3">
+								<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--c-primary)]/10 text-[var(--c-primary)]">
+									<span class="material-symbols-outlined text-[22px]">schedule</span>
+								</span>
+								<div>
+									<h3 class="text-base font-bold text-[var(--c-text-strong)]">
+										{{ ts.t('tourn.phStatusTitle') }}
+									</h3>
+									<p class="text-xs text-[var(--c-text-muted)]">
+										{{ ts.t('tourn.modalDate') }}: {{ tourn.date }}
+									</p>
+								</div>
+							</div>
+
+							<span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600">
+								<span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+								{{ tourn.status || ts.t('tourn.statusActive') }}
+							</span>
+						</div>
+
+						<p class="mt-4 text-xs leading-relaxed text-[var(--c-text-muted)]">
+							{{ ts.t('tourn.phStatusDesc') }}
+						</p>
+					</div>
+
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+						<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs">
+							<div class="flex items-center gap-2 text-[var(--c-primary)]">
+								<span class="material-symbols-outlined text-[20px]">timer</span>
+								<span class="text-xs font-bold uppercase tracking-wider">Round 1</span>
+							</div>
+							<p class="mt-2 text-sm font-bold text-[var(--c-text-strong)]">07:00 – 12:00</p>
+							<p class="mt-1 text-xs text-[var(--c-text-muted)]">Morning predator session (Shore & Boat)</p>
+						</div>
+
+						<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs">
+							<div class="flex items-center gap-2 text-[var(--c-primary)]">
+								<span class="material-symbols-outlined text-[20px]">lunch_dining</span>
+								<span class="text-xs font-bold uppercase tracking-wider">Break & Audit</span>
+							</div>
+							<p class="mt-2 text-sm font-bold text-[var(--c-text-strong)]">12:00 – 13:30</p>
+							<p class="mt-1 text-xs text-[var(--c-text-muted)]">Arbiter verification and catch tally</p>
+						</div>
+
+						<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs">
+							<div class="flex items-center gap-2 text-[var(--c-primary)]">
+								<span class="material-symbols-outlined text-[20px]">emoji_events</span>
+								<span class="text-xs font-bold uppercase tracking-wider">Round 2 & Awards</span>
+							</div>
+							<p class="mt-2 text-sm font-bold text-[var(--c-text-strong)]">13:30 – 18:00</p>
+							<p class="mt-1 text-xs text-[var(--c-text-muted)]">Final round, podium presentation</p>
+						</div>
+					</div>
+				</div>
+			}
+
+			<!-- Tab 4: Leaderboard & Scoring -->
+			@if (activeDetailTab() === 'leaderboard') {
+				<div class="mt-6 space-y-6">
+					<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-6 shadow-xs">
+						<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+							<div class="flex items-center gap-3">
+								<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--c-primary)]/10 text-[var(--c-primary)]">
+									<span class="material-symbols-outlined text-[22px]">leaderboard</span>
+								</span>
+								<div>
+									<h3 class="text-base font-bold text-[var(--c-text-strong)]">
+										{{ ts.t('tourn.phLeadTitle') }}
+									</h3>
+									<p class="text-xs text-[var(--c-text-muted)]">
+										{{ ts.t('tourn.targetSpeciesLabel') }}: {{ tourn.targetSpecies }}
+									</p>
+								</div>
+							</div>
+
+							<a
+								routerLink="/refereeing"
+								class="theme-interactive inline-flex items-center gap-1.5 self-start sm:self-center rounded-xl bg-[var(--c-primary)] px-4 py-2 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-xs transition-all"
+							>
+								<span class="material-symbols-outlined text-[16px]">gavel</span>
+								<span>{{ ts.t('tourn.refereeingBtn') }}</span>
+							</a>
+						</div>
+
+						<p class="mt-4 text-xs leading-relaxed text-[var(--c-text-muted)]">
+							{{ ts.t('tourn.phLeadDesc') }}
+						</p>
+					</div>
+				</div>
+			}
+		</div>
+	} @else {
+		<!-- Page Header (Main View) -->
+		<header class="mb-8">
+			<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+				<div class="flex items-center gap-3">
+					<span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--c-primary)] text-white shadow-sm">
+						<span class="material-symbols-outlined text-[24px]">emoji_events</span>
+					</span>
+					<div>
+						<div class="flex items-center gap-2">
+							<span class="rounded bg-[var(--c-primary)]/10 px-2 py-0.5 text-xs font-semibold text-[var(--c-primary)]">
+								{{ ts.t('tourn.badge') }}
+							</span>
+							<span class="text-xs uppercase tracking-wider text-[var(--c-text-muted)]">
+								{{ ts.t('tourn.category') }}
+							</span>
+						</div>
+						<h1 class="text-2xl font-bold tracking-tight text-[var(--c-text-strong)] sm:text-3xl">
+							{{ ts.t('tourn.title') }}
+						</h1>
+					</div>
+				</div>
+
+				<div class="flex flex-wrap items-center gap-2.5">
+					@if (mode() === 'view') {
+						<button
+							type="button"
+							(click)="setMode('editor')"
+							class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm cursor-pointer transition-all"
+						>
+							<span class="material-symbols-outlined text-[20px]">add</span>
+							<span>{{ ts.t('tourn.createBtn') }}</span>
+						</button>
+
+						<a
+							routerLink="/refereeing"
+							class="theme-interactive inline-flex items-center gap-2 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2.5 text-sm font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] shadow-sm"
+						>
+							<span class="material-symbols-outlined text-[20px] text-[var(--c-primary)]">phishing</span>
+							<span>{{ ts.t('tourn.submitCatchBtn') }}</span>
+						</a>
+					} @else {
+						<button
+							type="button"
+							(click)="setMode('view')"
+							class="theme-interactive inline-flex items-center gap-2 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2.5 text-sm font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] shadow-sm cursor-pointer"
+						>
+							<span class="material-symbols-outlined text-[20px] text-[var(--c-primary)]">arrow_back</span>
+							<span>{{ ts.t('tourn.backToTournaments') }}</span>
+						</button>
+
+						<button
+							type="button"
+							(click)="saveTournament()"
+							[disabled]="isSaving() || tournamentForm.invalid"
+							class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
+						>
+							@if (isSaving()) {
+								<span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>
+								<span>{{ ts.t('tourn.saving') }}</span>
+							} @else {
+								<span class="material-symbols-outlined text-[20px]">save</span>
+								<span>{{ ts.t('tourn.saveTournament') }}</span>
+							}
+						</button>
+					}
+				</div>
+			</div>
+			<p class="mt-3 max-w-2xl text-base text-[var(--c-text)]">
+				{{ ts.t('tourn.desc') }}
+			</p>
+		</header>
+
+		<!-- Main Canvas Card -->
+		<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-6 shadow-[var(--shadow-sm)] sm:p-8">
+			<!-- Main Mode Navigation (Tournaments vs Create Tournament) -->
+			<div class="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--c-border)] pb-4">
+				<div class="flex flex-wrap items-center gap-2">
+					<button
+						type="button"
+						(click)="setMode('view')"
+						class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all cursor-pointer"
+						[class]="mode() === 'view' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
+					>
+						<span class="material-symbols-outlined text-[18px]">emoji_events</span>
+						<span>{{ ts.t('tourn.tournamentsTab') }}</span>
+						@if (tournaments().length > 0) {
+							<span class="rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold text-white">
+								{{ tournaments().length }}
+							</span>
+						}
+					</button>
+				</div>
+
+				<button
+					type="button"
+					(click)="setMode('editor')"
+					class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm transition-all cursor-pointer"
+				>
+					<span class="material-symbols-outlined text-[18px]">add</span>
+					<span>{{ ts.t('tourn.createBtn') }}</span>
+				</button>
+			</div>
+
+			<!-- View Mode: Tournaments List / Grid (Detail tabs removed) -->
+			@if (mode() === 'view') {
+				<div class="mt-6 space-y-6">
+					@if (tournaments().length > 0) {
+						<!-- Firestore Tournaments Grid -->
+						<div>
+							<div class="mb-4 flex items-center justify-between">
+								<h3 class="text-xs font-semibold uppercase tracking-wider text-[var(--c-text-muted)]">
+									{{ ts.t('tourn.publishedHeading') }} ({{ tournaments().length }})
+								</h3>
+								<span class="inline-flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
+									<span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+									{{ ts.t('tourn.cloudLive') }}
+								</span>
+							</div>
+
+							<div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+								@for (t of tournaments(); track t.id || t.title) {
+									<div
+										(click)="selectTournament(t)"
+										class="flex flex-col justify-between rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs hover:border-[var(--c-primary)] hover:shadow-md transition-all cursor-pointer"
+									>
+										<div>
+											<div class="flex items-start justify-between gap-2">
+												<span class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-600">
+													<span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+													{{ t.status || ts.t('tourn.statusActive') }}
+												</span>
+												<span class="text-[11px] font-medium text-[var(--c-text-muted)] flex items-center gap-1">
+													<span class="material-symbols-outlined text-[14px]">calendar_month</span>
+													{{ t.date }}
+												</span>
+											</div>
+
+											<h4 class="mt-3 text-base font-bold text-[var(--c-text-strong)] leading-snug">
+												{{ t.title }}
+											</h4>
+
+											<p class="mt-1 text-xs text-[var(--c-text-muted)] line-clamp-2 leading-relaxed">
+												{{ t.description }}
+											</p>
+
+											<div class="mt-4 space-y-1.5 text-xs border-t border-[var(--c-border)] pt-3 text-[var(--c-text)]">
+												<div class="flex items-center gap-2">
+													<span class="material-symbols-outlined text-[16px] text-[var(--c-primary)] shrink-0">location_on</span>
+													<span class="truncate font-medium">{{ t.waterBody }}</span>
+												</div>
+												<div class="flex items-center gap-2">
+													<span class="material-symbols-outlined text-[16px] text-[var(--c-primary)] shrink-0">groups</span>
+													<span class="truncate font-medium">{{ t.hostClub }}</span>
+												</div>
+												<div class="flex items-center gap-2">
+													<span class="material-symbols-outlined text-[16px] text-[var(--c-primary)] shrink-0">phishing</span>
+													<span class="truncate font-medium text-[var(--c-primary)]">{{ ts.t('tourn.targetLabel') }} {{ t.targetSpecies }}</span>
+												</div>
+											</div>
+
+											@if (t.rules) {
+												<div class="mt-3 rounded-xl bg-[var(--c-bg-secondary)] p-2.5 text-[11px] text-[var(--c-text-muted)]">
+													<span class="font-semibold text-[var(--c-text-strong)]">{{ ts.t('tourn.rulesLabel') }} </span>
+													<span class="line-clamp-2">{{ t.rules }}</span>
+												</div>
+											}
+										</div>
+
+										<div class="mt-5 flex items-center justify-between border-t border-[var(--c-border)] pt-3.5">
+											<a
+												routerLink="/refereeing"
+												(click)="$event.stopPropagation()"
+												class="theme-interactive inline-flex items-center gap-1.5 rounded-lg bg-[var(--c-primary)]/10 px-3 py-1.5 text-xs font-semibold text-[var(--c-primary)] hover:bg-[var(--c-primary)] hover:text-white transition-all"
+											>
+												<span class="material-symbols-outlined text-[16px]">gavel</span>
+												<span>{{ ts.t('tourn.refereeingBtn') }}</span>
+											</a>
+
+											<button
+												type="button"
+												(click)="selectTournament(t)"
+												class="theme-interactive inline-flex items-center gap-1 text-xs font-semibold text-[var(--c-text-muted)] hover:text-[var(--c-primary)] transition-colors cursor-pointer"
+											>
+												<span>{{ ts.t('tourn.detailsBtn') }}</span>
+												<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+											</button>
+										</div>
+									</div>
+								}
+							</div>
+						</div>
+					} @else {
+						<!-- Empty State when no tournaments in Firestore -->
+						<div class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-14 text-center">
+							<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--c-bg-secondary)] shadow-sm text-[var(--c-primary)]">
+								<span class="material-symbols-outlined text-[32px]">emoji_events</span>
+							</div>
+							<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
+								{{ ts.t('tourn.emptyTitle') }}
+							</h3>
+							<p class="mt-2 max-w-md text-xs text-[var(--c-text-muted)]">
+								{{ ts.t('tourn.emptyDesc') }}
+							</p>
+							<button
+								type="button"
+								(click)="setMode('editor')"
+								class="mt-6 theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-5 py-2.5 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm cursor-pointer transition-all"
+							>
+								<span class="material-symbols-outlined text-[18px]">add</span>
+								<span>{{ ts.t('tourn.createBtn') }}</span>
+							</button>
+						</div>
+					}
+				</div>
+			} @else {
+				<!-- Editor Mode: Tournament Editor & Setup Form -->
+				<div class="mt-6">
+					<!-- Header info -->
+					<div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs">
+						<div>
+							<h3 class="text-base font-bold text-[var(--c-text-strong)]">
+								{{ ts.t('tourn.editorTitle') }}
+							</h3>
+							<p class="mt-1 text-xs text-[var(--c-text-muted)]">
+								{{ ts.t('tourn.editorDesc') }}
+							</p>
+						</div>
+						<button
+							type="button"
+							(click)="setMode('view')"
+							class="theme-interactive inline-flex items-center gap-1.5 self-start sm:self-center rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3.5 py-2 text-xs font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] cursor-pointer"
+						>
+							<span class="material-symbols-outlined text-[16px]">close</span>
+							<span>{{ ts.t('tourn.cancel') }}</span>
+						</button>
+					</div>
+
+					<!-- Feedback alerts -->
+					@if (saveSuccess()) {
+						<div class="mb-5 flex items-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+							<span class="material-symbols-outlined text-[20px] text-emerald-600">check_circle</span>
+							<span>{{ saveSuccess() }}</span>
+						</div>
+					}
+					@if (saveError()) {
+						<div class="mb-5 flex items-center gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-xs font-medium text-red-600 dark:text-red-400">
+							<span class="material-symbols-outlined text-[20px] text-red-500">error</span>
+							<span>{{ saveError() }}</span>
+						</div>
+					}
+
+					<!-- Reactive Form -->
+					<form [formGroup]="tournamentForm" (ngSubmit)="saveTournament()" class="space-y-6">
+						<div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+							<!-- Tournament Title -->
+							<div class="space-y-1.5">
+								<label class="block text-xs font-semibold text-[var(--c-text-strong)]">
+									{{ ts.t('tourn.fieldTitle') }}
+								</label>
+								<input
+									type="text"
+									formControlName="title"
+									placeholder="{{ ts.t('tourn.phTitle') }}"
+									class="theme-interactive w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-4 py-2.5 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-hidden"
+									[class.border-red-500]="tournamentForm.controls.title.invalid && tournamentForm.controls.title.touched"
+								/>
+								@if (tournamentForm.controls.title.invalid && tournamentForm.controls.title.touched) {
+									<p class="text-[11px] text-red-500">{{ ts.t('tourn.valTitle') }}</p>
+								}
+							</div>
+
+							<!-- Host Club -->
+							<div class="space-y-1.5">
+								<label class="block text-xs font-semibold text-[var(--c-text-strong)]">
+									{{ ts.t('tourn.fieldHost') }}
+								</label>
+								<input
+									type="text"
+									formControlName="hostClub"
+									placeholder="{{ ts.t('tourn.phHost') }}"
+									class="theme-interactive w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-4 py-2.5 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-hidden"
+									[class.border-red-500]="tournamentForm.controls.hostClub.invalid && tournamentForm.controls.hostClub.touched"
+								/>
+								@if (tournamentForm.controls.hostClub.invalid && tournamentForm.controls.hostClub.touched) {
+									<p class="text-[11px] text-red-500">{{ ts.t('tourn.valHost') }}</p>
+								}
+							</div>
+
+							<!-- Water Body / Location -->
+							<div class="space-y-1.5">
+								<label class="block text-xs font-semibold text-[var(--c-text-strong)]">
+									{{ ts.t('tourn.fieldWater') }}
+								</label>
+								<input
+									type="text"
+									formControlName="waterBody"
+									placeholder="{{ ts.t('tourn.phWater') }}"
+									class="theme-interactive w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-4 py-2.5 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-hidden"
+									[class.border-red-500]="tournamentForm.controls.waterBody.invalid && tournamentForm.controls.waterBody.touched"
+								/>
+								@if (tournamentForm.controls.waterBody.invalid && tournamentForm.controls.waterBody.touched) {
+									<p class="text-[11px] text-red-500">{{ ts.t('tourn.valWater') }}</p>
+								}
+							</div>
+
+							<!-- Tournament Date -->
+							<div class="space-y-1.5">
+								<label class="block text-xs font-semibold text-[var(--c-text-strong)]">
+									{{ ts.t('tourn.fieldDate') }}
+								</label>
+								<input
+									type="date"
+									formControlName="date"
+									class="theme-interactive w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-4 py-2.5 text-xs text-[var(--c-text-strong)] focus:border-[var(--c-primary)] focus:outline-hidden"
+									[class.border-red-500]="tournamentForm.controls.date.invalid && tournamentForm.controls.date.touched"
+								/>
+								@if (tournamentForm.controls.date.invalid && tournamentForm.controls.date.touched) {
+									<p class="text-[11px] text-red-500">{{ ts.t('tourn.valDate') }}</p>
+								}
+							</div>
+
+							<!-- Target Species -->
+							<div class="space-y-1.5 md:col-span-2">
+								<label class="block text-xs font-semibold text-[var(--c-text-strong)]">
+									{{ ts.t('tourn.fieldSpecies') }}
+								</label>
+								<input
+									type="text"
+									formControlName="targetSpecies"
+									placeholder="{{ ts.t('tourn.phSpecies') }}"
+									class="theme-interactive w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-4 py-2.5 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-hidden"
+									[class.border-red-500]="tournamentForm.controls.targetSpecies.invalid && tournamentForm.controls.targetSpecies.touched"
+								/>
+								@if (tournamentForm.controls.targetSpecies.invalid && tournamentForm.controls.targetSpecies.touched) {
+									<p class="text-[11px] text-red-500">{{ ts.t('tourn.valSpecies') }}</p>
+								}
+							</div>
+
+							<!-- Tournament Description -->
+							<div class="space-y-1.5 md:col-span-2">
+								<label class="block text-xs font-semibold text-[var(--c-text-strong)]">
+									{{ ts.t('tourn.fieldDesc') }}
+								</label>
+								<textarea
+									rows="3"
+									formControlName="description"
+									placeholder="{{ ts.t('tourn.phDesc') }}"
+									class="theme-interactive w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-4 py-2.5 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-hidden resize-none"
+									[class.border-red-500]="tournamentForm.controls.description.invalid && tournamentForm.controls.description.touched"
+								></textarea>
+								@if (tournamentForm.controls.description.invalid && tournamentForm.controls.description.touched) {
+									<p class="text-[11px] text-red-500">{{ ts.t('tourn.valDesc') }}</p>
+								}
+							</div>
+
+							<!-- Rules & Catch Validation -->
+							<div class="space-y-1.5 md:col-span-2">
+								<label class="block text-xs font-semibold text-[var(--c-text-strong)]">
+									{{ ts.t('tourn.fieldRules') }}
+								</label>
+								<textarea
+									rows="3"
+									formControlName="rules"
+									placeholder="{{ ts.t('tourn.phRules') }}"
+									class="theme-interactive w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-4 py-2.5 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-hidden resize-none"
+									[class.border-red-500]="tournamentForm.controls.rules.invalid && tournamentForm.controls.rules.touched"
+								></textarea>
+								@if (tournamentForm.controls.rules.invalid && tournamentForm.controls.rules.touched) {
+									<p class="text-[11px] text-red-500">{{ ts.t('tourn.valRules') }}</p>
+								}
+							</div>
+						</div>
+
+						<div class="flex flex-wrap items-center justify-end gap-3 pt-3 border-t border-[var(--c-border)]">
+							<button
+								type="button"
+								(click)="setMode('view')"
+								class="theme-interactive inline-flex items-center gap-2 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2.5 text-xs font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] cursor-pointer"
+							>
+								<span>{{ ts.t('tourn.cancel') }}</span>
+							</button>
+
+							<button
+								type="submit"
+								[disabled]="isSaving() || tournamentForm.invalid"
+								class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-5 py-2.5 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
+							>
+								@if (isSaving()) {
+									<span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
+									<span>{{ ts.t('tourn.savingToFirestore') }}</span>
+								} @else {
+									<span class="material-symbols-outlined text-[16px]">save</span>
+									<span>{{ ts.t('tourn.saveTournament') }}</span>
+								}
+							</button>
+						</div>
+					</form>
+				</div>
+			}
 		</div>
 	}
 </section>

@@ -13,7 +13,7 @@ import { catchError, Observable, of } from 'rxjs';
 import { TranslationService } from '../../services/translation.service';
 
 export type TournamentMainMode = 'view' | 'editor';
-export type TournamentTab = 'overview' | 'rules' | 'participants' | 'status' | 'leaderboard';
+export type TournamentDetailTab = 'overview' | 'rules' | 'participants' | 'status' | 'leaderboard';
 export type EditorSection = 'general' | 'schedule' | 'scoring' | 'penalties';
 
 export interface TournamentItem {
@@ -41,8 +41,21 @@ export class TournamentsComponent {
 
 	// Navigation & view signals
 	protected readonly mode = signal<TournamentMainMode>('view');
-	protected readonly activeTab = signal<TournamentTab>('overview');
+	protected readonly activeDetailTab = signal<TournamentDetailTab>('overview');
 	protected readonly activeSection = signal<EditorSection>('general');
+	protected readonly settingsMenuOpen = signal(false);
+
+	// 4 Dropdown options for tournament sections
+	protected readonly tournamentMenuOptions: Array<{
+		id: TournamentDetailTab;
+		labelKey: string;
+		icon: string;
+	}> = [
+		{ id: 'rules', labelKey: 'tourn.subtabRules', icon: 'gavel' },
+		{ id: 'participants', labelKey: 'tourn.subtabParticipants', icon: 'groups' },
+		{ id: 'status', labelKey: 'tourn.subtabStatus', icon: 'schedule' },
+		{ id: 'leaderboard', labelKey: 'tourn.subtabLeaderboard', icon: 'leaderboard' },
+	];
 
 	// Selected tournament for details view
 	protected readonly selectedTournament = signal<TournamentItem | null>(null);
@@ -91,6 +104,7 @@ export class TournamentsComponent {
 
 			if (mode === 'editor' || tab === 'editor') {
 				this.mode.set('editor');
+				this.selectedTournament.set(null);
 			} else if (mode === 'view') {
 				this.mode.set('view');
 			}
@@ -109,7 +123,7 @@ export class TournamentsComponent {
 				tab === 'leaderboard' ||
 				tab === 'overview'
 			) {
-				this.activeTab.set(tab);
+				this.activeDetailTab.set(tab as TournamentDetailTab);
 			} else if (
 				tab === 'general' ||
 				tab === 'schedule' ||
@@ -124,12 +138,25 @@ export class TournamentsComponent {
 
 	protected setMode(mode: TournamentMainMode): void {
 		this.mode.set(mode);
+		if (mode === 'editor') {
+			this.selectedTournament.set(null);
+		}
+		this.settingsMenuOpen.set(false);
 		this.saveError.set(null);
 		this.saveSuccess.set(null);
 	}
 
-	protected setTab(tab: TournamentTab): void {
-		this.activeTab.set(tab);
+	protected setDetailTab(tab: TournamentDetailTab): void {
+		this.activeDetailTab.set(tab);
+	}
+
+	protected toggleSettingsMenu(): void {
+		this.settingsMenuOpen.update((open) => !open);
+	}
+
+	protected selectSection(tab: TournamentDetailTab): void {
+		this.activeDetailTab.set(tab);
+		this.settingsMenuOpen.set(false);
 	}
 
 	protected setSection(section: EditorSection): void {
@@ -138,8 +165,9 @@ export class TournamentsComponent {
 
 	protected selectTournament(tournament: TournamentItem | null): void {
 		this.selectedTournament.set(tournament);
+		this.settingsMenuOpen.set(false);
 		if (tournament) {
-			this.activeTab.set('overview');
+			this.activeDetailTab.set('overview');
 			this.mode.set('view');
 		}
 	}
@@ -184,7 +212,7 @@ export class TournamentsComponent {
 			setTimeout(() => {
 				this.mode.set('view');
 				this.selectedTournament.set({ ...payload, id: docRef.id });
-				this.activeTab.set('overview');
+				this.activeDetailTab.set('overview');
 				this.saveSuccess.set(null);
 			}, 800);
 		} catch (err: unknown) {
