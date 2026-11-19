@@ -310,7 +310,7 @@ const TRANSLATIONS_UK: Record<string, string> = {
 	// Topbar & Navigation
 	'nav.tournaments': 'Турніри',
 	'nav.refereeing': 'Суддівство',
-	'nav.about': 'Про проект',
+	'nav.about': 'Про проєкт',
 	'nav.profile': 'Профіль',
 	'nav.github': 'Репозиторій GitHub',
 	'nav.githubTitle': 'SpotSport на GitHub',

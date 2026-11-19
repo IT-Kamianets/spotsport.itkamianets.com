@@ -7,17 +7,19 @@ import { ThemeService } from '@wawjs/ngx-ui';
 import { environment } from '../environments/environment';
 import { FooterComponent } from './layouts/footer/footer.component';
 import { TopbarComponent } from './layouts/topbar/topbar.component';
+import { BottomNavComponent } from './layouts/bottom-nav/bottom-nav.component';
 
 @Component({
 	selector: 'app-root',
-	imports: [RouterOutlet, TopbarComponent, FooterComponent],
+	imports: [RouterOutlet, TopbarComponent, FooterComponent, BottomNavComponent],
 	template: `
-		<div class="flex min-h-screen flex-col">
+		<div class="flex min-h-screen flex-col pb-20 md:pb-0">
 			<app-topbar />
 			<main class="flex-1">
 				<router-outlet />
 			</main>
 			<app-footer />
+			<app-bottom-nav />
 		</div>
 	`,
 })

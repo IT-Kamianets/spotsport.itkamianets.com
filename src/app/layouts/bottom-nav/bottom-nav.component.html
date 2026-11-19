@@ -1,0 +1,36 @@
+<nav
+	class="fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--c-border)] bg-[var(--c-bg-primary)]/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)] md:hidden shadow-[var(--shadow-md)]"
+	aria-label="Mobile Navigation"
+>
+	<div class="grid h-16 grid-cols-3 items-center">
+		<!-- 1. Tournaments / Турніри -->
+		<a
+			routerLink="/tournaments"
+			routerLinkActive="text-[var(--c-primary)] font-semibold"
+			class="theme-interactive flex flex-col items-center justify-center gap-1 py-1 text-xs text-[var(--c-text-muted)] hover:text-[var(--c-text-strong)] transition-colors cursor-pointer"
+		>
+			<span class="material-symbols-outlined text-[24px]">emoji_events</span>
+			<span class="text-[11px] leading-none">{{ ts.t('nav.tournaments') }}</span>
+		</a>
+
+		<!-- 2. Refereeing / Суддівство -->
+		<a
+			routerLink="/refereeing"
+			routerLinkActive="text-[var(--c-primary)] font-semibold"
+			class="theme-interactive flex flex-col items-center justify-center gap-1 py-1 text-xs text-[var(--c-text-muted)] hover:text-[var(--c-text-strong)] transition-colors cursor-pointer"
+		>
+			<span class="material-symbols-outlined text-[24px]">gavel</span>
+			<span class="text-[11px] leading-none">{{ ts.t('nav.refereeing') }}</span>
+		</a>
+
+		<!-- 3. About / Про проєкт -->
+		<a
+			routerLink="/about"
+			routerLinkActive="text-[var(--c-primary)] font-semibold"
+			class="theme-interactive flex flex-col items-center justify-center gap-1 py-1 text-xs text-[var(--c-text-muted)] hover:text-[var(--c-text-strong)] transition-colors cursor-pointer"
+		>
+			<span class="material-symbols-outlined text-[24px]">info</span>
+			<span class="text-[11px] leading-none">{{ ts.t('nav.about') }}</span>
+		</a>
+	</div>
+</nav>

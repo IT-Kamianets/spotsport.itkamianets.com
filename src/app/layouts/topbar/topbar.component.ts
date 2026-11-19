@@ -20,7 +20,6 @@ export class TopbarComponent {
 
 	protected readonly navPages = MVP_PAGES.filter((page) => page.id !== 'home');
 	protected readonly githubRepoUrl = 'https://github.com/IT-Kamianets/spotsport.itkamianets.com';
-	protected readonly mobileNavOpen = signal(false);
 	protected readonly languageMenuOpen = signal(false);
 	protected readonly isProfilePage = signal(false);
 	protected readonly company = this._companyService.company;
@@ -33,14 +32,6 @@ export class TopbarComponent {
 			});
 
 		this.isProfilePage.set(this._router.url.startsWith('/profile'));
-	}
-
-	protected toggleMobileNav(): void {
-		this.mobileNavOpen.update((v) => !v);
-	}
-
-	protected closeMobileNav(): void {
-		this.mobileNavOpen.set(false);
 	}
 
 	protected toggleLanguageMenu(): void {
