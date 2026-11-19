@@ -226,7 +226,14 @@ const TRANSLATIONS_EN: Record<string, string> = {
 	'tourn.targetSpeciesLabel': 'Target Species',
 	'tourn.rulesOverview': 'Catch Validation & Rules',
 	'tourn.scoringCriteria': 'Scoring Criteria & Multipliers',
-	'tourn.cprGuarantee': 'Catch-Photo-Release (CPR) strictly enforced. Catches must be measured on official SpotSport ruler.',
+	'tourn.joinTournament': 'Join Tournament',
+	'tourn.joining': 'Joining...',
+	'tourn.alreadyJoined': 'Joined',
+	'tourn.joinSuccess': 'You have successfully joined the tournament!',
+	'tourn.alreadyRegistered': 'You are already registered for this tournament.',
+	'tourn.authRequiredToJoin': 'Please sign in or create an angler account to join this tournament.',
+	'tourn.joinError': 'Failed to join tournament. Please try again.',
+	'tourn.emptyParticipants': 'No participants have joined this tournament yet. Be the first to join!',
 
 	// Refereeing Page
 	'ref.badge': 'MVP Page 03',
@@ -504,7 +511,14 @@ const TRANSLATIONS_UK: Record<string, string> = {
 	'tourn.targetSpeciesLabel': 'Цільові види риб',
 	'tourn.rulesOverview': 'Валідація виловів та правила',
 	'tourn.scoringCriteria': 'Критерії оцінювання та коефіцієнти',
-	'tourn.cprGuarantee': 'Суворе дотримання формату «Зловив-Сфотографував-Відпусти». Вилови вимірюються на офіційній лінійці SpotSport.',
+	'tourn.joinTournament': 'Приєднатися до турніру',
+	'tourn.joining': 'Приєднання...',
+	'tourn.alreadyJoined': 'Ви берете участь',
+	'tourn.joinSuccess': 'Ви успішно приєдналися до турніру!',
+	'tourn.alreadyRegistered': 'Ви вже зареєстровані учасником цього турніру.',
+	'tourn.authRequiredToJoin': 'Будь ласка, увійдіть або зареєструйтесь, щоб приєднатися до турніру.',
+	'tourn.joinError': 'Не вдалося приєднатися до турніру. Спробуйте ще раз.',
+	'tourn.emptyParticipants': 'Ще немає зареєстрованих учасників. Станьте першим!',
 
 	// Refereeing Page
 	'ref.badge': 'MVP Сторінка 03',

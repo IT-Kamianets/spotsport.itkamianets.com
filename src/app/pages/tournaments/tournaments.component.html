@@ -71,12 +71,34 @@
 						<span>{{ ts.t('tourn.backToTournaments') }}</span>
 					</button>
 
+					<!-- Join Tournament Button -->
+					<button
+						type="button"
+						(click)="joinTournament()"
+						[disabled]="isJoining() || isUserRegistered()"
+						class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition-all cursor-pointer"
+						[class]="isUserRegistered()
+							? 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 cursor-default'
+							: 'bg-[var(--c-primary)] text-white hover:bg-[var(--c-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed'"
+					>
+						@if (isJoining()) {
+							<span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>
+							<span>{{ ts.t('tourn.joining') }}</span>
+						} @else if (isUserRegistered()) {
+							<span class="material-symbols-outlined text-[20px] text-emerald-600">check_circle</span>
+							<span>{{ ts.t('tourn.alreadyJoined') }}</span>
+						} @else {
+							<span class="material-symbols-outlined text-[20px]">person_add</span>
+							<span>{{ ts.t('tourn.joinTournament') }}</span>
+						}
+					</button>
+
 					<a
 						[routerLink]="['/refereeing']"
 						[queryParams]="{ mode: 'catch', tab: 'submit', tournamentId: tourn.id || tourn.title }"
-						class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm transition-all cursor-pointer"
+						class="theme-interactive inline-flex items-center gap-2 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2.5 text-sm font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] shadow-sm transition-all cursor-pointer"
 					>
-						<span class="material-symbols-outlined text-[20px]">add_a_photo</span>
+						<span class="material-symbols-outlined text-[20px] text-[var(--c-primary)]">add_a_photo</span>
 						<span>{{ ts.t('tourn.modalSubmitCatch') }}</span>
 					</a>
 				</div>
@@ -88,6 +110,32 @@
 
 		<!-- Main Canvas Card for Tournament Details -->
 		<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-6 shadow-[var(--shadow-sm)] sm:p-8">
+			<!-- Join Tournament Feedback Banner -->
+			@if (joinFeedback(); as feedback) {
+				<div
+					class="mb-6 flex items-center justify-between gap-3 rounded-2xl border p-4 text-xs font-medium transition-all"
+					[class]="feedback.type === 'success'
+						? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+						: (feedback.type === 'error'
+							? 'border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-400'
+							: 'border-[var(--c-primary)]/20 bg-[var(--c-primary)]/10 text-[var(--c-primary)]')"
+				>
+					<div class="flex items-center gap-2.5">
+						<span class="material-symbols-outlined text-[20px]">
+							{{ feedback.type === 'success' ? 'check_circle' : (feedback.type === 'error' ? 'error' : 'info') }}
+						</span>
+						<span>{{ feedback.message }}</span>
+					</div>
+					<button
+						type="button"
+						(click)="joinFeedback.set(null)"
+						class="text-[var(--c-text-muted)] hover:text-[var(--c-text-strong)] cursor-pointer"
+					>
+						<span class="material-symbols-outlined text-[18px]">close</span>
+					</button>
+				</div>
+			}
+
 			<!-- Tab 1: Overview & Info -->
 			@if (activeDetailTab() === 'overview') {
 				<div class="space-y-6">
@@ -248,7 +296,7 @@
 			@if (activeDetailTab() === 'participants') {
 				<div class="space-y-6">
 					<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-6 shadow-xs">
-						<div class="flex items-center justify-between">
+						<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 							<div class="flex items-center gap-3">
 								<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--c-primary)]/10 text-[var(--c-primary)]">
 									<span class="material-symbols-outlined text-[22px]">badge</span>
@@ -263,14 +311,64 @@
 								</div>
 							</div>
 
-							<span class="rounded-full bg-[var(--c-primary)]/10 px-3 py-1 text-xs font-semibold text-[var(--c-primary)]">
-								{{ tourn.status || ts.t('tourn.statusActive') }}
-							</span>
+							<div class="flex items-center gap-2">
+								<span class="rounded-full bg-[var(--c-primary)]/10 px-3 py-1 text-xs font-semibold text-[var(--c-primary)]">
+									{{ participants().length }} {{ ts.t('tourn.tabParticipants') }}
+								</span>
+								@if (!isUserRegistered()) {
+									<button
+										type="button"
+										(click)="joinTournament()"
+										[disabled]="isJoining()"
+										class="theme-interactive inline-flex items-center gap-1.5 rounded-xl bg-[var(--c-primary)] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-xs transition-all cursor-pointer"
+									>
+										@if (isJoining()) {
+											<span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
+										} @else {
+											<span class="material-symbols-outlined text-[16px]">person_add</span>
+										}
+										<span>{{ ts.t('tourn.joinTournament') }}</span>
+									</button>
+								}
+							</div>
 						</div>
 
 						<p class="mt-4 text-xs leading-relaxed text-[var(--c-text-muted)]">
 							{{ ts.t('tourn.phPartDesc') }}
 						</p>
+
+						<!-- Registered Participants List from Firestore -->
+						<div class="mt-6 border-t border-[var(--c-border)] pt-4">
+							@if (participants().length > 0) {
+								<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+									@for (p of participants(); track p.id || p.userId) {
+										<div class="flex items-center gap-3 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-3 shadow-xs">
+											<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--c-primary)]/10 text-[var(--c-primary)]">
+												<span class="material-symbols-outlined text-[20px]">person</span>
+											</span>
+											<div class="min-w-0 flex-1">
+												<p class="truncate text-xs font-bold text-[var(--c-text-strong)]">
+													{{ p.displayName || 'Angler' }}
+												</p>
+												<p class="truncate text-[11px] text-[var(--c-text-muted)]">
+													{{ p.email || 'Registered participant' }}
+												</p>
+											</div>
+											<span class="material-symbols-outlined text-[18px] text-emerald-500 shrink-0" title="Confirmed participant">
+												verified
+											</span>
+										</div>
+									}
+								</div>
+							} @else {
+								<div class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] p-6 text-center">
+									<span class="material-symbols-outlined text-[28px] text-[var(--c-text-muted)]">group_off</span>
+									<p class="mt-2 text-xs text-[var(--c-text-muted)]">
+										{{ ts.t('tourn.emptyParticipants') }}
+									</p>
+								</div>
+							}
+						</div>
 					</div>
 				</div>
 			}
