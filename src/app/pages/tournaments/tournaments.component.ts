@@ -1,7 +1,8 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import QRCode from 'qrcode';
 import {
 	addDoc,
 	collection,
@@ -49,6 +50,7 @@ export interface ParticipantItem {
 })
 export class TournamentsComponent {
 	private readonly _route = inject(ActivatedRoute);
+	private readonly _router = inject(Router);
 	private readonly _firestore = inject(Firestore);
 	public readonly authService = inject(AuthService);
 	public readonly ts = inject(TranslationService);
@@ -115,6 +117,23 @@ export class TournamentsComponent {
 	// Join state signals & computed properties
 	protected readonly isJoining = signal(false);
 	protected readonly joinFeedback = signal<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+
+	// QR / Share modal state
+	protected readonly qrModalOpen = signal(false);
+	protected readonly qrDataUrl = signal<string>('');
+	protected readonly linkCopied = signal(false);
+	protected readonly qrTournUrl = signal<string>('');
+	@ViewChild('qrCanvas') private readonly _qrCanvas?: ElementRef<HTMLCanvasElement>;
+
+	// Camera QR scanner state
+	protected readonly scanModalOpen = signal(false);
+	protected readonly scanError = signal<string | null>(null);
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private _html5Scanner: any = null;
+	private _scannerRunning = false;
+
+	// Manual join-via-code input
+	protected readonly joinCodeInput = signal('');
 
 	protected readonly isUserRegistered = computed(() => {
 		const user = this.currentUser();
@@ -234,6 +253,125 @@ export class TournamentsComponent {
 			this.activeDetailTab.set('overview');
 			this.mode.set('view');
 		}
+	}
+
+	/**
+	 * Extracts a tournament ID from a scanned URL or raw ID string.
+	 * Handles: full https://spotsport.itkamianets.com/tournaments/<id>  or bare <id>.
+	 */
+	private _extractTournamentId(raw: string): string {
+		const trimmed = raw.trim();
+		try {
+			const url = new URL(trimmed);
+			const segments = url.pathname.split('/').filter(Boolean);
+			const idx = segments.indexOf('tournaments');
+			if (idx !== -1 && segments[idx + 1]) {
+				return decodeURIComponent(segments[idx + 1]);
+			}
+		} catch {
+			// not a URL — treat as bare ID
+		}
+		return trimmed;
+	}
+
+	/** Opens the camera scanner modal. */
+	protected async openScanModal(): Promise<void> {
+		this.scanError.set(null);
+		this.scanModalOpen.set(true);
+		// Give Angular time to render #qr-reader before starting scanner
+		setTimeout(() => void this._startScanner(), 120);
+	}
+
+	/** Starts html5-qrcode scanner inside #qr-reader div. */
+	private async _startScanner(): Promise<void> {
+		if (this._scannerRunning) return;
+		try {
+			// Dynamic import to avoid SSR issues
+			const { Html5Qrcode } = await import('html5-qrcode');
+			this._html5Scanner = new Html5Qrcode('qr-reader');
+			await this._html5Scanner.start(
+				{ facingMode: 'environment' },
+				{ fps: 10, qrbox: { width: 220, height: 220 } },
+				(decodedText: string) => {
+					void this._onScanSuccess(decodedText);
+				},
+				() => { /* ignore frequent not-found errors */ },
+			);
+			this._scannerRunning = true;
+		} catch {
+			this.scanError.set(this.ts.t('tourn.scanError'));
+		}
+	}
+
+	/** Called on successful QR scan. */
+	private async _onScanSuccess(decodedText: string): Promise<void> {
+		await this._stopScanner();
+		this.scanModalOpen.set(false);
+		const id = this._extractTournamentId(decodedText);
+		if (id) {
+			void this._router.navigate(['/tournaments'], { queryParams: { id } });
+		}
+	}
+
+	/** Stops the camera stream and cleans up. */
+	private async _stopScanner(): Promise<void> {
+		if (this._scannerRunning && this._html5Scanner) {
+			try {
+				await this._html5Scanner.stop();
+				this._html5Scanner.clear();
+			} catch { /* already stopped */ }
+			this._scannerRunning = false;
+		}
+	}
+
+	/** Closes the scanner modal and stops camera. */
+	protected async closeScanModal(): Promise<void> {
+		await this._stopScanner();
+		this.scanModalOpen.set(false);
+		this.scanError.set(null);
+	}
+
+	/** Navigates to a tournament from the manual code/URL input. */
+	protected navigateViaCode(): void {
+		const raw = this.joinCodeInput();
+		if (!raw.trim()) return;
+		const id = this._extractTournamentId(raw);
+		if (id) {
+			this.joinCodeInput.set('');
+			void this._router.navigate(['/tournaments'], { queryParams: { id } });
+		}
+	}
+
+	/**
+	 * Opens the QR / Share modal and generates a QR code data URL for the current tournament.
+	 */
+	protected async openQrModal(): Promise<void> {
+		const tourn = this.selectedTournament();
+		const tournId = tourn?.id || tourn?.title || '';
+		const url = `https://spotsport.itkamianets.com/tournaments/${encodeURIComponent(tournId)}`;
+		this.qrTournUrl.set(url);
+		this.linkCopied.set(false);
+		try {
+			const dataUrl = await QRCode.toDataURL(url, {
+				width: 240,
+				margin: 2,
+				color: { dark: '#000000', light: '#ffffff' },
+			});
+			this.qrDataUrl.set(dataUrl);
+		} catch {
+			this.qrDataUrl.set('');
+		}
+		this.qrModalOpen.set(true);
+	}
+
+	/** Copies the tournament URL to the clipboard and shows a brief confirmation. */
+	protected copyTournLink(): void {
+		const url = this.qrTournUrl();
+		if (!url) return;
+		navigator.clipboard.writeText(url).then(() => {
+			this.linkCopied.set(true);
+			setTimeout(() => this.linkCopied.set(false), 2000);
+		});
 	}
 
 	/**

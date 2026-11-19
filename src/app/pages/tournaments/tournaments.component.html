@@ -1,4 +1,4 @@
-<section class="mx-auto max-w-[var(--container)] px-4 py-8 sm:px-6 sm:py-12">
+﻿<section class="mx-auto max-w-[var(--container)] px-4 py-8 sm:px-6 sm:py-12">
 	@if (selectedTournament(); as tourn) {
 		<!-- DEDICATED FULL-PAGE VIEW FOR SELECTED TOURNAMENT (matching Profile page layout style) -->
 		<!-- Page Header -->
@@ -69,6 +69,16 @@
 					>
 						<span class="material-symbols-outlined text-[20px] text-[var(--c-primary)]">arrow_back</span>
 						<span>{{ ts.t('tourn.backToTournaments') }}</span>
+					</button>
+
+					<!-- Share / QR Code Button -->
+					<button
+						type="button"
+						(click)="openQrModal()"
+						class="theme-interactive inline-flex items-center gap-2 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2.5 text-sm font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] shadow-sm transition-all cursor-pointer"
+					>
+						<span class="material-symbols-outlined text-[20px] text-[var(--c-primary)]">qr_code_2</span>
+						<span>{{ ts.t('tourn.shareQr') }}</span>
 					</button>
 
 					<!-- Join Tournament Button -->
@@ -409,7 +419,7 @@
 								<span class="material-symbols-outlined text-[20px]">timer</span>
 								<span class="text-xs font-bold uppercase tracking-wider">Round 1</span>
 							</div>
-							<p class="mt-2 text-sm font-bold text-[var(--c-text-strong)]">07:00 – 12:00</p>
+							<p class="mt-2 text-sm font-bold text-[var(--c-text-strong)]">07:00 вЂ“ 12:00</p>
 							<p class="mt-1 text-xs text-[var(--c-text-muted)]">Morning predator session (Shore & Boat)</p>
 						</div>
 
@@ -418,7 +428,7 @@
 								<span class="material-symbols-outlined text-[20px]">lunch_dining</span>
 								<span class="text-xs font-bold uppercase tracking-wider">Break & Audit</span>
 							</div>
-							<p class="mt-2 text-sm font-bold text-[var(--c-text-strong)]">12:00 – 13:30</p>
+							<p class="mt-2 text-sm font-bold text-[var(--c-text-strong)]">12:00 вЂ“ 13:30</p>
 							<p class="mt-1 text-xs text-[var(--c-text-muted)]">Arbiter verification and catch tally</p>
 						</div>
 
@@ -427,7 +437,7 @@
 								<span class="material-symbols-outlined text-[20px]">emoji_events</span>
 								<span class="text-xs font-bold uppercase tracking-wider">Round 2 & Awards</span>
 							</div>
-							<p class="mt-2 text-sm font-bold text-[var(--c-text-strong)]">13:30 – 18:00</p>
+							<p class="mt-2 text-sm font-bold text-[var(--c-text-strong)]">13:30 вЂ“ 18:00</p>
 							<p class="mt-1 text-xs text-[var(--c-text-muted)]">Final round, podium presentation</p>
 						</div>
 					</div>
@@ -572,6 +582,48 @@
 					<span>{{ ts.t('tourn.createBtn') }}</span>
 				</button>
 			</div>
+
+			<!-- Scan QR / Join via Code bar (hub view only) -->
+			@if (mode() === 'view') {
+				<div class="mt-5 flex flex-col gap-3 rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-4 sm:flex-row sm:items-center">
+					<!-- Scan button -->
+					<button
+						type="button"
+						(click)="openScanModal()"
+						class="theme-interactive inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2.5 text-sm font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] hover:text-[var(--c-primary)] shadow-sm transition-all cursor-pointer"
+					>
+						<span class="material-symbols-outlined text-[20px] text-[var(--c-primary)]">qr_code_scanner</span>
+						<span>{{ ts.t('tourn.scanQr') }}</span>
+					</button>
+
+					<!-- Divider -->
+					<span class="hidden text-xs text-[var(--c-text-muted)] sm:block">|</span>
+
+					<!-- Manual code / URL input -->
+					<div class="flex flex-1 items-center gap-2">
+						<div class="relative flex-1">
+							<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[18px] text-[var(--c-text-muted)]">link</span>
+							<input
+								type="text"
+								[value]="joinCodeInput()"
+								(input)="joinCodeInput.set($any($event.target).value)"
+								(keydown.enter)="navigateViaCode()"
+								[placeholder]="ts.t('tourn.joinViaCodePlaceholder')"
+								class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] pl-9 pr-3 py-2.5 text-sm text-[var(--c-text)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
+							/>
+						</div>
+						<button
+							type="button"
+							(click)="navigateViaCode()"
+							[disabled]="!joinCodeInput().trim()"
+							class="theme-interactive inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--c-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-all cursor-pointer"
+						>
+							<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+							<span class="hidden sm:inline">{{ ts.t('tourn.joinViaCodeBtn') }}</span>
+						</button>
+					</div>
+				</div>
+			}
 
 			<!-- View Mode: Tournaments List / Grid -->
 			@if (mode() === 'view') {
@@ -872,3 +924,155 @@
 		</div>
 	}
 </section>
+
+<!-- QR / Share Modal -->
+@if (qrModalOpen()) {
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center p-4"
+		(click)="qrModalOpen.set(false)"
+		role="dialog"
+		aria-modal="true"
+	>
+		<!-- Backdrop -->
+		<div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+
+		<!-- Modal panel -->
+		<div
+			class="relative z-10 w-full max-w-sm rounded-3xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-6 shadow-2xl"
+			(click)="$event.stopPropagation()"
+		>
+			<!-- Header -->
+			<div class="mb-5 flex items-center justify-between">
+				<div class="flex items-center gap-2.5">
+					<span class="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--c-primary)]/10 text-[var(--c-primary)]">
+						<span class="material-symbols-outlined text-[20px]">qr_code_2</span>
+					</span>
+					<h2 class="text-base font-bold text-[var(--c-text-strong)]">{{ ts.t('tourn.qrModalTitle') }}</h2>
+				</div>
+				<button
+					type="button"
+					(click)="qrModalOpen.set(false)"
+					class="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--c-text-muted)] hover:bg-[var(--c-bg-secondary)] hover:text-[var(--c-text-strong)] transition-colors cursor-pointer"
+					[attr.aria-label]="ts.t('tourn.qrClose')"
+				>
+					<span class="material-symbols-outlined text-[20px]">close</span>
+				</button>
+			</div>
+
+			<!-- QR Code Image -->
+			<div class="mb-5 flex justify-center">
+				@if (qrDataUrl()) {
+					<img
+						[src]="qrDataUrl()"
+						alt="QR Code"
+						width="200"
+						height="200"
+						class="rounded-2xl border border-[var(--c-border)] bg-white p-2 shadow-sm"
+					/>
+				} @else {
+					<div class="flex h-[200px] w-[200px] items-center justify-center rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)]">
+						<span class="material-symbols-outlined text-[36px] text-[var(--c-text-muted)]">qr_code</span>
+					</div>
+				}
+			</div>
+
+			<!-- URL display -->
+			<div class="mb-4">
+				<p class="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--c-text-muted)]">
+					{{ ts.t('tourn.qrDirectUrl') }}
+				</p>
+				<div class="flex items-center gap-2 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-2.5">
+					<span class="min-w-0 flex-1 truncate font-mono text-[11px] text-[var(--c-text)]">{{ qrTournUrl() }}</span>
+				</div>
+			</div>
+
+			<!-- Actions -->
+			<div class="flex gap-2">
+				<button
+					type="button"
+					(click)="copyTournLink()"
+					class="flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all cursor-pointer"
+					[class]="linkCopied()
+						? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
+						: 'bg-[var(--c-primary)] text-white hover:bg-[var(--c-primary-hover)]'"
+				>
+					<span class="material-symbols-outlined text-[18px]">{{ linkCopied() ? 'check_circle' : 'content_copy' }}</span>
+					<span>{{ linkCopied() ? ts.t('tourn.qrCopied') : ts.t('tourn.qrCopyLink') }}</span>
+				</button>
+				<button
+					type="button"
+					(click)="qrModalOpen.set(false)"
+					class="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2.5 text-sm font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] transition-all cursor-pointer"
+				>
+					{{ ts.t('tourn.qrClose') }}
+				</button>
+			</div>
+		</div>
+	</div>
+}
+
+<!-- Camera QR Scanner Modal -->
+@if (scanModalOpen()) {
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center p-4"
+		(click)="closeScanModal()"
+		role="dialog"
+		aria-modal="true"
+	>
+		<!-- Backdrop -->
+		<div class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+
+		<!-- Panel -->
+		<div
+			class="relative z-10 w-full max-w-sm rounded-3xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-6 shadow-2xl"
+			(click)="$event.stopPropagation()"
+		>
+			<!-- Header -->
+			<div class="mb-4 flex items-center justify-between">
+				<div class="flex items-center gap-2.5">
+					<span class="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--c-primary)]/10 text-[var(--c-primary)]">
+						<span class="material-symbols-outlined text-[20px]">qr_code_scanner</span>
+					</span>
+					<h2 class="text-base font-bold text-[var(--c-text-strong)]">{{ ts.t('tourn.scanModalTitle') }}</h2>
+				</div>
+				<button
+					type="button"
+					(click)="closeScanModal()"
+					class="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--c-text-muted)] hover:bg-[var(--c-bg-secondary)] hover:text-[var(--c-text-strong)] transition-colors cursor-pointer"
+				>
+					<span class="material-symbols-outlined text-[20px]">close</span>
+				</button>
+			</div>
+
+			<!-- Instruction -->
+			@if (!scanError()) {
+				<p class="mb-3 text-xs text-[var(--c-text-muted)]">{{ ts.t('tourn.scanInstruction') }}</p>
+			}
+
+			<!-- Error state -->
+			@if (scanError()) {
+				<div class="mb-4 flex items-center gap-2.5 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs font-medium text-red-600 dark:text-red-400">
+					<span class="material-symbols-outlined text-[18px]">error</span>
+					<span>{{ scanError() }}</span>
+				</div>
+			}
+
+			<!-- Video container for html5-qrcode -->
+			<div
+				id="qr-reader"
+				class="overflow-hidden rounded-2xl bg-black"
+				style="min-height: 240px;"
+			></div>
+
+			<!-- Close button -->
+			<button
+				type="button"
+				(click)="closeScanModal()"
+				class="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2.5 text-sm font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] transition-all cursor-pointer"
+			>
+				<span class="material-symbols-outlined text-[18px]">close</span>
+				{{ ts.t('tourn.scanClose') }}
+			</button>
+		</div>
+	</div>
+}

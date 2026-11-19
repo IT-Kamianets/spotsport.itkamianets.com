@@ -150,11 +150,6 @@ const TRANSLATIONS_EN: Record<string, string> = {
 	'msg.googleSuccess': 'Successfully authenticated with Google! Angler profile synced to Cloud Firestore database.',
 
 	// Tournaments Page
-	'tourn.shareQR': 'Share / QR Code',
-	'tourn.shareTitle': 'Share this tournament',
-	'tourn.copyLink': 'Copy Link',
-	'tourn.linkCopied': 'Link copied to clipboard!',
-
 	'tourn.badge': 'MVP Page 02',
 	'tourn.category': 'Tournament Platform',
 	'tourn.title': 'Tournaments & Tournament Editor',
@@ -239,6 +234,20 @@ const TRANSLATIONS_EN: Record<string, string> = {
 	'tourn.authRequiredToJoin': 'Please sign in or create an angler account to join this tournament.',
 	'tourn.joinError': 'Failed to join tournament. Please try again.',
 	'tourn.emptyParticipants': 'No participants have joined this tournament yet. Be the first to join!',
+	'tourn.shareQr': 'Share / QR',
+	'tourn.qrModalTitle': 'Share Tournament',
+	'tourn.qrDirectUrl': 'Direct URL',
+	'tourn.qrCopyLink': 'Copy Link',
+	'tourn.qrCopied': 'Copied!',
+	'tourn.qrClose': 'Close',
+	'tourn.scanQr': 'Scan QR Code',
+	'tourn.joinViaCode': 'Join via Code / QR',
+	'tourn.joinViaCodePlaceholder': 'Paste tournament URL or ID…',
+	'tourn.joinViaCodeBtn': 'Go to Tournament',
+	'tourn.scanModalTitle': 'Scan Tournament QR',
+	'tourn.scanInstruction': 'Point the camera at a SpotSport tournament QR code.',
+	'tourn.scanError': 'Camera access denied or not available.',
+	'tourn.scanClose': 'Close Scanner',
 
 	// Refereeing Page
 	'ref.badge': 'MVP Page 03',
@@ -440,11 +449,6 @@ const TRANSLATIONS_UK: Record<string, string> = {
 	'msg.googleSuccess': 'Успішно автентифіковано через Google! Профіль рибалки синхронізовано з Cloud Firestore.',
 
 	// Tournaments Page
-	'tourn.shareQR': 'Share / QR Code',
-	'tourn.shareTitle': 'Share this tournament',
-	'tourn.copyLink': 'Copy Link',
-	'tourn.linkCopied': 'Link copied to clipboard!',
-
 	'tourn.badge': 'MVP Сторінка 02',
 	'tourn.category': 'Турнірна платформа',
 	'tourn.title': 'Турніри та редактор турнірів',
@@ -529,6 +533,20 @@ const TRANSLATIONS_UK: Record<string, string> = {
 	'tourn.authRequiredToJoin': 'Будь ласка, увійдіть або зареєструйтесь, щоб приєднатися до турніру.',
 	'tourn.joinError': 'Не вдалося приєднатися до турніру. Спробуйте ще раз.',
 	'tourn.emptyParticipants': 'Ще немає зареєстрованих учасників. Станьте першим!',
+	'tourn.shareQr': 'Поділитись / QR',
+	'tourn.qrModalTitle': 'Поділитись турніром',
+	'tourn.qrDirectUrl': 'Пряме посилання',
+	'tourn.qrCopyLink': 'Скопіювати',
+	'tourn.qrCopied': 'Скопійовано!',
+	'tourn.qrClose': 'Закрити',
+	'tourn.scanQr': 'Сканувати QR-код',
+	'tourn.joinViaCode': 'Приєднатись за кодом / QR',
+	'tourn.joinViaCodePlaceholder': 'Вставте URL турніру або ID…',
+	'tourn.joinViaCodeBtn': 'Перейти до турніру',
+	'tourn.scanModalTitle': 'Сканування QR турніру',
+	'tourn.scanInstruction': 'Наведіть камеру на QR-код турніру SpotSport.',
+	'tourn.scanError': 'Доступ до камери заборонено або недоступний.',
+	'tourn.scanClose': 'Закрити сканер',
 
 	// Refereeing Page
 	'ref.badge': 'MVP Сторінка 03',
