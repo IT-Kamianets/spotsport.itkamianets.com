@@ -153,7 +153,7 @@ const TRANSLATIONS_EN: Record<string, string> = {
 	'tourn.shareQR': 'Share / QR Code',
 	'tourn.shareTitle': 'Share this tournament',
 	'tourn.copyLink': 'Copy Link',
-	'tourn.linkCopied': 'Link copied to clipboard!'
+	'tourn.linkCopied': 'Link copied to clipboard!',
 
 	'tourn.badge': 'MVP Page 02',
 	'tourn.category': 'Tournament Platform',
@@ -443,7 +443,7 @@ const TRANSLATIONS_UK: Record<string, string> = {
 	'tourn.shareQR': 'Share / QR Code',
 	'tourn.shareTitle': 'Share this tournament',
 	'tourn.copyLink': 'Copy Link',
-	'tourn.linkCopied': 'Link copied to clipboard!'
+	'tourn.linkCopied': 'Link copied to clipboard!',
 
 	'tourn.badge': 'MVP Сторінка 02',
 	'tourn.category': 'Турнірна платформа',
