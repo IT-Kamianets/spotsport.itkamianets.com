@@ -47,7 +47,7 @@ export class TournamentsComponent {
 	protected readonly activeSection = signal<EditorSection>('general');
 	protected readonly settingsMenuOpen = signal(false);
 
-	// Dropdown options for tournament sections in gear menu
+	// Dropdown options for tournament sections (Overview + Details)
 	protected readonly tournamentMenuOptions: Array<{
 		id: TournamentDetailTab;
 		labelKey: string;

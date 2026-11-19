@@ -88,7 +88,7 @@
 
 		<!-- Main Canvas Card for Tournament Details -->
 		<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-6 shadow-[var(--shadow-sm)] sm:p-8">
-			<!-- Section 1: Overview & Info -->
+			<!-- Tab 1: Overview & Info -->
 			@if (activeDetailTab() === 'overview') {
 				<div class="space-y-6">
 					<!-- 4 Key Metadata Cards -->
@@ -205,7 +205,7 @@
 
 			<!-- Tab 2: Rules & Regulations -->
 			@if (activeDetailTab() === 'rules') {
-				<div class="mt-6 space-y-6">
+				<div class="space-y-6">
 					<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-6 shadow-xs">
 						<h3 class="text-base font-bold text-[var(--c-text-strong)] flex items-center gap-2">
 							<span class="material-symbols-outlined text-[20px] text-[var(--c-primary)]">gavel</span>
@@ -246,7 +246,7 @@
 
 			<!-- Tab 3: Participants Roster -->
 			@if (activeDetailTab() === 'participants') {
-				<div class="mt-6 space-y-6">
+				<div class="space-y-6">
 					<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-6 shadow-xs">
 						<div class="flex items-center justify-between">
 							<div class="flex items-center gap-3">
@@ -277,7 +277,7 @@
 
 			<!-- Tab: Status & Schedule -->
 			@if (activeDetailTab() === 'status') {
-				<div class="mt-6 space-y-6">
+				<div class="space-y-6">
 					<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-6 shadow-xs">
 						<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 							<div class="flex items-center gap-3">
@@ -338,7 +338,7 @@
 
 			<!-- Tab 4: Leaderboard & Scoring -->
 			@if (activeDetailTab() === 'leaderboard') {
-				<div class="mt-6 space-y-6">
+				<div class="space-y-6">
 					<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-6 shadow-xs">
 						<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 							<div class="flex items-center gap-3">
