@@ -150,6 +150,11 @@ const TRANSLATIONS_EN: Record<string, string> = {
 	'msg.googleSuccess': 'Successfully authenticated with Google! Angler profile synced to Cloud Firestore database.',
 
 	// Tournaments Page
+	'tourn.shareQR': 'Share / QR Code',
+	'tourn.shareTitle': 'Share this tournament',
+	'tourn.copyLink': 'Copy Link',
+	'tourn.linkCopied': 'Link copied to clipboard!'
+
 	'tourn.badge': 'MVP Page 02',
 	'tourn.category': 'Tournament Platform',
 	'tourn.title': 'Tournaments & Tournament Editor',
@@ -435,6 +440,11 @@ const TRANSLATIONS_UK: Record<string, string> = {
 	'msg.googleSuccess': 'Успішно автентифіковано через Google! Профіль рибалки синхронізовано з Cloud Firestore.',
 
 	// Tournaments Page
+	'tourn.shareQR': 'Share / QR Code',
+	'tourn.shareTitle': 'Share this tournament',
+	'tourn.copyLink': 'Copy Link',
+	'tourn.linkCopied': 'Link copied to clipboard!'
+
 	'tourn.badge': 'MVP Сторінка 02',
 	'tourn.category': 'Турнірна платформа',
 	'tourn.title': 'Турніри та редактор турнірів',
