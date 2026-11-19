@@ -47,12 +47,13 @@ export class TournamentsComponent {
 	protected readonly activeSection = signal<EditorSection>('general');
 	protected readonly settingsMenuOpen = signal(false);
 
-	// 4 Dropdown options for tournament sections
+	// Dropdown options for tournament sections in gear menu
 	protected readonly tournamentMenuOptions: Array<{
 		id: TournamentDetailTab;
 		labelKey: string;
 		icon: string;
 	}> = [
+		{ id: 'overview', labelKey: 'tourn.subtabOverview', icon: 'info' },
 		{ id: 'rules', labelKey: 'tourn.subtabRules', icon: 'gavel' },
 		{ id: 'participants', labelKey: 'tourn.subtabParticipants', icon: 'groups' },
 		{ id: 'status', labelKey: 'tourn.subtabStatus', icon: 'schedule' },

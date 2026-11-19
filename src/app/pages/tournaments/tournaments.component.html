@@ -88,52 +88,9 @@
 
 		<!-- Main Canvas Card for Tournament Details -->
 		<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-6 shadow-[var(--shadow-sm)] sm:p-8">
-			<!-- Sub-navigation Tabs (matching Profile page layout style) -->
-			<div class="flex flex-wrap items-center gap-2 border-b border-[var(--c-border)] pb-4">
-				<button
-					type="button"
-					(click)="setDetailTab('overview')"
-					class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all cursor-pointer"
-					[class]="activeDetailTab() === 'overview' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
-				>
-					<span class="material-symbols-outlined text-[18px]">info</span>
-					<span>{{ ts.t('tourn.tabOverview') }}</span>
-				</button>
-
-				<button
-					type="button"
-					(click)="setDetailTab('rules')"
-					class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all cursor-pointer"
-					[class]="activeDetailTab() === 'rules' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
-				>
-					<span class="material-symbols-outlined text-[18px]">gavel</span>
-					<span>{{ ts.t('tourn.tabRules') }}</span>
-				</button>
-
-				<button
-					type="button"
-					(click)="setDetailTab('participants')"
-					class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all cursor-pointer"
-					[class]="activeDetailTab() === 'participants' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
-				>
-					<span class="material-symbols-outlined text-[18px]">groups</span>
-					<span>{{ ts.t('tourn.tabParticipants') }}</span>
-				</button>
-
-				<button
-					type="button"
-					(click)="setDetailTab('leaderboard')"
-					class="theme-interactive inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all cursor-pointer"
-					[class]="activeDetailTab() === 'leaderboard' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
-				>
-					<span class="material-symbols-outlined text-[18px]">leaderboard</span>
-					<span>{{ ts.t('tourn.tabLeaderboard') }}</span>
-				</button>
-			</div>
-
-			<!-- Tab 1: Overview & Info -->
+			<!-- Section 1: Overview & Info -->
 			@if (activeDetailTab() === 'overview') {
-				<div class="mt-6 space-y-6">
+				<div class="space-y-6">
 					<!-- 4 Key Metadata Cards -->
 					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 						<div class="flex items-start gap-3 rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-4 shadow-xs">
