@@ -42,7 +42,7 @@
 
 						@if (settingsMenuOpen()) {
 							<div
-								class="absolute right-0 top-[calc(100%+0.5rem)] z-50 min-w-56 overflow-hidden rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-1.5 shadow-[var(--shadow-md)]"
+								class="absolute left-0 sm:left-auto sm:right-0 top-[calc(100%+0.5rem)] z-50 min-w-56 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-1.5 shadow-[var(--shadow-md)]"
 							>
 								@for (item of tournamentMenuOptions; track item.id) {
 									<button
