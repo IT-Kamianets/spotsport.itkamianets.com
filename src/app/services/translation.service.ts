@@ -278,6 +278,15 @@ const TRANSLATIONS_EN: Record<string, string> = {
 	'catch.leaderboardBestLength': 'Best Length (cm)',
 	'catch.noCatches': 'No catches submitted yet for this tournament. Be the first to register a catch!',
 
+	// Catch Statuses & Moderation
+	'catch.statusPending': 'Pending',
+	'catch.statusApproved': 'Approved',
+	'catch.statusRejected': 'Rejected',
+	'catch.actionApprove': 'Approve',
+	'catch.actionReject': 'Reject',
+	'catch.moderationTitle': 'Catch Moderation',
+	'catch.viewPhoto': 'View Photo',
+
 	// Refereeing Page
 	'ref.badge': 'MVP Page 03',
 	'ref.category': 'Arbiter & Catches',
@@ -605,6 +614,15 @@ const TRANSLATIONS_UK: Record<string, string> = {
 	'catch.leaderboardTotalWeight': 'Загальна вага (кг)',
 	'catch.leaderboardBestLength': 'Найбільша довжина (см)',
 	'catch.noCatches': 'Виловів для цього турніру ще не зареєстровано. Зафіксуйте перший вилов!',
+
+	// Catch Statuses & Moderation
+	'catch.statusPending': 'Очікує перевірки',
+	'catch.statusApproved': 'Схвалено',
+	'catch.statusRejected': 'Відхилено',
+	'catch.actionApprove': 'Схвалити',
+	'catch.actionReject': 'Відхилити',
+	'catch.moderationTitle': 'Модерація виловів',
+	'catch.viewPhoto': 'Переглянути фото',
 
 	// Refereeing Page
 	'ref.badge': 'MVP Сторінка 03',

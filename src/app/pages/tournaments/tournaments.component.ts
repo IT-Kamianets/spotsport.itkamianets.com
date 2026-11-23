@@ -1,3 +1,4 @@
+import { DecimalPipe, LowerCasePipe } from '@angular/common';
 import { Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -19,7 +20,7 @@ import { TranslationService } from '../../services/translation.service';
 
 export type TournamentMainMode = 'view' | 'editor';
 export type TournamentTab = 'overview' | 'participants' | 'status' | 'leaderboard';
-export type TournamentDetailTab = 'overview' | 'rules' | 'participants' | 'status' | 'leaderboard';
+export type TournamentDetailTab = 'overview' | 'rules' | 'participants' | 'status' | 'leaderboard' | 'moderation';
 export type EditorSection = 'general' | 'schedule' | 'scoring' | 'penalties';
 
 export interface TournamentItem {
@@ -32,6 +33,8 @@ export interface TournamentItem {
 	date: string;
 	rules: string;
 	status?: 'active' | 'upcoming' | 'completed';
+	createdBy?: string | null;
+	organizerId?: string | null;
 	createdAt?: unknown;
 }
 
@@ -46,7 +49,7 @@ export interface ParticipantItem {
 
 @Component({
 	selector: 'app-tournaments',
-	imports: [ReactiveFormsModule, RouterLink],
+	imports: [DecimalPipe, LowerCasePipe, ReactiveFormsModule, RouterLink],
 	templateUrl: './tournaments.component.html',
 })
 export class TournamentsComponent {
@@ -69,21 +72,42 @@ export class TournamentsComponent {
 	protected readonly activeSection = signal<EditorSection>('general');
 	protected readonly settingsMenuOpen = signal(false);
 
-	// Dropdown options for tournament sections (Overview + Details)
-	protected readonly tournamentMenuOptions: Array<{
-		id: TournamentDetailTab;
-		labelKey: string;
-		icon: string;
-	}> = [
-		{ id: 'overview', labelKey: 'tourn.subtabOverview', icon: 'info' },
-		{ id: 'rules', labelKey: 'tourn.subtabRules', icon: 'gavel' },
-		{ id: 'participants', labelKey: 'tourn.subtabParticipants', icon: 'groups' },
-		{ id: 'status', labelKey: 'tourn.subtabStatus', icon: 'schedule' },
-		{ id: 'leaderboard', labelKey: 'tourn.subtabLeaderboard', icon: 'leaderboard' },
-	];
-
 	// Selected tournament for details view
 	protected readonly selectedTournament = signal<TournamentItem | null>(null);
+
+	// Organizer verification check
+	protected readonly isOrganizer = computed(() => {
+		const user = this.currentUser();
+		const tourn = this.selectedTournament();
+		if (!user || !tourn) return false;
+		const creatorId = tourn.organizerId || tourn.createdBy;
+		return Boolean(creatorId && creatorId === user.uid);
+	});
+
+	// Dropdown options for tournament sections (Overview + Details + Moderation for organizers)
+	protected readonly tournamentMenuOptions = computed<
+		Array<{
+			id: TournamentDetailTab;
+			labelKey: string;
+			icon: string;
+		}>
+	>(() => {
+		const base: Array<{
+			id: TournamentDetailTab;
+			labelKey: string;
+			icon: string;
+		}> = [
+			{ id: 'overview', labelKey: 'tourn.subtabOverview', icon: 'info' },
+			{ id: 'rules', labelKey: 'tourn.subtabRules', icon: 'gavel' },
+			{ id: 'participants', labelKey: 'tourn.subtabParticipants', icon: 'groups' },
+			{ id: 'status', labelKey: 'tourn.subtabStatus', icon: 'schedule' },
+			{ id: 'leaderboard', labelKey: 'tourn.subtabLeaderboard', icon: 'leaderboard' },
+		];
+		if (this.isOrganizer()) {
+			base.push({ id: 'moderation', labelKey: 'catch.moderationTitle', icon: 'fact_check' });
+		}
+		return base;
+	});
 
 	// Firestore collection & data stream for tournaments
 	private readonly _tournamentsCol = collection(this._firestore, 'tournaments');
@@ -128,6 +152,69 @@ export class TournamentsComponent {
 		}),
 	);
 	protected readonly catches = toSignal(this.catches$, { initialValue: [] });
+
+	// Filtered catches for leaderboard (only approved catches, with fallback for legacy catches without status)
+	protected readonly approvedCatches = computed(() => {
+		return this.catches().filter((c) => c.status === 'approved' || !c.status);
+	});
+
+	// Current user's own catches (all statuses)
+	protected readonly myCatches = computed(() => {
+		const user = this.currentUser();
+		if (!user) return [];
+		return this.catches().filter((c) => c.userId === user.uid);
+	});
+
+	// Pending catches for organizer review
+	protected readonly pendingCatches = computed(() => {
+		return this.catches().filter((c) => c.status === 'pending');
+	});
+
+	// Leaderboard rows aggregated from approved catches
+	protected readonly leaderboard = computed(() => {
+		const approved = this.approvedCatches();
+		const map = new Map<
+			string,
+			{
+				userId: string;
+				displayName: string;
+				catches: number;
+				totalLengthCm: number;
+				totalWeightKg: number;
+				bestLengthCm: number;
+			}
+		>();
+
+		for (const c of approved) {
+			const existing = map.get(c.userId);
+			const weight = c.weightKg ? Number(c.weightKg) : 0;
+			const length = Number(c.lengthCm) || 0;
+			if (existing) {
+				existing.catches += 1;
+				existing.totalLengthCm += length;
+				existing.totalWeightKg += weight;
+				if (length > existing.bestLengthCm) {
+					existing.bestLengthCm = length;
+				}
+			} else {
+				map.set(c.userId, {
+					userId: c.userId,
+					displayName: c.anglerName || 'Angler',
+					catches: 1,
+					totalLengthCm: length,
+					totalWeightKg: weight,
+					bestLengthCm: length,
+				});
+			}
+		}
+
+		return Array.from(map.values()).sort((a, b) => {
+			if (b.totalLengthCm !== a.totalLengthCm) {
+				return b.totalLengthCm - a.totalLengthCm;
+			}
+			return b.totalWeightKg - a.totalWeightKg;
+		});
+	});
 
 	// Submit Catch modal state and form
 	protected readonly catchModalOpen = signal(false);
@@ -245,7 +332,8 @@ export class TournamentsComponent {
 				tab === 'participants' ||
 				tab === 'status' ||
 				tab === 'leaderboard' ||
-				tab === 'overview'
+				tab === 'overview' ||
+				tab === 'moderation'
 			) {
 				this.activeDetailTab.set(tab as TournamentDetailTab);
 			} else if (
@@ -570,6 +658,24 @@ export class TournamentsComponent {
 		}
 	}
 
+	// Catch status update in moderation
+	protected readonly updatingCatchId = signal<string | null>(null);
+
+	/**
+	 * Allows an organizer to approve or reject a submitted catch.
+	 */
+	protected async setCatchStatus(c: CatchItem, status: 'approved' | 'rejected'): Promise<void> {
+		if (!c.id || !c.tournamentId) return;
+		this.updatingCatchId.set(c.id);
+		try {
+			await this.tournamentService.updateCatchStatus(c.tournamentId, c.id, status);
+		} catch (err: unknown) {
+			console.error('Error updating catch status:', err);
+		} finally {
+			this.updatingCatchId.set(null);
+		}
+	}
+
 	protected async saveTournament(): Promise<void> {
 		if (this.tournamentForm.invalid) {
 			this.tournamentForm.markAllAsTouched();
@@ -582,6 +688,7 @@ export class TournamentsComponent {
 
 		try {
 			const formValues = this.tournamentForm.getRawValue();
+			const user = this.currentUser();
 			const payload: TournamentItem = {
 				title: formValues.title.trim(),
 				description: formValues.description.trim(),
@@ -591,6 +698,7 @@ export class TournamentsComponent {
 				date: formValues.date,
 				rules: formValues.rules.trim(),
 				status: 'active',
+				createdBy: user ? user.uid : null,
 				createdAt: serverTimestamp(),
 			};
 

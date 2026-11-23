@@ -44,7 +44,7 @@
 							<div
 								class="absolute left-0 sm:left-auto sm:right-0 top-[calc(100%+0.5rem)] z-50 min-w-56 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-1.5 shadow-[var(--shadow-md)]"
 							>
-								@for (item of tournamentMenuOptions; track item.id) {
+								@for (item of tournamentMenuOptions(); track item.id) {
 									<button
 										type="button"
 										(click)="selectSection(item.id)"
@@ -456,26 +456,269 @@
 								</span>
 								<div>
 									<h3 class="text-base font-bold text-[var(--c-text-strong)]">
-										{{ ts.t('tourn.phLeadTitle') }}
+										{{ ts.t('catch.leaderboardHeading') }}
 									</h3>
 									<p class="text-xs text-[var(--c-text-muted)]">
 										{{ ts.t('tourn.targetSpeciesLabel') }}: {{ tourn.targetSpecies }}
+										&middot; {{ approvedCatches().length }} {{ ts.t('catch.leaderboardCatches') | lowercase }}
 									</p>
 								</div>
 							</div>
 
-							<a
-								routerLink="/refereeing"
-								class="theme-interactive inline-flex items-center gap-1.5 self-start sm:self-center rounded-xl bg-[var(--c-primary)] px-4 py-2 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-xs transition-all"
-							>
-								<span class="material-symbols-outlined text-[16px]">gavel</span>
-								<span>{{ ts.t('tourn.refereeingBtn') }}</span>
-							</a>
+							<div class="flex items-center gap-2">
+								<button
+									type="button"
+									(click)="openCatchModal()"
+									class="theme-interactive inline-flex items-center gap-1.5 rounded-xl bg-[var(--c-primary)] px-4 py-2 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-xs transition-all cursor-pointer"
+								>
+									<span class="material-symbols-outlined text-[16px]">add_a_photo</span>
+									<span>{{ ts.t('catch.submitBtn') }}</span>
+								</button>
+								<a
+									routerLink="/refereeing"
+									class="theme-interactive inline-flex items-center gap-1.5 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2 text-xs font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] shadow-xs transition-all"
+								>
+									<span class="material-symbols-outlined text-[16px]">gavel</span>
+									<span>{{ ts.t('tourn.refereeingBtn') }}</span>
+								</a>
+							</div>
 						</div>
 
-						<p class="mt-4 text-xs leading-relaxed text-[var(--c-text-muted)]">
-							{{ ts.t('tourn.phLeadDesc') }}
-						</p>
+						<!-- Official Standings (Approved Catches Only) -->
+						<div class="mt-5 border-t border-[var(--c-border)] pt-4">
+							@if (leaderboard().length > 0) {
+								<div class="overflow-x-auto">
+									<table class="w-full text-xs">
+										<thead>
+											<tr class="text-left text-[var(--c-text-muted)] border-b border-[var(--c-border)]">
+												<th class="pb-2 pr-3 font-semibold">#</th>
+												<th class="pb-2 pr-3 font-semibold">Angler</th>
+												<th class="pb-2 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardCatches') }}</th>
+												<th class="pb-2 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardTotalWeight') }}</th>
+												<th class="pb-2 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardBestLength') }}</th>
+											</tr>
+										</thead>
+										<tbody>
+											@for (row of leaderboard(); track row.userId; let i = $index) {
+												<tr class="border-b border-[var(--c-border)]/50 last:border-0" [class]="i === 0 ? 'text-[var(--c-primary)] font-bold' : 'text-[var(--c-text)]'">
+													<td class="py-2.5 pr-3">
+														@if (i === 0) {
+															<span class="material-symbols-outlined text-[16px] text-amber-500">emoji_events</span>
+														} @else {
+															{{ i + 1 }}
+														}
+													</td>
+													<td class="py-2.5 pr-3 max-w-[160px] truncate">{{ row.displayName }}</td>
+													<td class="py-2.5 pr-3 text-right font-medium">{{ row.catches }}</td>
+													<td class="py-2.5 pr-3 text-right">{{ row.totalWeightKg > 0 ? (row.totalWeightKg | number:'1.2-2') : '—' }}</td>
+													<td class="py-2.5 pr-3 text-right font-semibold">{{ row.bestLengthCm }} cm</td>
+												</tr>
+											}
+										</tbody>
+									</table>
+								</div>
+							} @else {
+								<div class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] p-6 text-center">
+									<span class="material-symbols-outlined text-[28px] text-[var(--c-text-muted)]">leaderboard</span>
+									<p class="mt-2 text-xs text-[var(--c-text-muted)]">
+										{{ ts.t('catch.noCatches') }}
+									</p>
+								</div>
+							}
+						</div>
+
+						<!-- Participant's Own Submitted Catches (with Status Badges) -->
+						@if (currentUser(); as user) {
+							<div class="mt-6 border-t border-[var(--c-border)] pt-4">
+								<h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--c-text-muted)] flex items-center gap-1.5">
+									<span class="material-symbols-outlined text-[16px] text-[var(--c-primary)]">person</span>
+									<span>My Submitted Catches ({{ myCatches().length }})</span>
+								</h4>
+								@if (myCatches().length > 0) {
+									<div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+										@for (c of myCatches(); track c.id) {
+											<div class="flex items-center justify-between rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-3 text-xs">
+												<div class="min-w-0 flex-1">
+													<div class="flex items-center gap-2">
+														<span class="font-bold text-[var(--c-text-strong)]">{{ c.species }}</span>
+														<span class="text-[var(--c-text-muted)]">&middot;</span>
+														<span class="font-semibold text-[var(--c-primary)]">{{ c.lengthCm }} cm</span>
+														@if (c.weightKg) {
+															<span class="text-[var(--c-text-muted)]">({{ c.weightKg }} kg)</span>
+														}
+													</div>
+													@if (c.notes) {
+														<p class="mt-1 truncate text-[11px] text-[var(--c-text-muted)]">{{ c.notes }}</p>
+													}
+												</div>
+
+												<!-- Status Badge for participant -->
+												<div class="ml-3 shrink-0 flex items-center gap-2">
+													@if (c.photoUrl) {
+														<a
+															[href]="c.photoUrl"
+															target="_blank"
+															rel="noopener noreferrer"
+															class="text-[var(--c-primary)] hover:underline inline-flex items-center"
+															[title]="ts.t('catch.viewPhoto')"
+														>
+															<span class="material-symbols-outlined text-[18px]">image</span>
+														</a>
+													}
+													<span
+														class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+														[class]="c.status === 'approved' || !c.status
+															? 'bg-emerald-500/10 text-emerald-600'
+															: (c.status === 'rejected'
+																? 'bg-red-500/10 text-red-600'
+																: 'bg-amber-500/10 text-amber-600')"
+													>
+														<span
+															class="h-1.5 w-1.5 rounded-full"
+															[class]="c.status === 'approved' || !c.status
+																? 'bg-emerald-500'
+																: (c.status === 'rejected'
+																	? 'bg-red-500'
+																	: 'bg-amber-500 animate-pulse')"
+														></span>
+														@if (c.status === 'approved' || !c.status) {
+															{{ ts.t('catch.statusApproved') }}
+														} @else if (c.status === 'rejected') {
+															{{ ts.t('catch.statusRejected') }}
+														} @else {
+															{{ ts.t('catch.statusPending') }}
+														}
+													</span>
+												</div>
+											</div>
+										}
+									</div>
+								} @else {
+									<p class="text-xs text-[var(--c-text-muted)]">You have not submitted any catches for this tournament yet.</p>
+								}
+							</div>
+						}
+					</div>
+				</div>
+			}
+
+			<!-- Tab 5: Organizer Catch Moderation Section -->
+			@if (activeDetailTab() === 'moderation' && isOrganizer()) {
+				<div class="space-y-6">
+					<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-6 shadow-xs">
+						<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+							<div class="flex items-center gap-3">
+								<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--c-primary)]/10 text-[var(--c-primary)]">
+									<span class="material-symbols-outlined text-[22px]">fact_check</span>
+								</span>
+								<div>
+									<h3 class="text-base font-bold text-[var(--c-text-strong)]">
+										{{ ts.t('catch.moderationTitle') }}
+									</h3>
+									<p class="text-xs text-[var(--c-text-muted)]">
+										Review and verify catches submitted by participants ({{ pendingCatches().length }} pending)
+									</p>
+								</div>
+							</div>
+
+							<span class="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-600">
+								<span class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
+								{{ pendingCatches().length }} {{ ts.t('catch.statusPending') }}
+							</span>
+						</div>
+
+						<!-- Moderation List -->
+						<div class="mt-6 border-t border-[var(--c-border)] pt-4">
+							@if (catches().length > 0) {
+								<div class="space-y-3">
+									@for (c of catches(); track c.id) {
+										<div
+											class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border p-4 text-xs transition-all"
+											[class]="c.status === 'pending'
+												? 'border-amber-500/30 bg-amber-500/5'
+												: 'border-[var(--c-border)] bg-[var(--c-bg-secondary)]'"
+										>
+											<div class="min-w-0 flex-1 space-y-1">
+												<div class="flex flex-wrap items-center gap-2">
+													<span class="font-bold text-[var(--c-text-strong)] text-sm">{{ c.anglerName || 'Angler' }}</span>
+													<span class="rounded bg-[var(--c-primary)]/10 px-2 py-0.5 font-semibold text-[var(--c-primary)]">
+														{{ c.species }}
+													</span>
+													<span class="font-semibold text-[var(--c-text-strong)]">{{ c.lengthCm }} cm</span>
+													@if (c.weightKg) {
+														<span class="text-[var(--c-text-muted)]">({{ c.weightKg }} kg)</span>
+													}
+													<!-- Current Status -->
+													<span
+														class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold"
+														[class]="c.status === 'approved'
+															? 'bg-emerald-500/10 text-emerald-600'
+															: (c.status === 'rejected'
+																? 'bg-red-500/10 text-red-600'
+																: 'bg-amber-500/10 text-amber-600')"
+													>
+														{{ c.status === 'approved' ? ts.t('catch.statusApproved') : (c.status === 'rejected' ? ts.t('catch.statusRejected') : ts.t('catch.statusPending')) }}
+													</span>
+												</div>
+
+												@if (c.notes) {
+													<p class="text-[var(--c-text-muted)] leading-relaxed">{{ c.notes }}</p>
+												}
+
+												@if (c.photoUrl) {
+													<div class="pt-1">
+														<a
+															[href]="c.photoUrl"
+															target="_blank"
+															rel="noopener noreferrer"
+															class="inline-flex items-center gap-1 text-[var(--c-primary)] hover:underline font-medium"
+														>
+															<span class="material-symbols-outlined text-[16px]">photo_camera</span>
+															<span>{{ ts.t('catch.viewPhoto') }}</span>
+															<span class="material-symbols-outlined text-[14px]">open_in_new</span>
+														</a>
+													</div>
+												}
+											</div>
+
+											<!-- Moderation Action Buttons -->
+											<div class="flex items-center gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[var(--c-border)]">
+												<button
+													type="button"
+													(click)="setCatchStatus(c, 'approved')"
+													[disabled]="updatingCatchId() === c.id || c.status === 'approved'"
+													class="theme-interactive inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+												>
+													@if (updatingCatchId() === c.id) {
+														<span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
+													} @else {
+														<span class="material-symbols-outlined text-[16px]">check</span>
+													}
+													<span>{{ ts.t('catch.actionApprove') }}</span>
+												</button>
+
+												<button
+													type="button"
+													(click)="setCatchStatus(c, 'rejected')"
+													[disabled]="updatingCatchId() === c.id || c.status === 'rejected'"
+													class="theme-interactive inline-flex items-center gap-1.5 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 font-semibold text-red-600 dark:text-red-400 hover:bg-red-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+												>
+													<span class="material-symbols-outlined text-[16px]">close</span>
+													<span>{{ ts.t('catch.actionReject') }}</span>
+												</button>
+											</div>
+										</div>
+									}
+								</div>
+							} @else {
+								<div class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] p-6 text-center">
+									<span class="material-symbols-outlined text-[28px] text-[var(--c-text-muted)]">fact_check</span>
+									<p class="mt-2 text-xs text-[var(--c-text-muted)]">
+										No catches have been submitted to this tournament yet.
+									</p>
+								</div>
+							}
+						</div>
 					</div>
 				</div>
 			}

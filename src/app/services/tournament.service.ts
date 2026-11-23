@@ -9,6 +9,7 @@ import {
 	query,
 	serverTimestamp,
 	setDoc,
+	updateDoc,
 } from '@angular/fire/firestore';
 import { catchError, Observable, of } from 'rxjs';
 
@@ -48,6 +49,8 @@ export interface TournamentItem {
 	date: string;
 	rules: string;
 	status?: 'active' | 'upcoming' | 'completed';
+	createdBy?: string | null;
+	organizerId?: string | null;
 	createdAt?: unknown;
 }
 
@@ -154,12 +157,30 @@ export class TournamentService {
 			weightKg: data.weightKg != null && !isNaN(Number(data.weightKg)) ? Number(data.weightKg) : null,
 			photoUrl: data.photoUrl?.trim() || null,
 			notes: data.notes?.trim() || null,
-			status: 'approved',
+			status: 'pending',
 			submittedAt: serverTimestamp(),
 			createdAt: serverTimestamp(),
 		};
 
 		const docRef = await addDoc(catchesCol, catchDoc);
 		return docRef.id;
+	}
+
+	/**
+	 * Update the verification status of a catch ('approved' | 'rejected') in Cloud Firestore.
+	 */
+	async updateCatchStatus(
+		tournamentId: string,
+		catchId: string,
+		status: 'approved' | 'rejected',
+	): Promise<void> {
+		if (!tournamentId || !catchId) {
+			throw new Error('Tournament ID and Catch ID are required to update catch status.');
+		}
+		const catchRef = doc(this._firestore, 'tournaments', tournamentId, 'catches', catchId);
+		await updateDoc(catchRef, {
+			status,
+			reviewedAt: serverTimestamp(),
+		});
 	}
 }
