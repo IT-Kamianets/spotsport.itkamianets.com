@@ -15,7 +15,7 @@ import {
 } from '@angular/fire/firestore';
 import { catchError, Observable, of, switchMap } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
-import { CatchItem, TournamentService } from '../../services/tournament.service';
+import { CatchItem, formatCatchTime, TournamentService } from '../../services/tournament.service';
 import { TranslationService } from '../../services/translation.service';
 
 export type TournamentMainMode = 'view' | 'editor';
@@ -162,6 +162,11 @@ export class TournamentsComponent {
 		if (!user) return [];
 		return this.catches().filter((c) => c.userId === user.uid);
 	});
+
+	// Date/time formatter for catch timestamps
+	protected formatCatchTime(val: unknown): string {
+		return formatCatchTime(val);
+	}
 
 	// Pending catches for organizer review
 	protected readonly pendingCatches = computed(() => {

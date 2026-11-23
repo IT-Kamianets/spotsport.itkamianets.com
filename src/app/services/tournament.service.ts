@@ -28,6 +28,35 @@ export interface CatchItem {
 	createdAt?: unknown;
 }
 
+/**
+ * Safely format a Firestore Timestamp, Date, string, seconds object, or number into a readable local string.
+ */
+export function formatCatchTime(val: unknown): string {
+	if (!val) return '';
+	try {
+		// Firestore Timestamp instance with .toDate()
+		if (typeof val === 'object' && val !== null && 'toDate' in val && typeof (val as { toDate: () => Date }).toDate === 'function') {
+			return (val as { toDate: () => Date }).toDate().toLocaleString();
+		}
+		// Firestore serialized Timestamp: { seconds: number, nanoseconds?: number }
+		if (typeof val === 'object' && val !== null && 'seconds' in val && typeof (val as { seconds: unknown }).seconds === 'number') {
+			return new Date((val as { seconds: number }).seconds * 1000).toLocaleString();
+		}
+		// Date instance
+		if (val instanceof Date) {
+			return isNaN(val.getTime()) ? '' : val.toLocaleString();
+		}
+		// String or number
+		if (typeof val === 'string' || typeof val === 'number') {
+			const d = new Date(val);
+			return isNaN(d.getTime()) ? String(val) : d.toLocaleString();
+		}
+		return '';
+	} catch {
+		return '';
+	}
+}
+
 export interface CatchSubmissionPayload {
 	tournamentId: string;
 	userId: string;

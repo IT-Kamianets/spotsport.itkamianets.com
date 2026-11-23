@@ -3,7 +3,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { of, switchMap } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
-import { CatchItem, TournamentItem, TournamentService } from '../../services/tournament.service';
+import { CatchItem, formatCatchTime, TournamentItem, TournamentService } from '../../services/tournament.service';
 import { TranslationService } from '../../services/translation.service';
 
 export type RefereeingMode = 'catch' | 'judging';
@@ -141,6 +141,10 @@ export class RefereeingComponent {
 
 	protected onSelectTournament(t: TournamentItem): void {
 		this.activeTournamentId.set(t.id || t.title);
+	}
+
+	protected formatCatchTime(val: unknown): string {
+		return formatCatchTime(val);
 	}
 
 	/**

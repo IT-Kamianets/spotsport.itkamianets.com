@@ -547,6 +547,12 @@
 															<span class="text-[var(--c-text-muted)]">({{ c.weightKg }} kg)</span>
 														}
 													</div>
+													@if (formatCatchTime(c.submittedAt || c.createdAt); as formattedTime) {
+														<div class="mt-0.5 text-[10px] text-[var(--c-text-muted)] flex items-center gap-1">
+															<span class="material-symbols-outlined text-[12px]">schedule</span>
+															<span>{{ formattedTime }}</span>
+														</div>
+													}
 													@if (c.notes) {
 														<p class="mt-1 truncate text-[11px] text-[var(--c-text-muted)]">{{ c.notes }}</p>
 													}
@@ -660,6 +666,13 @@
 														{{ c.status === 'approved' ? ts.t('catch.statusApproved') : (c.status === 'rejected' ? ts.t('catch.statusRejected') : ts.t('catch.statusPending')) }}
 													</span>
 												</div>
+
+												@if (formatCatchTime(c.submittedAt || c.createdAt); as formattedTime) {
+													<div class="text-[11px] text-[var(--c-text-muted)] flex items-center gap-1">
+														<span class="material-symbols-outlined text-[14px]">schedule</span>
+														<span>{{ formattedTime }}</span>
+													</div>
+												}
 
 												@if (c.notes) {
 													<p class="text-[var(--c-text-muted)] leading-relaxed">{{ c.notes }}</p>

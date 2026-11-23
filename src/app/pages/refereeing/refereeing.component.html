@@ -317,10 +317,10 @@
 														</span>
 													</div>
 
-													@if (c.submittedAt) {
+													@if (formatCatchTime(c.submittedAt || c.createdAt); as formattedTime) {
 														<div class="text-[11px] text-[var(--c-text-muted)] flex items-center gap-1">
 															<span class="material-symbols-outlined text-[14px]">schedule</span>
-															<span>{{ c.submittedAt }}</span>
+															<span>{{ formattedTime }}</span>
 														</div>
 													}
 
