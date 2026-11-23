@@ -66,6 +66,13 @@ export class RefereeingComponent {
 		return this.catches().filter((c) => c.status === 'pending');
 	});
 
+	// Current user's submitted catches for status tracker
+	protected readonly myCatches = computed(() => {
+		const user = this.currentUser();
+		if (!user) return [];
+		return this.catches().filter((c) => c.userId === user.uid);
+	});
+
 	// Prioritized catches for review queue: pending first, then others by submittedAt
 	protected readonly reviewCatches = computed(() => {
 		const list = [...this.catches()];
