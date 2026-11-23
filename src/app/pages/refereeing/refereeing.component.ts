@@ -66,6 +66,30 @@ export class RefereeingComponent {
 		return this.catches().filter((c) => c.status === 'pending');
 	});
 
+	// Prioritized catches for review queue: pending first, then others by submittedAt
+	protected readonly reviewCatches = computed(() => {
+		const list = [...this.catches()];
+		const getTime = (val: unknown): number => {
+			if (!val) return 0;
+			if (typeof val === 'string' || typeof val === 'number') {
+				const d = new Date(val).getTime();
+				return isNaN(d) ? 0 : d;
+			}
+			if (typeof val === 'object' && val !== null && 'toDate' in val && typeof (val as { toDate: () => Date }).toDate === 'function') {
+				return (val as { toDate: () => Date }).toDate().getTime();
+			}
+			return 0;
+		};
+
+		return list.sort((a, b) => {
+			if (a.status === 'pending' && b.status !== 'pending') return -1;
+			if (a.status !== 'pending' && b.status === 'pending') return 1;
+			const timeA = getTime(a.submittedAt || a.createdAt);
+			const timeB = getTime(b.submittedAt || b.createdAt);
+			return timeB - timeA;
+		});
+	});
+
 	protected readonly updatingCatchId = signal<string | null>(null);
 
 	protected readonly mode = signal<RefereeingMode>('catch');

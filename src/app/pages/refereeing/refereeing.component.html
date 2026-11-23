@@ -254,66 +254,105 @@
 						}
 
 						@if (selectedTournament(); as tourn) {
-							@if (isOrganizer()) {
-								<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs">
-									<div class="flex items-center justify-between pb-3 border-b border-[var(--c-border)]">
-										<div>
-											<h4 class="text-sm font-bold text-[var(--c-text-strong)]">{{ tourn.title }} &middot; {{ ts.t('ref.judgingTabReview') }}</h4>
-											<p class="text-xs text-[var(--c-text-muted)]">{{ ts.t('catch.reviewQueueDesc') }}</p>
-										</div>
+							<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs">
+								<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-[var(--c-border)]">
+									<div>
+										<h4 class="text-sm font-bold text-[var(--c-text-strong)]">{{ tourn.title }} &middot; {{ ts.t('ref.judgingTabReview') }}</h4>
+										<p class="text-xs text-[var(--c-text-muted)]">{{ ts.t('catch.reviewQueueDesc') }}</p>
+									</div>
+									<div class="flex items-center gap-2">
 										<span class="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-600">
 											<span class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
 											{{ pendingCatches().length }} {{ ts.t('catch.statusPending') }}
 										</span>
 									</div>
+								</div>
 
-									@if (pendingCatches().length > 0) {
-										<div class="mt-4 space-y-3">
-											@for (c of pendingCatches(); track c.id) {
-												<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 text-xs transition-all">
-													<div class="min-w-0 flex-1 space-y-1">
-														<div class="flex flex-wrap items-center gap-2">
-															<span class="font-bold text-[var(--c-text-strong)] text-sm">{{ c.anglerName || 'Angler' }}</span>
-															<span class="rounded bg-[var(--c-primary)]/10 px-2 py-0.5 font-semibold text-[var(--c-primary)]">
-																{{ c.species }}
-															</span>
-															<span class="font-semibold text-[var(--c-text-strong)]">{{ c.lengthCm }} cm</span>
-															@if (c.weightKg) {
-																<span class="text-[var(--c-text-muted)]">({{ c.weightKg }} kg)</span>
-															}
-															<span class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-600">
+								@if (!isOrganizer()) {
+									<div class="mt-4 flex items-center gap-2 rounded-xl border border-sky-500/30 bg-sky-500/10 p-3 text-xs text-sky-800 dark:text-sky-200">
+										<span class="material-symbols-outlined text-[18px] text-sky-500 shrink-0">info</span>
+										<span>{{ ts.t('ref.readOnlyNotice') }}</span>
+									</div>
+								}
+
+								@if (reviewCatches().length > 0) {
+									<div class="mt-4 space-y-3">
+										@for (c of reviewCatches(); track c.id) {
+											<div
+												class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border p-4 text-xs transition-all"
+												[class]="c.status === 'pending'
+													? 'border-amber-500/30 bg-amber-500/5'
+													: c.status === 'rejected'
+														? 'border-red-500/20 bg-red-500/5'
+														: 'border-[var(--c-border)] bg-[var(--c-bg-secondary)]/30'"
+											>
+												<div class="min-w-0 flex-1 space-y-1.5">
+													<div class="flex flex-wrap items-center gap-2">
+														<span class="font-bold text-[var(--c-text-strong)] text-sm">{{ c.anglerName || c.userId || 'Angler' }}</span>
+														<span class="rounded bg-[var(--c-primary)]/10 px-2 py-0.5 font-semibold text-[var(--c-primary)]">
+															{{ c.species }}
+														</span>
+														<span class="font-semibold text-[var(--c-text-strong)]">{{ c.lengthCm }} cm</span>
+														@if (c.weightKg) {
+															<span class="text-[var(--c-text-muted)]">({{ c.weightKg }} kg)</span>
+														}
+														<span
+															class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold"
+															[class]="c.status === 'approved'
+																? 'bg-emerald-500/10 text-emerald-600'
+																: c.status === 'rejected'
+																	? 'bg-red-500/10 text-red-600'
+																	: 'bg-amber-500/10 text-amber-600'"
+														>
+															@if (c.status === 'pending') {
 																<span class="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
 																{{ ts.t('catch.statusPending') }}
-															</span>
-														</div>
-
-														@if (c.notes) {
-															<p class="text-[var(--c-text-muted)] leading-relaxed">{{ c.notes }}</p>
-														}
-
-														@if (c.photoUrl) {
-															<div class="pt-1">
-																<a
-																	[href]="c.photoUrl"
-																	target="_blank"
-																	rel="noopener noreferrer"
-																	class="inline-flex items-center gap-1 text-[var(--c-primary)] hover:underline font-medium"
-																>
-																	<span class="material-symbols-outlined text-[16px]">photo_camera</span>
-																	<span>{{ ts.t('catch.viewPhoto') }}</span>
-																	<span class="material-symbols-outlined text-[14px]">open_in_new</span>
-																</a>
-															</div>
-														}
+															} @else if (c.status === 'approved') {
+																<span class="material-symbols-outlined text-[13px]">check</span>
+																{{ ts.t('catch.statusApproved') }}
+															} @else if (c.status === 'rejected') {
+																<span class="material-symbols-outlined text-[13px]">close</span>
+																{{ ts.t('catch.statusRejected') }}
+															}
+														</span>
 													</div>
 
-													<!-- Approve / Reject Actions -->
-													<div class="flex items-center gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[var(--c-border)]">
+													@if (c.submittedAt) {
+														<div class="text-[11px] text-[var(--c-text-muted)] flex items-center gap-1">
+															<span class="material-symbols-outlined text-[14px]">schedule</span>
+															<span>{{ c.submittedAt }}</span>
+														</div>
+													}
+
+													@if (c.notes) {
+														<p class="text-[var(--c-text-muted)] leading-relaxed">{{ c.notes }}</p>
+													}
+
+													@if (c.photoUrl) {
+														<div class="pt-1">
+															<a
+																[href]="c.photoUrl"
+																target="_blank"
+																rel="noopener noreferrer"
+																class="inline-flex items-center gap-1 text-[var(--c-primary)] hover:underline font-medium"
+															>
+																<span class="material-symbols-outlined text-[16px]">photo_camera</span>
+																<span>{{ ts.t('catch.viewPhoto') }}</span>
+																<span class="material-symbols-outlined text-[14px]">open_in_new</span>
+															</a>
+														</div>
+													}
+												</div>
+
+												<!-- Organizer actions or status pill -->
+												<div class="flex items-center gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[var(--c-border)]">
+													@if (isOrganizer()) {
 														<button
 															type="button"
 															(click)="setCatchStatus(c, 'approved')"
 															[disabled]="updatingCatchId() === c.id"
 															class="theme-interactive inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+															[class.opacity-60]="c.status === 'approved'"
 														>
 															@if (updatingCatchId() === c.id) {
 																<span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
@@ -328,33 +367,29 @@
 															(click)="setCatchStatus(c, 'rejected')"
 															[disabled]="updatingCatchId() === c.id"
 															class="theme-interactive inline-flex items-center gap-1.5 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 font-semibold text-red-600 dark:text-red-400 hover:bg-red-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+															[class.opacity-60]="c.status === 'rejected'"
 														>
 															<span class="material-symbols-outlined text-[16px]">close</span>
 															<span>{{ ts.t('catch.actionReject') }}</span>
 														</button>
-													</div>
+													} @else {
+														<span class="text-[11px] font-medium text-[var(--c-text-muted)] italic">
+															{{ ts.t('tourn.organizer') }} / {{ ts.t('ref.modeJudging') }}
+														</span>
+													}
 												</div>
-											}
-										</div>
-									} @else {
-										<div class="mt-4 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] p-6 text-center">
-											<span class="material-symbols-outlined text-[28px] text-[var(--c-text-muted)]">check_circle</span>
-											<p class="mt-2 text-xs text-[var(--c-text-muted)]">
-												{{ ts.t('catch.noPendingCatches') }}
-											</p>
-										</div>
-									}
-								</div>
-							} @else {
-								<!-- Not organizer notice fallback to queue overview -->
-								<div class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-16 text-center">
-									<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--c-bg-secondary)] shadow-sm">
-										<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">checklist</span>
+											</div>
+										}
 									</div>
-									<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">{{ ts.t('ref.phReviewTitle') }}</h3>
-									<p class="mt-2 max-w-md text-sm text-[var(--c-text-muted)]">{{ ts.t('ref.phReviewDesc') }}</p>
-								</div>
-							}
+								} @else {
+									<div class="mt-4 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] p-6 text-center">
+										<span class="material-symbols-outlined text-[28px] text-[var(--c-text-muted)]">check_circle</span>
+										<p class="mt-2 text-xs text-[var(--c-text-muted)]">
+											{{ ts.t('ref.noCatchesInQueue') }}
+										</p>
+									</div>
+								}
+							</div>
 						} @else {
 							<div class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-16 text-center">
 								<p class="text-xs text-[var(--c-text-muted)]">{{ ts.t('catch.selectTournamentHint') }}</p>
