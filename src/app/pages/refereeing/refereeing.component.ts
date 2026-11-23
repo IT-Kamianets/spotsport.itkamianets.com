@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { of, switchMap } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
@@ -52,9 +52,9 @@ export class RefereeingComponent {
 	});
 
 	// Catches for the selected tournament
-	protected readonly catches$ = this._route.queryParams.pipe(
-		switchMap((params) => {
-			const tid = params['tournamentId'] || this.selectedTournament()?.id;
+	protected readonly catches$ = toObservable(this.selectedTournament).pipe(
+		switchMap((tourn) => {
+			const tid = tourn?.id || tourn?.title;
 			if (!tid) return of([] as CatchItem[]);
 			return this.tournamentService.getCatches(tid);
 		}),

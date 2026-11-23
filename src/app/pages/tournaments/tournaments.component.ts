@@ -1,6 +1,6 @@
 import { DecimalPipe, LowerCasePipe } from '@angular/common';
 import { Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import QRCode from 'qrcode';
@@ -122,9 +122,8 @@ export class TournamentsComponent {
 	protected readonly tournaments = toSignal(this.tournaments$, { initialValue: [] });
 
 	// Stream of participants for the currently selected tournament
-	protected readonly participants$ = this._route.queryParams.pipe(
-		switchMap(() => {
-			const tourn = this.selectedTournament();
+	protected readonly participants$ = toObservable(this.selectedTournament).pipe(
+		switchMap((tourn) => {
 			const tournId = tourn?.id || tourn?.title;
 			if (!tournId) {
 				return of([] as ParticipantItem[]);
@@ -141,9 +140,8 @@ export class TournamentsComponent {
 	protected readonly participants = toSignal(this.participants$, { initialValue: [] });
 
 	// Stream of catches for the currently selected tournament
-	protected readonly catches$ = this._route.queryParams.pipe(
-		switchMap(() => {
-			const tourn = this.selectedTournament();
+	protected readonly catches$ = toObservable(this.selectedTournament).pipe(
+		switchMap((tourn) => {
 			const tournId = tourn?.id || tourn?.title;
 			if (!tournId) {
 				return of([] as CatchItem[]);
