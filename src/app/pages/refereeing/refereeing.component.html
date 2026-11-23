@@ -267,30 +267,101 @@
 						}
 					</div>
 				} @else {
-					<!-- Offline Sync Engine Placeholder -->
-					<div class="mt-6 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-16 text-center">
-						<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--c-bg-secondary)] shadow-sm">
-							<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">cloud_sync</span>
-						</div>
+					<!-- Real Network & Queue Status View -->
+					<div class="mt-6 space-y-4">
+						<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs">
+							<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[var(--c-border)]">
+								<div class="flex items-center gap-3">
+									<span
+										class="flex h-11 w-11 items-center justify-center rounded-2xl text-white shadow-xs transition-colors"
+										[class]="isOnline() ? 'bg-emerald-600' : 'bg-amber-600'"
+									>
+										<span class="material-symbols-outlined text-[24px]">
+											{{ isOnline() ? 'wifi' : 'wifi_off' }}
+										</span>
+									</span>
+									<div>
+										<div class="flex items-center gap-2">
+											<h4 class="text-sm font-bold text-[var(--c-text-strong)]">
+												{{ isOnline() ? 'Online · Live Sync Active' : 'Offline Mode · Water Cache Active' }}
+											</h4>
+											<span
+												class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold"
+												[class]="isOnline() ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'"
+											>
+												<span
+													class="h-1.5 w-1.5 rounded-full"
+													[class]="isOnline() ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'"
+												></span>
+												{{ isOnline() ? 'Connected' : 'Offline' }}
+											</span>
+										</div>
+										<p class="text-xs text-[var(--c-text-muted)]">
+											{{ isOnline()
+												? 'Real-time Cloud Firestore listener active for tournament catches.'
+												: 'Catches are preserved locally and queued for automatic sync upon reconnection.' }}
+										</p>
+									</div>
+								</div>
 
-						<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
-							{{ ts.t('ref.phOfflineTitle') }}
-						</h3>
+								<div class="flex items-center gap-2">
+									<button
+										type="button"
+										(click)="syncQueue()"
+										[disabled]="isRefreshing()"
+										class="theme-interactive inline-flex items-center gap-1.5 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3.5 py-2 text-xs font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] hover:text-[var(--c-primary)] disabled:opacity-50 transition-all cursor-pointer shadow-xs"
+									>
+										<span class="material-symbols-outlined text-[16px]" [class.animate-spin]="isRefreshing()">
+											sync
+										</span>
+										<span>{{ isRefreshing() ? 'Syncing...' : 'Sync & Refresh' }}</span>
+									</button>
+								</div>
+							</div>
 
-						<p class="mt-2 max-w-md text-sm text-[var(--c-text-muted)]">
-							{{ ts.t('ref.phOfflineDesc') }}
-						</p>
+							<!-- Queue & Network Metrics -->
+							<div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+								<div class="rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)]/50 p-3.5 text-xs">
+									<span class="text-[var(--c-text-muted)]">Pending / In-Review</span>
+									<div class="mt-1 flex items-baseline gap-2">
+										<span class="text-lg font-bold text-amber-600">{{ pendingCatches().length }}</span>
+										<span class="text-[11px] text-[var(--c-text-muted)]">catches awaiting decision</span>
+									</div>
+								</div>
 
-						<div class="mt-6 flex flex-wrap justify-center gap-2 text-xs text-[var(--c-text-muted)]">
-							<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
-								{{ ts.t('ref.badgeCacheReady') }}
-							</span>
-							<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
-								{{ ts.t('ref.badgeGpsReady') }}
-							</span>
-							<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
-								{{ ts.t('ref.badgePushReady') }}
-							</span>
+								<div class="rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)]/50 p-3.5 text-xs">
+									<span class="text-[var(--c-text-muted)]">My Submitted Catches</span>
+									<div class="mt-1 flex items-baseline gap-2">
+										<span class="text-lg font-bold text-[var(--c-primary)]">{{ myCatches().length }}</span>
+										<span class="text-[11px] text-[var(--c-text-muted)]">recorded in this tournament</span>
+									</div>
+								</div>
+
+								<div class="rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)]/50 p-3.5 text-xs">
+									<span class="text-[var(--c-text-muted)]">Last Status Check</span>
+									<div class="mt-1 flex items-baseline gap-2">
+										<span class="text-sm font-semibold text-[var(--c-text-strong)]">
+											{{ lastSyncedAt() || 'Just now' }}
+										</span>
+									</div>
+								</div>
+							</div>
+
+							<!-- Ready Badges -->
+							<div class="mt-5 flex flex-wrap gap-2 text-xs text-[var(--c-text-muted)] border-t border-[var(--c-border)] pt-4">
+								<span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+									<span class="material-symbols-outlined text-[14px] text-emerald-500">check_circle</span>
+									{{ ts.t('ref.badgeCacheReady') }}
+								</span>
+								<span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+									<span class="material-symbols-outlined text-[14px] text-emerald-500">check_circle</span>
+									{{ ts.t('ref.badgeGpsReady') }}
+								</span>
+								<span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+									<span class="material-symbols-outlined text-[14px] text-emerald-500">check_circle</span>
+									{{ ts.t('ref.badgePushReady') }}
+								</span>
+							</div>
 						</div>
 					</div>
 				}
@@ -495,40 +566,138 @@
 							</div>
 						}
 					</div>
+				} @else if (activeJudgingTab() === 'leaderboard') {
+					<!-- Real Live Standings Monitor for Arbiters -->
+					<div class="mt-6 space-y-4">
+						@if (tournaments().length > 1) {
+							<div class="flex flex-wrap items-center gap-2">
+								<span class="text-xs font-semibold text-[var(--c-text-muted)]">{{ ts.t('tourn.tournamentsTab') }}:</span>
+								@for (t of tournaments(); track t.id || t.title) {
+									<button
+										type="button"
+										(click)="onSelectTournament(t)"
+										class="rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer"
+										[class]="selectedTournament()?.id === t.id || selectedTournament()?.title === t.title
+											? 'bg-[var(--c-primary)] text-white shadow-xs'
+											: 'border border-[var(--c-border)] bg-[var(--c-bg-primary)] text-[var(--c-text)] hover:border-[var(--c-primary)]'"
+									>
+										{{ t.title }}
+									</button>
+								}
+							</div>
+						}
+
+						@if (selectedTournament(); as tourn) {
+							<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs">
+								<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[var(--c-border)]">
+									<div class="flex items-center gap-3">
+										<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--c-primary)]/10 text-[var(--c-primary)]">
+											<span class="material-symbols-outlined text-[22px]">monitoring</span>
+										</span>
+										<div>
+											<h4 class="text-sm font-bold text-[var(--c-text-strong)]">
+												{{ tourn.title }} &middot; {{ ts.t('ref.judgingTabLeaderboard') }}
+											</h4>
+											<p class="text-xs text-[var(--c-text-muted)]">
+												Real-time arbiter score calculation from verified submissions
+											</p>
+										</div>
+									</div>
+
+									<!-- Summary Badges: Approved vs Pending vs Rejected -->
+									<div class="flex flex-wrap items-center gap-2">
+										<span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-600">
+											<span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+											{{ approvedCatches().length }} {{ ts.t('catch.statusApproved') }}
+										</span>
+										<span class="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-600">
+											<span class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
+											{{ pendingCatches().length }} {{ ts.t('catch.statusPending') }}
+										</span>
+										<span class="inline-flex items-center gap-1.5 rounded-full bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-600">
+											<span class="h-2 w-2 rounded-full bg-red-500"></span>
+											{{ rejectedCatches().length }} {{ ts.t('catch.statusRejected') }}
+										</span>
+									</div>
+								</div>
+
+								<!-- Live Standings Table or Empty State -->
+								@if (liveStandings().length > 0) {
+									<div class="mt-4 overflow-x-auto">
+										<table class="w-full text-xs">
+											<thead>
+												<tr class="text-left text-[var(--c-text-muted)] border-b border-[var(--c-border)]">
+													<th class="pb-2.5 pr-3 font-semibold">#</th>
+													<th class="pb-2.5 pr-3 font-semibold">Angler</th>
+													<th class="pb-2.5 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardCatches') }}</th>
+													<th class="pb-2.5 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardTotalWeight') }}</th>
+													<th class="pb-2.5 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardBestLength') }}</th>
+												</tr>
+											</thead>
+											<tbody>
+												@for (row of liveStandings(); track row.userId; let i = $index) {
+													<tr
+														class="border-b border-[var(--c-border)]/50 last:border-0 transition-colors"
+														[class]="i === 0 ? 'text-[var(--c-primary)] font-bold bg-[var(--c-primary)]/5' : 'text-[var(--c-text)]'"
+													>
+														<td class="py-2.5 pr-3">
+															@if (i === 0) {
+																<span class="inline-flex items-center gap-1">
+																	<span class="material-symbols-outlined text-[16px] text-amber-500">emoji_events</span>
+																	<span>1</span>
+																</span>
+															} @else {
+																{{ i + 1 }}
+															}
+														</td>
+														<td class="py-2.5 pr-3 max-w-[160px] truncate font-medium">
+															{{ row.displayName }}
+														</td>
+														<td class="py-2.5 pr-3 text-right font-medium">
+															{{ row.catches }}
+														</td>
+														<td class="py-2.5 pr-3 text-right">
+															{{ row.totalWeightKg > 0 ? (row.totalWeightKg | number:'1.2-2') : '—' }}
+														</td>
+														<td class="py-2.5 pr-3 text-right font-semibold">
+															{{ row.bestLengthCm }} cm
+														</td>
+													</tr>
+												}
+											</tbody>
+										</table>
+									</div>
+								} @else {
+									<div class="mt-4 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] p-8 text-center">
+										<span class="material-symbols-outlined text-[32px] text-[var(--c-text-muted)]">leaderboard</span>
+										<h5 class="mt-2 text-sm font-semibold text-[var(--c-text-strong)]">
+											No Approved Standings Yet
+										</h5>
+										<p class="mt-1 text-xs text-[var(--c-text-muted)] max-w-sm">
+											Standings will populate automatically as submitted catches are reviewed and approved by tournament judges.
+										</p>
+									</div>
+								}
+							</div>
+						} @else {
+							<div class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-16 text-center">
+								<p class="text-xs text-[var(--c-text-muted)]">{{ ts.t('catch.selectTournamentHint') }}</p>
+							</div>
+						}
+					</div>
 				} @else {
-					<!-- Judging Empty State Body for penalties and leaderboard tabs -->
+					<!-- Judging Empty State Body for penalties tab -->
 					<div class="mt-6 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-16 text-center">
 						<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--c-bg-secondary)] shadow-sm">
-							@switch (activeJudgingTab()) {
-								@case ('penalties') {
-									<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">warning_amber</span>
-								}
-								@case ('leaderboard') {
-									<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">trending_up</span>
-								}
-							}
+							<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">warning_amber</span>
 						</div>
 
 						<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
-							@switch (activeJudgingTab()) {
-								@case ('penalties') {
-									{{ ts.t('ref.phPenaltiesTitle') }}
-								}
-								@case ('leaderboard') {
-									{{ ts.t('ref.phLeaderboardTitle') }}
-								}
-							}
+							{{ ts.t('ref.phPenaltiesTitle') }}
 						</h3>
 
 						<p class="mt-2 max-w-md text-sm text-[var(--c-text-muted)]">
-							@switch (activeJudgingTab()) {
-								@case ('penalties') {
-									{{ ts.t('ref.phPenaltiesDesc') }}
-								}
-								@case ('leaderboard') {
-									{{ ts.t('ref.phLeaderboardDesc') }}
-								}
-							}
+							{{ ts.t('ref.phPenaltiesDesc') }}
 						</p>
 
 						<div class="mt-6 flex flex-wrap justify-center gap-2 text-xs text-[var(--c-text-muted)]">

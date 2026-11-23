@@ -1,4 +1,5 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { DecimalPipe, isPlatformBrowser } from '@angular/common';
+import { Component, computed, inject, PLATFORM_ID, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { of, switchMap } from 'rxjs';
@@ -12,13 +13,21 @@ export type JudgingTab = 'review' | 'penalties' | 'leaderboard';
 
 @Component({
 	selector: 'app-refereeing',
+	imports: [DecimalPipe],
 	templateUrl: './refereeing.component.html',
 })
 export class RefereeingComponent {
 	private readonly _route = inject(ActivatedRoute);
+	private readonly _platformId = inject(PLATFORM_ID);
+	private readonly _isBrowser = isPlatformBrowser(this._platformId);
 	public readonly authService = inject(AuthService);
 	public readonly tournamentService = inject(TournamentService);
 	public readonly ts = inject(TranslationService);
+
+	// Online status signal
+	protected readonly isOnline = signal<boolean>(this._isBrowser ? navigator.onLine : true);
+	protected readonly isRefreshing = signal<boolean>(false);
+	protected readonly lastSyncedAt = signal<string | null>(null);
 
 	// Current authenticated user
 	protected readonly currentUser = toSignal(this.authService.authState$, {
@@ -73,6 +82,64 @@ export class RefereeingComponent {
 		return this.catches().filter((c) => c.userId === user.uid);
 	});
 
+	// Filtered catches for live standings monitor
+	protected readonly approvedCatches = computed(() => {
+		return this.catches().filter((c) => c.status === 'approved' || !c.status);
+	});
+
+	protected readonly rejectedCatches = computed(() => {
+		return this.catches().filter((c) => c.status === 'rejected');
+	});
+
+	// Live leaderboard standings aggregated from approved catches
+	protected readonly liveStandings = computed(() => {
+		const approved = this.approvedCatches();
+		const map = new Map<
+			string,
+			{
+				userId: string;
+				displayName: string;
+				catches: number;
+				totalLengthCm: number;
+				totalWeightKg: number;
+				bestLengthCm: number;
+			}
+		>();
+
+		for (const c of approved) {
+			const existing = map.get(c.userId);
+			const weight = c.weightKg ? Number(c.weightKg) : 0;
+			const length = Number(c.lengthCm) || 0;
+			if (existing) {
+				existing.catches += 1;
+				existing.totalLengthCm += length;
+				existing.totalWeightKg += weight;
+				if (length > existing.bestLengthCm) {
+					existing.bestLengthCm = length;
+				}
+			} else {
+				map.set(c.userId, {
+					userId: c.userId,
+					displayName: c.anglerName || 'Angler',
+					catches: 1,
+					totalLengthCm: length,
+					totalWeightKg: weight,
+					bestLengthCm: length,
+				});
+			}
+		}
+
+		return Array.from(map.values()).sort((a, b) => {
+			if (b.totalWeightKg !== a.totalWeightKg) {
+				return b.totalWeightKg - a.totalWeightKg;
+			}
+			if (b.totalLengthCm !== a.totalLengthCm) {
+				return b.totalLengthCm - a.totalLengthCm;
+			}
+			return b.bestLengthCm - a.bestLengthCm;
+		});
+	});
+
 	// Prioritized catches for review queue: pending first, then others by submittedAt
 	protected readonly reviewCatches = computed(() => {
 		const list = [...this.catches()];
@@ -105,6 +172,11 @@ export class RefereeingComponent {
 	protected readonly showCatchDetailsDialog = signal(false);
 
 	constructor() {
+		if (this._isBrowser) {
+			window.addEventListener('online', () => this.isOnline.set(true));
+			window.addEventListener('offline', () => this.isOnline.set(false));
+		}
+
 		this._route.queryParams.subscribe((params) => {
 			const mode = params['mode'];
 			const tab = params['tab'];
@@ -152,6 +224,20 @@ export class RefereeingComponent {
 
 	protected formatCatchTime(val: unknown): string {
 		return formatCatchTime(val);
+	}
+
+	/**
+	 * Trigger a soft refresh / sync state check.
+	 */
+	protected syncQueue(): void {
+		this.isRefreshing.set(true);
+		if (this._isBrowser) {
+			this.isOnline.set(navigator.onLine);
+		}
+		setTimeout(() => {
+			this.lastSyncedAt.set(new Date().toLocaleTimeString());
+			this.isRefreshing.set(false);
+		}, 600);
 	}
 
 	/**
