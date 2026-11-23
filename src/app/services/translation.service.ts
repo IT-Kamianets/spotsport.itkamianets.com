@@ -286,6 +286,11 @@ const TRANSLATIONS_EN: Record<string, string> = {
 	'catch.actionReject': 'Reject',
 	'catch.moderationTitle': 'Catch Moderation',
 	'catch.viewPhoto': 'View Photo',
+	'catch.myCatches': 'My Submitted Catches',
+	'catch.myCatchesEmpty': 'You have not submitted any catches for this tournament yet.',
+	'catch.reviewQueueDesc': 'Review and verify pending catches submitted by participants',
+	'catch.noPendingCatches': 'No pending catches to review in this tournament.',
+	'catch.selectTournamentHint': 'Select a tournament to view and review pending catches.',
 
 	// Refereeing Page
 	'ref.badge': 'MVP Page 03',
@@ -623,6 +628,11 @@ const TRANSLATIONS_UK: Record<string, string> = {
 	'catch.actionReject': 'Відхилити',
 	'catch.moderationTitle': 'Модерація виловів',
 	'catch.viewPhoto': 'Переглянути фото',
+	'catch.myCatches': 'Мої подані вилови',
+	'catch.myCatchesEmpty': 'Ви ще не подавали виловів для цього турніру.',
+	'catch.reviewQueueDesc': 'Перевірка та верифікація виловів, які очікують підтвердження',
+	'catch.noPendingCatches': 'Немає виловів, які очікують перевірки в цьому турнірі.',
+	'catch.selectTournamentHint': 'Оберіть турнір, щоб переглянути та оцінити вилови на перевірці.',
 
 	// Refereeing Page
 	'ref.badge': 'MVP Сторінка 03',

@@ -232,62 +232,184 @@
 					</button>
 				</div>
 
-				<!-- Judging Empty State Body -->
-				<div class="mt-6 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-16 text-center">
-					<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--c-bg-secondary)] shadow-sm">
-						@switch (activeJudgingTab()) {
-							@case ('review') {
-								<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">checklist</span>
+				<!-- Judging Review Body or Empty State -->
+				@if (activeJudgingTab() === 'review') {
+					<div class="mt-6 space-y-4">
+						@if (tournaments().length > 1) {
+							<div class="flex flex-wrap items-center gap-2">
+								<span class="text-xs font-semibold text-[var(--c-text-muted)]">{{ ts.t('tourn.tournamentsTab') }}:</span>
+								@for (t of tournaments(); track t.id || t.title) {
+									<button
+										type="button"
+										(click)="onSelectTournament(t)"
+										class="rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer"
+										[class]="selectedTournament()?.id === t.id || selectedTournament()?.title === t.title
+											? 'bg-[var(--c-primary)] text-white shadow-xs'
+											: 'border border-[var(--c-border)] bg-[var(--c-bg-primary)] text-[var(--c-text)] hover:border-[var(--c-primary)]'"
+									>
+										{{ t.title }}
+									</button>
+								}
+							</div>
+						}
+
+						@if (selectedTournament(); as tourn) {
+							@if (isOrganizer()) {
+								<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs">
+									<div class="flex items-center justify-between pb-3 border-b border-[var(--c-border)]">
+										<div>
+											<h4 class="text-sm font-bold text-[var(--c-text-strong)]">{{ tourn.title }} &middot; {{ ts.t('ref.judgingTabReview') }}</h4>
+											<p class="text-xs text-[var(--c-text-muted)]">{{ ts.t('catch.reviewQueueDesc') }}</p>
+										</div>
+										<span class="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-600">
+											<span class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
+											{{ pendingCatches().length }} {{ ts.t('catch.statusPending') }}
+										</span>
+									</div>
+
+									@if (pendingCatches().length > 0) {
+										<div class="mt-4 space-y-3">
+											@for (c of pendingCatches(); track c.id) {
+												<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 text-xs transition-all">
+													<div class="min-w-0 flex-1 space-y-1">
+														<div class="flex flex-wrap items-center gap-2">
+															<span class="font-bold text-[var(--c-text-strong)] text-sm">{{ c.anglerName || 'Angler' }}</span>
+															<span class="rounded bg-[var(--c-primary)]/10 px-2 py-0.5 font-semibold text-[var(--c-primary)]">
+																{{ c.species }}
+															</span>
+															<span class="font-semibold text-[var(--c-text-strong)]">{{ c.lengthCm }} cm</span>
+															@if (c.weightKg) {
+																<span class="text-[var(--c-text-muted)]">({{ c.weightKg }} kg)</span>
+															}
+															<span class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-600">
+																<span class="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+																{{ ts.t('catch.statusPending') }}
+															</span>
+														</div>
+
+														@if (c.notes) {
+															<p class="text-[var(--c-text-muted)] leading-relaxed">{{ c.notes }}</p>
+														}
+
+														@if (c.photoUrl) {
+															<div class="pt-1">
+																<a
+																	[href]="c.photoUrl"
+																	target="_blank"
+																	rel="noopener noreferrer"
+																	class="inline-flex items-center gap-1 text-[var(--c-primary)] hover:underline font-medium"
+																>
+																	<span class="material-symbols-outlined text-[16px]">photo_camera</span>
+																	<span>{{ ts.t('catch.viewPhoto') }}</span>
+																	<span class="material-symbols-outlined text-[14px]">open_in_new</span>
+																</a>
+															</div>
+														}
+													</div>
+
+													<!-- Approve / Reject Actions -->
+													<div class="flex items-center gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[var(--c-border)]">
+														<button
+															type="button"
+															(click)="setCatchStatus(c, 'approved')"
+															[disabled]="updatingCatchId() === c.id"
+															class="theme-interactive inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+														>
+															@if (updatingCatchId() === c.id) {
+																<span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
+															} @else {
+																<span class="material-symbols-outlined text-[16px]">check</span>
+															}
+															<span>{{ ts.t('catch.actionApprove') }}</span>
+														</button>
+
+														<button
+															type="button"
+															(click)="setCatchStatus(c, 'rejected')"
+															[disabled]="updatingCatchId() === c.id"
+															class="theme-interactive inline-flex items-center gap-1.5 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 font-semibold text-red-600 dark:text-red-400 hover:bg-red-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+														>
+															<span class="material-symbols-outlined text-[16px]">close</span>
+															<span>{{ ts.t('catch.actionReject') }}</span>
+														</button>
+													</div>
+												</div>
+											}
+										</div>
+									} @else {
+										<div class="mt-4 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] p-6 text-center">
+											<span class="material-symbols-outlined text-[28px] text-[var(--c-text-muted)]">check_circle</span>
+											<p class="mt-2 text-xs text-[var(--c-text-muted)]">
+												{{ ts.t('catch.noPendingCatches') }}
+											</p>
+										</div>
+									}
+								</div>
+							} @else {
+								<!-- Not organizer notice fallback to queue overview -->
+								<div class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-16 text-center">
+									<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--c-bg-secondary)] shadow-sm">
+										<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">checklist</span>
+									</div>
+									<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">{{ ts.t('ref.phReviewTitle') }}</h3>
+									<p class="mt-2 max-w-md text-sm text-[var(--c-text-muted)]">{{ ts.t('ref.phReviewDesc') }}</p>
+								</div>
 							}
-							@case ('penalties') {
-								<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">warning_amber</span>
-							}
-							@case ('leaderboard') {
-								<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">trending_up</span>
-							}
+						} @else {
+							<div class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-16 text-center">
+								<p class="text-xs text-[var(--c-text-muted)]">{{ ts.t('catch.selectTournamentHint') }}</p>
+							</div>
 						}
 					</div>
+				} @else {
+					<!-- Judging Empty State Body for penalties and leaderboard tabs -->
+					<div class="mt-6 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-16 text-center">
+						<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--c-bg-secondary)] shadow-sm">
+							@switch (activeJudgingTab()) {
+								@case ('penalties') {
+									<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">warning_amber</span>
+								}
+								@case ('leaderboard') {
+									<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">trending_up</span>
+								}
+							}
+						</div>
 
-					<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
-						@switch (activeJudgingTab()) {
-							@case ('review') {
-								{{ ts.t('ref.phReviewTitle') }}
+						<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
+							@switch (activeJudgingTab()) {
+								@case ('penalties') {
+									{{ ts.t('ref.phPenaltiesTitle') }}
+								}
+								@case ('leaderboard') {
+									{{ ts.t('ref.phLeaderboardTitle') }}
+								}
 							}
-							@case ('penalties') {
-								{{ ts.t('ref.phPenaltiesTitle') }}
-							}
-							@case ('leaderboard') {
-								{{ ts.t('ref.phLeaderboardTitle') }}
-							}
-						}
-					</h3>
+						</h3>
 
-					<p class="mt-2 max-w-md text-sm text-[var(--c-text-muted)]">
-						@switch (activeJudgingTab()) {
-							@case ('review') {
-								{{ ts.t('ref.phReviewDesc') }}
+						<p class="mt-2 max-w-md text-sm text-[var(--c-text-muted)]">
+							@switch (activeJudgingTab()) {
+								@case ('penalties') {
+									{{ ts.t('ref.phPenaltiesDesc') }}
+								}
+								@case ('leaderboard') {
+									{{ ts.t('ref.phLeaderboardDesc') }}
+								}
 							}
-							@case ('penalties') {
-								{{ ts.t('ref.phPenaltiesDesc') }}
-							}
-							@case ('leaderboard') {
-								{{ ts.t('ref.phLeaderboardDesc') }}
-							}
-						}
-					</p>
+						</p>
 
-					<div class="mt-6 flex flex-wrap justify-center gap-2 text-xs text-[var(--c-text-muted)]">
-						<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
-							{{ ts.t('ref.badgeTwoJudge') }}
-						</span>
-						<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
-							{{ ts.t('ref.badgeDispute') }}
-						</span>
-						<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
-							{{ ts.t('ref.badgeSockets') }}
-						</span>
+						<div class="mt-6 flex flex-wrap justify-center gap-2 text-xs text-[var(--c-text-muted)]">
+							<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+								{{ ts.t('ref.badgeTwoJudge') }}
+							</span>
+							<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+								{{ ts.t('ref.badgeDispute') }}
+							</span>
+							<span class="rounded-full border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-1">
+								{{ ts.t('ref.badgeSockets') }}
+							</span>
+						</div>
 					</div>
-				</div>
+				}
 			</div>
 		}
 	</div>
