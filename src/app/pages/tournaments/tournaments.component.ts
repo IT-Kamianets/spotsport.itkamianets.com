@@ -14,6 +14,7 @@ import {
 } from '@angular/fire/firestore';
 import { catchError, Observable, of, switchMap } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { CatchItem, TournamentService } from '../../services/tournament.service';
 import { TranslationService } from '../../services/translation.service';
 
 export type TournamentMainMode = 'view' | 'editor';
@@ -53,6 +54,7 @@ export class TournamentsComponent {
 	private readonly _router = inject(Router);
 	private readonly _firestore = inject(Firestore);
 	public readonly authService = inject(AuthService);
+	public readonly tournamentService = inject(TournamentService);
 	public readonly ts = inject(TranslationService);
 
 	// Current authenticated user signal
@@ -113,6 +115,50 @@ export class TournamentsComponent {
 		}),
 	);
 	protected readonly participants = toSignal(this.participants$, { initialValue: [] });
+
+	// Stream of catches for the currently selected tournament
+	protected readonly catches$ = this._route.queryParams.pipe(
+		switchMap(() => {
+			const tourn = this.selectedTournament();
+			const tournId = tourn?.id || tourn?.title;
+			if (!tournId) {
+				return of([] as CatchItem[]);
+			}
+			return this.tournamentService.getCatches(tournId);
+		}),
+	);
+	protected readonly catches = toSignal(this.catches$, { initialValue: [] });
+
+	// Submit Catch modal state and form
+	protected readonly catchModalOpen = signal(false);
+	protected readonly isSubmittingCatch = signal(false);
+	protected readonly catchFeedback = signal<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+
+	protected readonly speciesList = computed(() => {
+		const tourn = this.selectedTournament();
+		if (!tourn?.targetSpecies) {
+			return ['Pike', 'Perch', 'Zander', 'Carp', 'Catfish'];
+		}
+		return tourn.targetSpecies
+			.split(',')
+			.map((s) => s.trim())
+			.filter(Boolean);
+	});
+
+	protected readonly catchForm = new FormGroup({
+		species: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+		lengthCm: new FormControl<number | null>(null, [
+			Validators.required,
+			Validators.min(5),
+			Validators.max(300),
+		]),
+		weightKg: new FormControl<number | null>(null, [
+			Validators.min(0.01),
+			Validators.max(100),
+		]),
+		photoUrl: new FormControl('', { nonNullable: true }),
+		notes: new FormControl('', { nonNullable: true }),
+	});
 
 	// Join state signals & computed properties
 	protected readonly isJoining = signal(false);
@@ -249,6 +295,8 @@ export class TournamentsComponent {
 		this.selectedTournament.set(tournament);
 		this.settingsMenuOpen.set(false);
 		this.joinFeedback.set(null);
+		this.catchFeedback.set(null);
+		this.catchModalOpen.set(false);
 		if (tournament) {
 			this.activeDetailTab.set('overview');
 			this.mode.set('view');
@@ -428,6 +476,97 @@ export class TournamentsComponent {
 			});
 		} finally {
 			this.isJoining.set(false);
+		}
+	}
+
+	/**
+	 * Opens the Submit Catch modal, pre-filling the first target species if available.
+	 */
+	protected openCatchModal(): void {
+		const user = this.currentUser();
+		if (!user) {
+			this.joinFeedback.set({
+				type: 'info',
+				message: this.ts.t('catch.authRequired'),
+			});
+			return;
+		}
+
+		const species = this.speciesList();
+		this.catchForm.reset({
+			species: species.length > 0 ? species[0] : '',
+			lengthCm: null,
+			weightKg: null,
+			photoUrl: '',
+			notes: '',
+		});
+		this.catchFeedback.set(null);
+		this.catchModalOpen.set(true);
+	}
+
+	/**
+	 * Closes the Submit Catch modal.
+	 */
+	protected closeCatchModal(): void {
+		this.catchModalOpen.set(false);
+	}
+
+	/**
+	 * Submits the catch form data to Cloud Firestore via TournamentService.
+	 */
+	protected async submitCatch(): Promise<void> {
+		if (this.catchForm.invalid) {
+			this.catchForm.markAllAsTouched();
+			return;
+		}
+
+		const user = this.currentUser();
+		const tourn = this.selectedTournament();
+		if (!user || !tourn) {
+			this.catchFeedback.set({
+				type: 'error',
+				message: this.ts.t('catch.authRequired'),
+			});
+			return;
+		}
+
+		const tournId = tourn.id || tourn.title;
+		const values = this.catchForm.getRawValue();
+
+		this.isSubmittingCatch.set(true);
+		this.catchFeedback.set(null);
+
+		try {
+			await this.tournamentService.submitCatch({
+				tournamentId: tournId,
+				userId: user.uid,
+				anglerName: user.displayName || user.email?.split('@')[0] || 'Angler',
+				species: values.species,
+				lengthCm: Number(values.lengthCm),
+				weightKg: values.weightKg ? Number(values.weightKg) : null,
+				photoUrl: values.photoUrl.trim() || null,
+				notes: values.notes.trim() || null,
+			});
+
+			this.catchFeedback.set({
+				type: 'success',
+				message: this.ts.t('catch.successMessage'),
+			});
+			this.catchForm.reset();
+
+			// Auto-close modal after brief success feedback
+			setTimeout(() => {
+				this.catchModalOpen.set(false);
+				this.catchFeedback.set(null);
+			}, 1200);
+		} catch (err: unknown) {
+			console.error('Error submitting catch to Firestore:', err);
+			this.catchFeedback.set({
+				type: 'error',
+				message: this.ts.t('catch.errorMessage'),
+			});
+		} finally {
+			this.isSubmittingCatch.set(false);
 		}
 	}
 
