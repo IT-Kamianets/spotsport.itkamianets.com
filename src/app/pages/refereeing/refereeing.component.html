@@ -129,16 +129,6 @@
 				<div class="flex flex-wrap items-center gap-2 rounded-xl bg-[var(--c-bg-primary)] p-1.5 shadow-xs">
 					<button
 						type="button"
-						(click)="setCatchTab('submit')"
-						class="theme-interactive inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer"
-						[class]="activeCatchTab() === 'submit' ? 'bg-[var(--c-bg-secondary)] text-[var(--c-primary)] shadow-xs' : 'text-[var(--c-text)] hover:text-[var(--c-text-strong)]'"
-					>
-						<span class="material-symbols-outlined text-[16px]">add_a_photo</span>
-						<span>{{ ts.t('ref.subtabSubmit') }}</span>
-					</button>
-
-					<button
-						type="button"
 						(click)="setCatchTab('status')"
 						class="theme-interactive inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer"
 						[class]="activeCatchTab() === 'status' ? 'bg-[var(--c-bg-secondary)] text-[var(--c-primary)] shadow-xs' : 'text-[var(--c-text)] hover:text-[var(--c-text-strong)]'"
@@ -162,9 +152,6 @@
 				<div class="mt-6 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-primary)]/50 px-6 py-16 text-center">
 					<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--c-bg-secondary)] shadow-sm">
 						@switch (activeCatchTab()) {
-							@case ('submit') {
-								<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">camera_alt</span>
-							}
 							@case ('status') {
 								<span class="material-symbols-outlined text-[32px] text-[var(--c-primary)]">pending_actions</span>
 							}
@@ -176,9 +163,6 @@
 
 					<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
 						@switch (activeCatchTab()) {
-							@case ('submit') {
-								{{ ts.t('ref.phSubmitTitle') }}
-							}
 							@case ('status') {
 								{{ ts.t('ref.phStatusTitle') }}
 							}
@@ -190,9 +174,6 @@
 
 					<p class="mt-2 max-w-md text-sm text-[var(--c-text-muted)]">
 						@switch (activeCatchTab()) {
-							@case ('submit') {
-								{{ ts.t('ref.phSubmitDesc') }}
-							}
 							@case ('status') {
 								{{ ts.t('ref.phStatusDesc') }}
 							}

@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { TranslationService } from '../../services/translation.service';
 
 export type RefereeingMode = 'catch' | 'judging';
-export type CatchTab = 'submit' | 'status' | 'offline';
+export type CatchTab = 'status' | 'offline';
 export type JudgingTab = 'review' | 'penalties' | 'leaderboard';
 
 @Component({
@@ -15,7 +15,7 @@ export class RefereeingComponent {
 	public readonly ts = inject(TranslationService);
 
 	protected readonly mode = signal<RefereeingMode>('catch');
-	protected readonly activeCatchTab = signal<CatchTab>('submit');
+	protected readonly activeCatchTab = signal<CatchTab>('status');
 	protected readonly activeJudgingTab = signal<JudgingTab>('review');
 	protected readonly showCatchDetailsDialog = signal(false);
 
@@ -31,8 +31,10 @@ export class RefereeingComponent {
 				}
 			} else if (mode === 'catch' || tab === 'catch' || tab === 'submit' || tab === 'status' || tab === 'offline') {
 				this.mode.set('catch');
-				if (tab === 'submit' || tab === 'status' || tab === 'offline') {
+				if (tab === 'status' || tab === 'offline') {
 					this.activeCatchTab.set(tab);
+				} else {
+					this.activeCatchTab.set('status');
 				}
 			}
 		});
