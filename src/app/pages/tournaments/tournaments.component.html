@@ -1411,61 +1411,247 @@
 					}
 				</div>
 
-				<!-- Length and Weight Grid -->
-				<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-					<!-- Length (cm) -->
-					<div>
-						<label class="mb-1.5 block text-xs font-semibold text-[var(--c-text-strong)]">
-							{{ ts.t('catch.lengthLabel') }} <span class="text-red-500">*</span>
-						</label>
-						<input
-							type="number"
-							formControlName="lengthCm"
-							[placeholder]="ts.t('catch.lengthPlaceholder')"
-							min="5"
-							max="300"
-							step="0.1"
-							class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-2.5 text-sm text-[var(--c-text)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
-						/>
-						@if (catchForm.controls.lengthCm.invalid && catchForm.controls.lengthCm.touched) {
-							<p class="mt-1 text-[11px] text-red-500">{{ ts.t('catch.validationLength') }}</p>
-						}
-					</div>
-
-					<!-- Weight (kg) -->
-					<div>
-						<label class="mb-1.5 block text-xs font-semibold text-[var(--c-text-strong)]">
-							{{ ts.t('catch.weightLabel') }}
-						</label>
-						<input
-							type="number"
-							formControlName="weightKg"
-							[placeholder]="ts.t('catch.weightPlaceholder')"
-							min="0.01"
-							max="100"
-							step="0.01"
-							class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-2.5 text-sm text-[var(--c-text)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
-						/>
-						@if (catchForm.controls.weightKg.invalid && catchForm.controls.weightKg.touched) {
-							<p class="mt-1 text-[11px] text-red-500">{{ ts.t('catch.validationWeight') }}</p>
-						}
-					</div>
+				<!-- Scoring Mode Helper Banner -->
+				<div class="rounded-xl border p-3 text-xs flex items-center gap-2.5 transition-colors"
+					[class]="activeScoringMode() === 'weight'
+						? 'border-indigo-500/20 bg-indigo-500/5 text-indigo-700 dark:text-indigo-300'
+						: 'border-[var(--c-primary)]/20 bg-[var(--c-primary)]/5 text-[var(--c-text-strong)]'"
+				>
+					<span class="material-symbols-outlined text-[20px] shrink-0"
+						[class]="activeScoringMode() === 'weight' ? 'text-indigo-600' : 'text-[var(--c-primary)]'"
+					>
+						{{ activeScoringMode() === 'weight' ? 'scale' : 'straighten' }}
+					</span>
+					<span class="leading-relaxed">
+						{{ activeScoringMode() === 'weight' ? ts.t('catch.scoringWeightNotice') : ts.t('catch.scoringLengthNotice') }}
+					</span>
 				</div>
 
-				<!-- Photo URL -->
+				<!-- Length and Weight Grid (Adaptive based on scoring mode) -->
+				<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+					@if (activeScoringMode() === 'weight') {
+						<!-- Primary: Weight input with g / kg unit switcher -->
+						<div class="space-y-1.5">
+							<div class="flex items-center justify-between">
+								<label class="block text-xs font-semibold text-[var(--c-text-strong)]">
+									{{ ts.t('catch.weightInputLabel') }} <span class="text-red-500">*</span>
+								</label>
+								<!-- Unit Toggle Buttons: г vs кг -->
+								<div class="inline-flex rounded-lg border border-[var(--c-border)] p-0.5 bg-[var(--c-bg-primary)] text-[11px] font-semibold">
+									<button
+										type="button"
+										(click)="weightInputUnit.set('g')"
+										class="rounded px-2 py-0.5 transition-all cursor-pointer"
+										[class]="weightInputUnit() === 'g'
+											? 'bg-[var(--c-primary)] text-white'
+											: 'text-[var(--c-text-muted)] hover:text-[var(--c-text-strong)]'"
+									>
+										г
+									</button>
+									<button
+										type="button"
+										(click)="weightInputUnit.set('kg')"
+										class="rounded px-2 py-0.5 transition-all cursor-pointer"
+										[class]="weightInputUnit() === 'kg'
+											? 'bg-[var(--c-primary)] text-white'
+											: 'text-[var(--c-text-muted)] hover:text-[var(--c-text-strong)]'"
+									>
+										кг
+									</button>
+								</div>
+							</div>
+
+							<div class="relative">
+								<input
+									type="number"
+									formControlName="weightKg"
+									[placeholder]="weightInputUnit() === 'g' ? ts.t('catch.weightGramsPlaceholder') : ts.t('catch.weightPlaceholder')"
+									[min]="weightInputUnit() === 'g' ? 1 : 0.001"
+									[max]="weightInputUnit() === 'g' ? 100000 : 100"
+									[step]="weightInputUnit() === 'g' ? 1 : 0.001"
+									class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-2.5 text-sm text-[var(--c-text)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
+								/>
+								<span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-[var(--c-text-muted)]">
+									{{ weightInputUnit() }}
+								</span>
+							</div>
+
+							@if (catchForm.controls.weightKg.invalid && catchForm.controls.weightKg.touched) {
+								<p class="mt-1 text-[11px] text-red-500">{{ ts.t('catch.validationWeight') }}</p>
+							}
+						</div>
+
+						<!-- Secondary: Length (Optional in weight mode) -->
+						<div class="space-y-1.5">
+							<label class="block text-xs font-semibold text-[var(--c-text-strong)]">
+								{{ ts.t('catch.lengthLabel') }} <span class="text-xs text-[var(--c-text-muted)] font-normal">(см, опціонально)</span>
+							</label>
+							<div class="relative">
+								<input
+									type="number"
+									formControlName="lengthCm"
+									[placeholder]="ts.t('catch.lengthPlaceholder')"
+									min="1"
+									max="300"
+									step="0.1"
+									class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-2.5 text-sm text-[var(--c-text)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
+								/>
+								<span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-[var(--c-text-muted)]">
+									см
+								</span>
+							</div>
+						</div>
+					} @else {
+						<!-- Primary: Length input in cm -->
+						<div class="space-y-1.5">
+							<label class="block text-xs font-semibold text-[var(--c-text-strong)]">
+								{{ ts.t('catch.lengthLabel') }} <span class="text-red-500">*</span>
+							</label>
+							<div class="relative">
+								<input
+									type="number"
+									formControlName="lengthCm"
+									[placeholder]="ts.t('catch.lengthPlaceholder')"
+									min="5"
+									max="300"
+									step="0.1"
+									class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-2.5 text-sm text-[var(--c-text)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
+								/>
+								<span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-[var(--c-text-muted)]">
+									см
+								</span>
+							</div>
+							@if (catchForm.controls.lengthCm.invalid && catchForm.controls.lengthCm.touched) {
+								<p class="mt-1 text-[11px] text-red-500">{{ ts.t('catch.validationLength') }}</p>
+							}
+						</div>
+
+						<!-- Secondary: Weight (kg / optional in length mode) -->
+						<div class="space-y-1.5">
+							<div class="flex items-center justify-between">
+								<label class="block text-xs font-semibold text-[var(--c-text-strong)]">
+									{{ ts.t('catch.weightLabel') }}
+								</label>
+								<div class="inline-flex rounded-lg border border-[var(--c-border)] p-0.5 bg-[var(--c-bg-primary)] text-[11px] font-semibold">
+									<button
+										type="button"
+										(click)="weightInputUnit.set('g')"
+										class="rounded px-2 py-0.5 transition-all cursor-pointer"
+										[class]="weightInputUnit() === 'g'
+											? 'bg-[var(--c-primary)] text-white'
+											: 'text-[var(--c-text-muted)] hover:text-[var(--c-text-strong)]'"
+									>
+										г
+									</button>
+									<button
+										type="button"
+										(click)="weightInputUnit.set('kg')"
+										class="rounded px-2 py-0.5 transition-all cursor-pointer"
+										[class]="weightInputUnit() === 'kg'
+											? 'bg-[var(--c-primary)] text-white'
+											: 'text-[var(--c-text-muted)] hover:text-[var(--c-text-strong)]'"
+									>
+										кг
+									</button>
+								</div>
+							</div>
+
+							<div class="relative">
+								<input
+									type="number"
+									formControlName="weightKg"
+									[placeholder]="weightInputUnit() === 'g' ? ts.t('catch.weightGramsPlaceholder') : ts.t('catch.weightPlaceholder')"
+									[min]="weightInputUnit() === 'g' ? 1 : 0.001"
+									[max]="weightInputUnit() === 'g' ? 100000 : 100"
+									[step]="weightInputUnit() === 'g' ? 1 : 0.001"
+									class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3 py-2.5 text-sm text-[var(--c-text)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
+								/>
+								<span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-[var(--c-text-muted)]">
+									{{ weightInputUnit() }}
+								</span>
+							</div>
+
+							@if (catchForm.controls.weightKg.invalid && catchForm.controls.weightKg.touched) {
+								<p class="mt-1 text-[11px] text-red-500">{{ ts.t('catch.validationWeight') }}</p>
+							}
+						</div>
+					}
+				</div>
+
+				<!-- Photo Capture / Upload with Ruler Warning -->
 				<div>
 					<label class="mb-1.5 block text-xs font-semibold text-[var(--c-text-strong)]">
 						{{ ts.t('catch.photoUrlLabel') }}
 					</label>
-					<div class="relative">
-						<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[18px] text-[var(--c-text-muted)]">photo_camera</span>
-						<input
-							type="url"
-							formControlName="photoUrl"
-							[placeholder]="ts.t('catch.photoUrlPlaceholder')"
-							class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] pl-9 pr-3 py-2.5 text-sm text-[var(--c-text)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-none transition-colors"
-						/>
+
+					<!-- Reminder helper label -->
+					<div class="mb-2 flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 p-2.5 text-xs text-amber-800 dark:text-amber-200">
+						<span class="material-symbols-outlined text-[18px] text-amber-500 shrink-0">straighten</span>
+						<span class="leading-relaxed">{{ ts.t('catch.photoRulerHint') }}</span>
 					</div>
+
+					<!-- Hidden File/Camera Input -->
+					<input
+						#catchFileInput
+						type="file"
+						accept="image/*"
+						capture="environment"
+						(change)="onPhotoSelected($event)"
+						class="hidden"
+					/>
+
+					@if (photoPreview()) {
+						<!-- Live Photo Preview & Retake Button -->
+						<div class="relative overflow-hidden rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-2">
+							<div class="relative aspect-[16/10] w-full overflow-hidden rounded-lg bg-black/5">
+								<img
+									[src]="photoPreview()"
+									alt="Catch preview with ruler"
+									class="h-full w-full object-contain"
+								/>
+							</div>
+
+							<div class="mt-2 flex items-center justify-between">
+								<span class="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600">
+									<span class="material-symbols-outlined text-[15px]">check_circle</span>
+									<span>Photo attached</span>
+								</span>
+
+								<button
+									type="button"
+									(click)="clearPhoto()"
+									class="theme-interactive inline-flex items-center gap-1 rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-500/20 transition-all cursor-pointer"
+								>
+									<span class="material-symbols-outlined text-[15px]">refresh</span>
+									<span>{{ ts.t('catch.photoRetake') }}</span>
+								</button>
+							</div>
+						</div>
+					} @else {
+						<!-- Photo Trigger Button -->
+						<button
+							type="button"
+							(click)="catchFileInput.click()"
+							[disabled]="isCompressingPhoto()"
+							class="theme-interactive flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[var(--c-border)] bg-[var(--c-bg-secondary)]/50 px-4 py-6 text-center hover:border-[var(--c-primary)] hover:bg-[var(--c-bg-secondary)] transition-all cursor-pointer"
+						>
+							<div class="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--c-primary)]/10 text-[var(--c-primary)]">
+								@if (isCompressingPhoto()) {
+									<span class="material-symbols-outlined text-[24px] animate-spin">progress_activity</span>
+								} @else {
+									<span class="material-symbols-outlined text-[24px]">photo_camera</span>
+								}
+							</div>
+							<div>
+								<span class="text-xs font-semibold text-[var(--c-text-strong)]">
+									{{ isCompressingPhoto() ? 'Optimizing photo...' : ts.t('catch.photoSelect') }}
+								</span>
+								<p class="mt-0.5 text-[11px] text-[var(--c-text-muted)]">
+									Camera capture on mobile or image file upload
+								</p>
+							</div>
+						</button>
+					}
 				</div>
 
 				<!-- Notes -->

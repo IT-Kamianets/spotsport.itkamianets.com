@@ -1,10 +1,19 @@
 import { DecimalPipe, isPlatformBrowser } from '@angular/common';
 import { Component, computed, inject, PLATFORM_ID, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { of, switchMap } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
-import { CatchItem, formatCatchTime, TournamentItem, TournamentService } from '../../services/tournament.service';
+import {
+	CatchItem,
+	formatCatchTime,
+	ParticipantItem,
+	PenaltyItem,
+	PenaltySeverity,
+	TournamentItem,
+	TournamentService,
+} from '../../services/tournament.service';
 import { TranslationService } from '../../services/translation.service';
 
 export type RefereeingMode = 'catch' | 'judging';
@@ -13,7 +22,7 @@ export type JudgingTab = 'review' | 'penalties' | 'leaderboard';
 
 @Component({
 	selector: 'app-refereeing',
-	imports: [DecimalPipe],
+	imports: [DecimalPipe, ReactiveFormsModule],
 	templateUrl: './refereeing.component.html',
 })
 export class RefereeingComponent {
@@ -59,6 +68,38 @@ export class RefereeingComponent {
 		const creatorId = tourn.organizerId || tourn.createdBy;
 		return Boolean(creatorId && creatorId === user.uid);
 	});
+
+	// Registered participants for selected tournament
+	protected readonly participants$ = toObservable(this.selectedTournament).pipe(
+		switchMap((tourn) => {
+			const tid = tourn?.id || tourn?.title;
+			if (!tid) return of([] as ParticipantItem[]);
+			return this.tournamentService.getParticipants(tid);
+		}),
+	);
+	protected readonly participants = toSignal(this.participants$, { initialValue: [] });
+
+	// Penalties stream for selected tournament
+	protected readonly penalties$ = toObservable(this.selectedTournament).pipe(
+		switchMap((tourn) => {
+			const tid = tourn?.id || tourn?.title;
+			if (!tid) return of([] as PenaltyItem[]);
+			return this.tournamentService.getPenalties(tid);
+		}),
+	);
+	protected readonly penalties = toSignal(this.penalties$, { initialValue: [] });
+
+	// Penalty Form
+	protected readonly penaltyForm = new FormGroup({
+		userId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+		severity: new FormControl<PenaltySeverity>('warning', { nonNullable: true, validators: [Validators.required] }),
+		pointsDeducted: new FormControl<number | null>(null),
+		reason: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(3)] }),
+	});
+
+	protected readonly isAddingPenalty = signal(false);
+	protected readonly penaltyError = signal<string | null>(null);
+	protected readonly deletingPenaltyId = signal<string | null>(null);
 
 	// Catches for the selected tournament
 	protected readonly catches$ = toObservable(this.selectedTournament).pipe(
@@ -238,6 +279,68 @@ export class RefereeingComponent {
 			this.lastSyncedAt.set(new Date().toLocaleTimeString());
 			this.isRefreshing.set(false);
 		}, 600);
+	}
+
+	/**
+	 * Allows an organizer to add a penalty for a participant.
+	 */
+	protected async addPenalty(): Promise<void> {
+		if (this.penaltyForm.invalid) {
+			this.penaltyForm.markAllAsTouched();
+			return;
+		}
+
+		const tourn = this.selectedTournament();
+		const tournId = tourn?.id || tourn?.title;
+		const user = this.currentUser();
+		if (!tournId || !user) return;
+
+		const values = this.penaltyForm.getRawValue();
+		const part = this.participants().find((p) => p.userId === values.userId);
+
+		this.isAddingPenalty.set(true);
+		this.penaltyError.set(null);
+
+		try {
+			await this.tournamentService.addPenalty(tournId, {
+				userId: values.userId,
+				anglerName: part?.displayName || part?.email?.split('@')[0] || 'Angler',
+				severity: values.severity,
+				pointsDeducted: values.pointsDeducted ? Number(values.pointsDeducted) : null,
+				reason: values.reason.trim(),
+				issuedBy: user.displayName || user.email || user.uid,
+			});
+
+			this.penaltyForm.reset({
+				userId: '',
+				severity: 'warning',
+				pointsDeducted: null,
+				reason: '',
+			});
+		} catch (err: unknown) {
+			console.error('Error adding penalty:', err);
+			this.penaltyError.set('Failed to save penalty. Please try again.');
+		} finally {
+			this.isAddingPenalty.set(false);
+		}
+	}
+
+	/**
+	 * Allows an organizer to revoke/remove a penalty.
+	 */
+	protected async removePenalty(p: PenaltyItem): Promise<void> {
+		const tourn = this.selectedTournament();
+		const tournId = p.tournamentId || tourn?.id || tourn?.title;
+		if (!tournId || !p.id) return;
+
+		this.deletingPenaltyId.set(p.id);
+		try {
+			await this.tournamentService.removePenalty(tournId, p.id);
+		} catch (err: unknown) {
+			console.error('Error removing penalty:', err);
+		} finally {
+			this.deletingPenaltyId.set(null);
+		}
 	}
 
 	/**

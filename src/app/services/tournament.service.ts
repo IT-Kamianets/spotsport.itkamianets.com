@@ -3,6 +3,7 @@ import {
 	addDoc,
 	collection,
 	collectionData,
+	deleteDoc,
 	doc,
 	Firestore,
 	orderBy,
@@ -21,6 +22,7 @@ export interface CatchItem {
 	species: string;
 	lengthCm: number;
 	weightKg?: number | null;
+	weightGrams?: number | null;
 	photoUrl?: string | null;
 	notes?: string | null;
 	status?: 'pending' | 'approved' | 'rejected';
@@ -64,9 +66,12 @@ export interface CatchSubmissionPayload {
 	species: string;
 	lengthCm: number;
 	weightKg?: number | null;
+	weightGrams?: number | null;
 	photoUrl?: string | null;
 	notes?: string | null;
 }
+
+export type TournamentScoringMode = 'length' | 'weight' | 'both';
 
 export interface TournamentItem {
 	id?: string;
@@ -77,6 +82,7 @@ export interface TournamentItem {
 	targetSpecies: string;
 	date: string;
 	rules: string;
+	scoringMode?: TournamentScoringMode;
 	status?: 'active' | 'upcoming' | 'completed';
 	createdBy?: string | null;
 	organizerId?: string | null;
@@ -90,6 +96,20 @@ export interface ParticipantItem {
 	displayName?: string | null;
 	tournamentId: string;
 	joinedAt?: unknown;
+}
+
+export type PenaltySeverity = 'warning' | 'point_deduction' | 'disqualification';
+
+export interface PenaltyItem {
+	id?: string;
+	tournamentId: string;
+	userId: string;
+	anglerName?: string | null;
+	severity: PenaltySeverity;
+	pointsDeducted?: number | null;
+	reason: string;
+	issuedBy?: string | null;
+	createdAt?: unknown;
 }
 
 @Injectable({
@@ -146,6 +166,34 @@ export class TournamentService {
 	}
 
 	/**
+	 * Create a new tournament in Cloud Firestore.
+	 * Automatically links `createdBy` and `organizerId` to the creator's UID.
+	 */
+	async createTournament(
+		tournament: Omit<TournamentItem, 'id' | 'createdAt'> & { userId?: string | null },
+	): Promise<string> {
+		const tournamentsCol = collection(this._firestore, 'tournaments');
+		const creatorUid = tournament.userId || tournament.createdBy || tournament.organizerId || null;
+		const payload: Omit<TournamentItem, 'id'> = {
+			title: tournament.title.trim(),
+			description: tournament.description.trim(),
+			hostClub: tournament.hostClub.trim(),
+			waterBody: tournament.waterBody.trim(),
+			targetSpecies: tournament.targetSpecies.trim(),
+			date: tournament.date,
+			rules: tournament.rules.trim(),
+			scoringMode: tournament.scoringMode || 'length',
+			status: tournament.status || 'active',
+			createdBy: creatorUid,
+			organizerId: creatorUid,
+			createdAt: serverTimestamp(),
+		};
+
+		const docRef = await addDoc(tournamentsCol, payload);
+		return docRef.id;
+	}
+
+	/**
 	 * Register an authenticated user as a participant in a tournament.
 	 */
 	async joinTournament(
@@ -177,13 +225,21 @@ export class TournamentService {
 		}
 
 		const catchesCol = collection(this._firestore, 'tournaments', data.tournamentId, 'catches');
+		const weightKg = data.weightKg != null && !isNaN(Number(data.weightKg)) ? Number(data.weightKg) : null;
+		const weightGrams = data.weightGrams != null && !isNaN(Number(data.weightGrams))
+			? Number(data.weightGrams)
+			: weightKg != null
+				? Math.round(weightKg * 1000)
+				: null;
+
 		const catchDoc: Omit<CatchItem, 'id'> = {
 			tournamentId: data.tournamentId,
 			userId: data.userId,
 			anglerName: data.anglerName?.trim() || 'Angler',
 			species: data.species.trim(),
 			lengthCm: Number(data.lengthCm),
-			weightKg: data.weightKg != null && !isNaN(Number(data.weightKg)) ? Number(data.weightKg) : null,
+			weightKg,
+			weightGrams,
 			photoUrl: data.photoUrl?.trim() || null,
 			notes: data.notes?.trim() || null,
 			status: 'pending',
@@ -211,5 +267,51 @@ export class TournamentService {
 			status,
 			reviewedAt: serverTimestamp(),
 		});
+	}
+
+	/**
+	 * Get real-time penalties stream for a given tournament.
+	 */
+	getPenalties(tournamentId: string): Observable<PenaltyItem[]> {
+		if (!tournamentId) return of([]);
+		const penaltiesCol = collection(this._firestore, 'tournaments', tournamentId, 'penalties');
+		const penaltiesQuery = query(penaltiesCol, orderBy('createdAt', 'desc'));
+		return (collectionData(penaltiesQuery, { idField: 'id' }) as Observable<PenaltyItem[]>).pipe(
+			catchError((err) => {
+				console.warn('Firestore penalties query fallback to unordered collection:', err);
+				return (collectionData(penaltiesCol, { idField: 'id' }) as Observable<PenaltyItem[]>).pipe(
+					catchError((fallbackErr) => {
+						console.warn('Firestore penalties fetch error:', fallbackErr);
+						return of([]);
+					}),
+				);
+			}),
+		);
+	}
+
+	/**
+	 * Add a penalty for a participant in a tournament.
+	 */
+	async addPenalty(
+		tournamentId: string,
+		payload: Omit<PenaltyItem, 'id' | 'createdAt' | 'tournamentId'>,
+	): Promise<string> {
+		if (!tournamentId) throw new Error('Tournament ID is required to add a penalty.');
+		const penaltiesCol = collection(this._firestore, 'tournaments', tournamentId, 'penalties');
+		const docRef = await addDoc(penaltiesCol, {
+			...payload,
+			tournamentId,
+			createdAt: serverTimestamp(),
+		});
+		return docRef.id;
+	}
+
+	/**
+	 * Remove / revoke a penalty from a tournament.
+	 */
+	async removePenalty(tournamentId: string, penaltyId: string): Promise<void> {
+		if (!tournamentId || !penaltyId) throw new Error('Tournament ID and Penalty ID are required.');
+		const penaltyRef = doc(this._firestore, 'tournaments', tournamentId, 'penalties', penaltyId);
+		await deleteDoc(penaltyRef);
 	}
 }

@@ -15,7 +15,13 @@ import {
 } from '@angular/fire/firestore';
 import { catchError, Observable, of, switchMap } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
-import { CatchItem, formatCatchTime, TournamentService } from '../../services/tournament.service';
+import {
+	CatchItem,
+	formatCatchTime,
+	TournamentItem,
+	TournamentScoringMode,
+	TournamentService,
+} from '../../services/tournament.service';
 import { TranslationService } from '../../services/translation.service';
 
 export type TournamentMainMode = 'view' | 'editor';
@@ -23,20 +29,7 @@ export type TournamentTab = 'overview' | 'participants' | 'status' | 'leaderboar
 export type TournamentDetailTab = 'overview' | 'rules' | 'participants' | 'status' | 'leaderboard' | 'moderation';
 export type EditorSection = 'general' | 'schedule' | 'scoring' | 'penalties';
 
-export interface TournamentItem {
-	id?: string;
-	title: string;
-	description: string;
-	hostClub: string;
-	waterBody: string;
-	targetSpecies: string;
-	date: string;
-	rules: string;
-	status?: 'active' | 'upcoming' | 'completed';
-	createdBy?: string | null;
-	organizerId?: string | null;
-	createdAt?: unknown;
-}
+export type { TournamentItem };
 
 export interface ParticipantItem {
 	id?: string;
@@ -223,6 +216,26 @@ export class TournamentsComponent {
 	protected readonly catchModalOpen = signal(false);
 	protected readonly isSubmittingCatch = signal(false);
 	protected readonly catchFeedback = signal<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+	protected readonly photoPreview = signal<string | null>(null);
+	protected readonly isCompressingPhoto = signal<boolean>(false);
+	@ViewChild('catchFileInput') protected readonly catchFileInput?: ElementRef<HTMLInputElement>;
+
+	// Active tournament scoring mode detection
+	protected readonly activeScoringMode = computed<TournamentScoringMode>(() => {
+		const tourn = this.selectedTournament();
+		if (!tourn) return 'length';
+		if (tourn.scoringMode) return tourn.scoringMode;
+		const rulesLower = (tourn.rules || '').toLowerCase();
+		const descLower = (tourn.description || '').toLowerCase();
+		const text = `${rulesLower} ${descLower}`;
+		if (text.includes('ваг') || text.includes('weight') || text.includes('gram') || text.includes('грам')) {
+			return 'weight';
+		}
+		return 'length';
+	});
+
+	// Selected weight input unit ('kg' or 'g') in Submit Catch modal
+	protected readonly weightInputUnit = signal<'kg' | 'g'>('kg');
 
 	protected readonly speciesList = computed(() => {
 		const tourn = this.selectedTournament();
@@ -584,6 +597,20 @@ export class TournamentsComponent {
 		}
 
 		const species = this.speciesList();
+		const mode = this.activeScoringMode();
+		this.photoPreview.set(null);
+
+		// Adapt validators according to scoring mode
+		if (mode === 'weight') {
+			this.catchForm.controls.weightKg.setValidators([Validators.required, Validators.min(0.001), Validators.max(100)]);
+			this.catchForm.controls.lengthCm.setValidators([Validators.min(1), Validators.max(300)]);
+		} else {
+			this.catchForm.controls.lengthCm.setValidators([Validators.required, Validators.min(5), Validators.max(300)]);
+			this.catchForm.controls.weightKg.setValidators([Validators.min(0.001), Validators.max(100)]);
+		}
+		this.catchForm.controls.lengthCm.updateValueAndValidity();
+		this.catchForm.controls.weightKg.updateValueAndValidity();
+
 		this.catchForm.reset({
 			species: species.length > 0 ? species[0] : '',
 			lengthCm: null,
@@ -591,6 +618,9 @@ export class TournamentsComponent {
 			photoUrl: '',
 			notes: '',
 		});
+		if (this.catchFileInput?.nativeElement) {
+			this.catchFileInput.nativeElement.value = '';
+		}
 		this.catchFeedback.set(null);
 		this.catchModalOpen.set(true);
 	}
@@ -600,6 +630,70 @@ export class TournamentsComponent {
 	 */
 	protected closeCatchModal(): void {
 		this.catchModalOpen.set(false);
+	}
+
+	/**
+	 * Handles image file selection/capture from camera/gallery,
+	 * downscaling and compressing it client-side into a compact JPEG data URL.
+	 */
+	protected onPhotoSelected(event: Event): void {
+		const input = event.target as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file) return;
+
+		this.isCompressingPhoto.set(true);
+
+		const reader = new FileReader();
+		reader.onload = (e) => {
+			const img = new Image();
+			img.onload = () => {
+				const maxDim = 1024;
+				let width = img.width;
+				let height = img.height;
+
+				if (width > maxDim || height > maxDim) {
+					if (width > height) {
+						height = Math.round((height * maxDim) / width);
+						width = maxDim;
+					} else {
+						width = Math.round((width * maxDim) / height);
+						height = maxDim;
+					}
+				}
+
+				const canvas = document.createElement('canvas');
+				canvas.width = width;
+				canvas.height = height;
+				const ctx = canvas.getContext('2d');
+				if (ctx) {
+					ctx.drawImage(img, 0, 0, width, height);
+					// Compress to JPEG with 0.72 quality (~60-120 KB, well within 1MB Firestore limit)
+					const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.72);
+					this.photoPreview.set(compressedDataUrl);
+					this.catchForm.patchValue({ photoUrl: compressedDataUrl });
+				}
+				this.isCompressingPhoto.set(false);
+			};
+			img.onerror = () => {
+				this.isCompressingPhoto.set(false);
+			};
+			img.src = e.target?.result as string;
+		};
+		reader.onerror = () => {
+			this.isCompressingPhoto.set(false);
+		};
+		reader.readAsDataURL(file);
+	}
+
+	/**
+	 * Clear or retake the current photo preview and form value.
+	 */
+	protected clearPhoto(): void {
+		this.photoPreview.set(null);
+		this.catchForm.patchValue({ photoUrl: '' });
+		if (this.catchFileInput?.nativeElement) {
+			this.catchFileInput.nativeElement.value = '';
+		}
 	}
 
 	/**
@@ -624,6 +718,25 @@ export class TournamentsComponent {
 		const tournId = tourn.id || tourn.title;
 		const values = this.catchForm.getRawValue();
 
+		// Normalize weight according to selected unit (g vs kg)
+		let normalizedWeightKg: number | null = null;
+		let normalizedWeightGrams: number | null = null;
+		if (values.weightKg != null && !isNaN(Number(values.weightKg))) {
+			const rawWeight = Number(values.weightKg);
+			if (this.weightInputUnit() === 'g') {
+				normalizedWeightGrams = Math.round(rawWeight);
+				normalizedWeightKg = Math.round((rawWeight / 1000) * 1000) / 1000;
+			} else {
+				normalizedWeightKg = rawWeight;
+				normalizedWeightGrams = Math.round(rawWeight * 1000);
+			}
+		}
+
+		// Normalize length: if tournament is weight-based and user didn't enter length, fallback cleanly
+		const normalizedLengthCm = values.lengthCm != null && !isNaN(Number(values.lengthCm))
+			? Number(values.lengthCm)
+			: 0;
+
 		this.isSubmittingCatch.set(true);
 		this.catchFeedback.set(null);
 
@@ -633,8 +746,9 @@ export class TournamentsComponent {
 				userId: user.uid,
 				anglerName: user.displayName || user.email?.split('@')[0] || 'Angler',
 				species: values.species,
-				lengthCm: Number(values.lengthCm),
-				weightKg: values.weightKg ? Number(values.weightKg) : null,
+				lengthCm: normalizedLengthCm,
+				weightKg: normalizedWeightKg,
+				weightGrams: normalizedWeightGrams,
 				photoUrl: values.photoUrl.trim() || null,
 				notes: values.notes.trim() || null,
 			});
@@ -643,7 +757,11 @@ export class TournamentsComponent {
 				type: 'success',
 				message: this.ts.t('catch.successMessage'),
 			});
+			this.photoPreview.set(null);
 			this.catchForm.reset();
+			if (this.catchFileInput?.nativeElement) {
+				this.catchFileInput.nativeElement.value = '';
+			}
 
 			// Auto-close modal after brief success feedback
 			setTimeout(() => {
@@ -692,6 +810,7 @@ export class TournamentsComponent {
 		try {
 			const formValues = this.tournamentForm.getRawValue();
 			const user = this.currentUser();
+			const creatorUid = user ? user.uid : null;
 			const payload: TournamentItem = {
 				title: formValues.title.trim(),
 				description: formValues.description.trim(),
@@ -701,7 +820,8 @@ export class TournamentsComponent {
 				date: formValues.date,
 				rules: formValues.rules.trim(),
 				status: 'active',
-				createdBy: user ? user.uid : null,
+				createdBy: creatorUid,
+				organizerId: creatorUid,
 				createdAt: serverTimestamp(),
 			};
 
