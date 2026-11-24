@@ -719,14 +719,14 @@
 												{{ tourn.title }} &middot; {{ ts.t('ref.judgingTabPenalties') }}
 											</h4>
 											<p class="text-xs text-[var(--c-text-muted)]">
-												Assign warnings, penalty points deductions, or disqualifications
+												{{ ts.t('ref.penaltiesSubtitle') }}
 											</p>
 										</div>
 									</div>
 
 									<span class="inline-flex items-center gap-1.5 rounded-full bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-600">
 										<span class="h-2 w-2 rounded-full bg-red-500"></span>
-										{{ penalties().length }} Penalties Applied
+										{{ penalties().length }} {{ ts.t('ref.penaltiesAppliedCount') }}
 									</span>
 								</div>
 
@@ -740,7 +740,7 @@
 									<form [formGroup]="penaltyForm" (ngSubmit)="addPenalty()" class="mt-5 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)]/40 p-4 space-y-4">
 										<h5 class="text-xs font-bold uppercase tracking-wider text-[var(--c-text-strong)] flex items-center gap-1.5">
 											<span class="material-symbols-outlined text-[16px] text-amber-500">add_moderator</span>
-											<span>Issue Tournament Penalty / Sanction</span>
+											<span>{{ ts.t('ref.issuePenaltyHeading') }}</span>
 										</h5>
 
 										@if (penaltyError()) {
@@ -752,13 +752,13 @@
 										<div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
 											<!-- Participant Select -->
 											<div>
-												<label class="mb-1 block text-xs font-semibold text-[var(--c-text-strong)]">Participant *</label>
+												<label class="mb-1 block text-xs font-semibold text-[var(--c-text-strong)]">{{ ts.t('ref.penaltyParticipantLabel') }}</label>
 												@if (participants().length > 0) {
 													<select
 														formControlName="userId"
 														class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-3 py-2 text-xs text-[var(--c-text)] focus:border-[var(--c-primary)] focus:outline-none"
 													>
-														<option value="" disabled>Select participant...</option>
+														<option value="" disabled>{{ ts.t('ref.penaltySelectParticipant') }}</option>
 														@for (p of participants(); track p.userId) {
 															<option [value]="p.userId">{{ p.displayName || p.email || p.userId }}</option>
 														}
@@ -767,7 +767,7 @@
 													<input
 														type="text"
 														formControlName="userId"
-														placeholder="Participant User ID or name"
+														[placeholder]="ts.t('ref.penaltyParticipantPlaceholder')"
 														class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-3 py-2 text-xs text-[var(--c-text)] focus:border-[var(--c-primary)] focus:outline-none"
 													/>
 												}
@@ -775,24 +775,24 @@
 
 											<!-- Severity -->
 											<div>
-												<label class="mb-1 block text-xs font-semibold text-[var(--c-text-strong)]">Penalty Type *</label>
+												<label class="mb-1 block text-xs font-semibold text-[var(--c-text-strong)]">{{ ts.t('ref.penaltyTypeLabel') }}</label>
 												<select
 													formControlName="severity"
 													class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-3 py-2 text-xs text-[var(--c-text)] focus:border-[var(--c-primary)] focus:outline-none"
 												>
-													<option value="warning">Warning / Yellow Card</option>
-													<option value="point_deduction">Points / Weight Deduction</option>
-													<option value="disqualification">Disqualification (Red Card)</option>
+													<option value="warning">{{ ts.t('ref.severityWarning') }}</option>
+													<option value="point_deduction">{{ ts.t('ref.severityDeduction') }}</option>
+													<option value="disqualification">{{ ts.t('ref.severityDisqualification') }}</option>
 												</select>
 											</div>
 
 											<!-- Points / Penalty Value -->
 											<div>
-												<label class="mb-1 block text-xs font-semibold text-[var(--c-text-strong)]">Deduction (Pts / kg)</label>
+												<label class="mb-1 block text-xs font-semibold text-[var(--c-text-strong)]">{{ ts.t('ref.deductionLabel') }}</label>
 												<input
 													type="number"
 													formControlName="pointsDeducted"
-													placeholder="e.g. 5 or 0.5"
+													[placeholder]="ts.t('ref.deductionPlaceholder')"
 													step="0.1"
 													min="0"
 													class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-3 py-2 text-xs text-[var(--c-text)] focus:border-[var(--c-primary)] focus:outline-none"
@@ -802,11 +802,11 @@
 
 										<!-- Reason / Note -->
 										<div>
-											<label class="mb-1 block text-xs font-semibold text-[var(--c-text-strong)]">Infraction Reason / Arbiter Note *</label>
+											<label class="mb-1 block text-xs font-semibold text-[var(--c-text-strong)]">{{ ts.t('ref.reasonLabel') }}</label>
 											<input
 												type="text"
 												formControlName="reason"
-												placeholder="e.g. Boundary violation in sector B, late arrival, fish handling rule infringement..."
+												[placeholder]="ts.t('ref.reasonPlaceholder')"
 												class="w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-3 py-2 text-xs text-[var(--c-text)] focus:border-[var(--c-primary)] focus:outline-none"
 											/>
 										</div>
@@ -822,7 +822,7 @@
 												} @else {
 													<span class="material-symbols-outlined text-[15px]">gavel</span>
 												}
-												<span>Apply Penalty</span>
+												<span>{{ ts.t('ref.applyPenaltyBtn') }}</span>
 											</button>
 										</div>
 									</form>
@@ -831,7 +831,7 @@
 								<!-- List of Applied Penalties -->
 								<div class="mt-6 border-t border-[var(--c-border)] pt-4">
 									<h5 class="text-xs font-bold uppercase tracking-wider text-[var(--c-text-muted)] mb-3">
-										Applied Penalties ({{ penalties().length }})
+										{{ ts.t('ref.appliedPenaltiesHeading') }} ({{ penalties().length }})
 									</h5>
 
 									@if (penalties().length > 0) {
@@ -851,7 +851,13 @@
 															>
 																<span class="material-symbols-outlined text-[13px]">warning</span>
 																<span>
-																	{{ p.severity === 'disqualification' ? 'Disqualification' : (p.severity === 'point_deduction' ? 'Points Deduction' : 'Warning') }}
+																	@if (p.severity === 'disqualification') {
+																		{{ ts.t('ref.severityBadgeDisqualification') }}
+																	} @else if (p.severity === 'point_deduction') {
+																		{{ ts.t('ref.severityBadgeDeduction') }}
+																	} @else {
+																		{{ ts.t('ref.severityBadgeWarning') }}
+																	}
 																</span>
 															</span>
 
@@ -869,7 +875,7 @@
 																<span>{{ time }}</span>
 															}
 															@if (p.issuedBy) {
-																<span>&middot; Issued by: {{ p.issuedBy }}</span>
+																<span>&middot; {{ ts.t('ref.issuedBy') }} {{ p.issuedBy }}</span>
 															}
 														</div>
 													</div>
@@ -887,7 +893,7 @@
 																} @else {
 																	<span class="material-symbols-outlined text-[15px]">delete</span>
 																}
-																<span>Revoke</span>
+																<span>{{ ts.t('ref.revokePenalty') }}</span>
 															</button>
 														</div>
 													}
@@ -898,7 +904,7 @@
 										<div class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--c-border)] p-6 text-center">
 											<span class="material-symbols-outlined text-[28px] text-[var(--c-text-muted)]">verified_user</span>
 											<p class="mt-2 text-xs text-[var(--c-text-muted)]">
-												No penalties or infractions recorded for this tournament. Clean competition record!
+												{{ ts.t('ref.noPenaltiesTitle') }}
 											</p>
 										</div>
 									}
