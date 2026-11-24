@@ -161,6 +161,19 @@ export class TournamentsComponent {
 		return formatCatchTime(val);
 	}
 
+	/**
+	 * Formats and localizes tournament rules, converting default English CPR text to Ukrainian if active.
+	 */
+	protected formatRules(rules?: string | null): string {
+		if (!rules) return '';
+		const trimmed = rules.trim();
+		const defaultEn = 'Catch-Photo-Release (CPR) format. Verified length on official SpotSport ruler. Catch and release alive.';
+		if (trimmed === defaultEn || trimmed.toLowerCase() === defaultEn.toLowerCase()) {
+			return this.ts.t('tourn.defaultCprRules');
+		}
+		return rules;
+	}
+
 	// Pending catches for organizer review
 	protected readonly pendingCatches = computed(() => {
 		return this.catches().filter((c) => c.status === 'pending');

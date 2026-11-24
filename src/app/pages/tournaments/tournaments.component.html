@@ -227,7 +227,7 @@
 										{{ ts.t('tourn.cprGuarantee') }}
 									</p>
 									<p class="mt-1 text-emerald-600/90 dark:text-emerald-400">
-										{{ tourn.rules }}
+										{{ formatRules(tourn.rules) }}
 									</p>
 								</div>
 							</div>
@@ -271,7 +271,7 @@
 							<span>{{ ts.t('tourn.rulesOverview') }}</span>
 						</h3>
 						<p class="mt-3 text-sm leading-relaxed text-[var(--c-text)]">
-							{{ tourn.rules }}
+							{{ formatRules(tourn.rules) }}
 						</p>
 					</div>
 
@@ -965,7 +965,7 @@
 											@if (t.rules) {
 												<div class="mt-3 rounded-xl bg-[var(--c-bg-secondary)] p-2.5 text-[11px] text-[var(--c-text-muted)]">
 													<span class="font-semibold text-[var(--c-text-strong)]">{{ ts.t('tourn.rulesLabel') }} </span>
-													<span class="line-clamp-2">{{ t.rules }}</span>
+													<span class="line-clamp-2">{{ formatRules(t.rules) }}</span>
 												</div>
 											}
 										</div>
