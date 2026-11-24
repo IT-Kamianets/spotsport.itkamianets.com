@@ -414,7 +414,8 @@
 						</p>
 					</div>
 
-					<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+					<div class="grid grid-cols-1 gap-4" [class.md:grid-cols-2]="(tourn.roundsCount || 2) === 1" [class.md:grid-cols-3]="(tourn.roundsCount || 2) >= 2">
+						<!-- Round 1 -->
 						<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs">
 							<div class="flex items-center gap-2 text-[var(--c-primary)]">
 								<span class="material-symbols-outlined text-[20px]">timer</span>
@@ -424,23 +425,45 @@
 							<p class="mt-1 text-xs text-[var(--c-text-muted)]">{{ ts.t('tourn.scheduleRound1Desc') }}</p>
 						</div>
 
-						<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs">
-							<div class="flex items-center gap-2 text-[var(--c-primary)]">
-								<span class="material-symbols-outlined text-[20px]">lunch_dining</span>
-								<span class="text-xs font-bold uppercase tracking-wider">{{ ts.t('tourn.scheduleBreakTitle') }}</span>
+						<!-- Optional Break / Intermission (enabled by default unless explicitly false) -->
+						@if (tourn.hasBreak !== false) {
+							<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs">
+								<div class="flex items-center gap-2 text-[var(--c-primary)]">
+									<span class="material-symbols-outlined text-[20px]">lunch_dining</span>
+									<span class="text-xs font-bold uppercase tracking-wider">{{ ts.t('tourn.scheduleBreakTitle') }}</span>
+								</div>
+								<p class="mt-2 text-sm font-bold text-[var(--c-text-strong)]">{{ tourn.breakTime || '12:00 – 13:30' }}</p>
+								<p class="mt-1 text-xs text-[var(--c-text-muted)]">{{ tourn.breakLabel || ts.t('tourn.scheduleBreakDesc') }}</p>
 							</div>
-							<p class="mt-2 text-sm font-bold text-[var(--c-text-strong)]">12:00 – 13:30</p>
-							<p class="mt-1 text-xs text-[var(--c-text-muted)]">{{ ts.t('tourn.scheduleBreakDesc') }}</p>
-						</div>
+						}
 
-						<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs">
-							<div class="flex items-center gap-2 text-[var(--c-primary)]">
-								<span class="material-symbols-outlined text-[20px]">emoji_events</span>
-								<span class="text-xs font-bold uppercase tracking-wider">{{ ts.t('tourn.scheduleRound2Title') }}</span>
+						<!-- Round 2 (when roundsCount >= 2 or undefined) -->
+						@if ((tourn.roundsCount || 2) >= 2) {
+							<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs">
+								<div class="flex items-center gap-2 text-[var(--c-primary)]">
+									<span class="material-symbols-outlined text-[20px]">{{ (tourn.roundsCount || 2) === 2 ? 'emoji_events' : 'timer' }}</span>
+									<span class="text-xs font-bold uppercase tracking-wider">
+										{{ (tourn.roundsCount || 2) === 2 ? ts.t('tourn.scheduleRound2AwardsTitle') : ts.t('tourn.scheduleRound2Title') }}
+									</span>
+								</div>
+								<p class="mt-2 text-sm font-bold text-[var(--c-text-strong)]">13:30 – 18:00</p>
+								<p class="mt-1 text-xs text-[var(--c-text-muted)]">
+									{{ (tourn.roundsCount || 2) === 2 ? ts.t('tourn.scheduleRound2AwardsDesc') : ts.t('tourn.scheduleRound2Desc') }}
+								</p>
 							</div>
-							<p class="mt-2 text-sm font-bold text-[var(--c-text-strong)]">13:30 – 18:00</p>
-							<p class="mt-1 text-xs text-[var(--c-text-muted)]">{{ ts.t('tourn.scheduleRound2Desc') }}</p>
-						</div>
+						}
+
+						<!-- Round 3 & Awards (when roundsCount === 3) -->
+						@if ((tourn.roundsCount || 2) === 3) {
+							<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs">
+								<div class="flex items-center gap-2 text-[var(--c-primary)]">
+									<span class="material-symbols-outlined text-[20px]">emoji_events</span>
+									<span class="text-xs font-bold uppercase tracking-wider">{{ ts.t('tourn.scheduleRound3Title') }}</span>
+								</div>
+								<p class="mt-2 text-sm font-bold text-[var(--c-text-strong)]">18:30 – 21:00</p>
+								<p class="mt-1 text-xs text-[var(--c-text-muted)]">{{ ts.t('tourn.scheduleRound3Desc') }}</p>
+							</div>
+						}
 					</div>
 				</div>
 			}
@@ -1149,6 +1172,71 @@
 								@if (tournamentForm.controls.rules.invalid && tournamentForm.controls.rules.touched) {
 									<p class="text-[11px] text-red-500">{{ ts.t('tourn.valRules') }}</p>
 								}
+							</div>
+
+							<!-- Schedule Setup: Rounds & Break Options -->
+							<div class="md:col-span-2 rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)]/40 p-4 space-y-4">
+								<div class="flex items-center gap-2 text-[var(--c-text-strong)]">
+									<span class="material-symbols-outlined text-[18px] text-[var(--c-primary)]">schedule</span>
+									<span class="text-xs font-bold uppercase tracking-wider">{{ ts.t('tourn.subtabStatus') }}</span>
+								</div>
+
+								<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+									<!-- Number of Rounds (1 to 3) -->
+									<div class="space-y-1.5">
+										<label class="block text-xs font-semibold text-[var(--c-text-strong)]">
+											{{ ts.t('tourn.fieldRounds') }}
+										</label>
+										<select
+											formControlName="roundsCount"
+											class="theme-interactive w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-4 py-2.5 text-xs text-[var(--c-text-strong)] focus:border-[var(--c-primary)] focus:outline-hidden"
+										>
+											<option [value]="1">1 {{ ts.t('tourn.scheduleRound1Title') }}</option>
+											<option [value]="2">2 {{ ts.t('tourn.fieldRounds') }}</option>
+											<option [value]="3">3 {{ ts.t('tourn.fieldRounds') }}</option>
+										</select>
+									</div>
+
+									<!-- Toggle Break -->
+									<div class="space-y-1.5 flex flex-col justify-center">
+										<label class="inline-flex items-center gap-2.5 text-xs font-semibold text-[var(--c-text-strong)] cursor-pointer mt-3">
+											<input
+												type="checkbox"
+												formControlName="hasBreak"
+												class="h-4 w-4 rounded border-[var(--c-border)] text-[var(--c-primary)] focus:ring-[var(--c-primary)]"
+											/>
+											<span>{{ ts.t('tourn.fieldHasBreak') }}</span>
+										</label>
+									</div>
+
+									@if (tournamentForm.controls.hasBreak.value) {
+										<!-- Break Time Interval -->
+										<div class="space-y-1.5">
+											<label class="block text-xs font-semibold text-[var(--c-text-strong)]">
+												{{ ts.t('tourn.fieldBreakTime') }}
+											</label>
+											<input
+												type="text"
+												formControlName="breakTime"
+												placeholder="{{ ts.t('tourn.phBreakTime') }}"
+												class="theme-interactive w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-4 py-2.5 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-hidden"
+											/>
+										</div>
+
+										<!-- Break Label / Description -->
+										<div class="space-y-1.5">
+											<label class="block text-xs font-semibold text-[var(--c-text-strong)]">
+												{{ ts.t('tourn.fieldBreakLabel') }}
+											</label>
+											<input
+												type="text"
+												formControlName="breakLabel"
+												placeholder="{{ ts.t('tourn.phBreakLabel') }}"
+												class="theme-interactive w-full rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] px-4 py-2.5 text-xs text-[var(--c-text-strong)] placeholder:text-[var(--c-text-muted)] focus:border-[var(--c-primary)] focus:outline-hidden"
+											/>
+										</div>
+									}
+								</div>
 							</div>
 						</div>
 

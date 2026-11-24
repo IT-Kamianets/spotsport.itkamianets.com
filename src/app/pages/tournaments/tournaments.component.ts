@@ -312,6 +312,10 @@ export class TournamentsComponent {
 			'Catch-Photo-Release (CPR) format. Verified length on official SpotSport ruler. Catch and release alive.',
 			{ nonNullable: true, validators: [Validators.required] },
 		),
+		roundsCount: new FormControl<number>(2, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(3)] }),
+		hasBreak: new FormControl<boolean>(true, { nonNullable: true }),
+		breakTime: new FormControl<string>('12:00 – 13:30', { nonNullable: true }),
+		breakLabel: new FormControl<string>('', { nonNullable: true }),
 	});
 
 	constructor() {
@@ -819,6 +823,10 @@ export class TournamentsComponent {
 				targetSpecies: formValues.targetSpecies.trim(),
 				date: formValues.date,
 				rules: formValues.rules.trim(),
+				roundsCount: Number(formValues.roundsCount) || 2,
+				hasBreak: Boolean(formValues.hasBreak),
+				breakTime: formValues.breakTime?.trim() || '12:00 – 13:30',
+				breakLabel: formValues.breakLabel?.trim() || null,
 				status: 'active',
 				createdBy: creatorUid,
 				organizerId: creatorUid,
@@ -836,6 +844,10 @@ export class TournamentsComponent {
 				targetSpecies: 'Pike, Perch, Zander',
 				date: new Date().toISOString().slice(0, 10),
 				rules: 'Catch-Photo-Release (CPR) format. Verified length on official SpotSport ruler. Catch and release alive.',
+				roundsCount: 2,
+				hasBreak: true,
+				breakTime: '12:00 – 13:30',
+				breakLabel: '',
 			});
 
 			setTimeout(() => {

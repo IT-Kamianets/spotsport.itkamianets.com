@@ -83,6 +83,10 @@ export interface TournamentItem {
 	date: string;
 	rules: string;
 	scoringMode?: TournamentScoringMode;
+	roundsCount?: number;
+	hasBreak?: boolean;
+	breakLabel?: string | null;
+	breakTime?: string | null;
 	status?: 'active' | 'upcoming' | 'completed';
 	createdBy?: string | null;
 	organizerId?: string | null;
@@ -183,6 +187,10 @@ export class TournamentService {
 			date: tournament.date,
 			rules: tournament.rules.trim(),
 			scoringMode: tournament.scoringMode || 'length',
+			roundsCount: tournament.roundsCount && tournament.roundsCount >= 1 && tournament.roundsCount <= 3 ? tournament.roundsCount : 2,
+			hasBreak: tournament.hasBreak !== undefined ? Boolean(tournament.hasBreak) : true,
+			breakLabel: tournament.breakLabel ? tournament.breakLabel.trim() : null,
+			breakTime: tournament.breakTime ? tournament.breakTime.trim() : null,
 			status: tournament.status || 'active',
 			createdBy: creatorUid,
 			organizerId: creatorUid,
