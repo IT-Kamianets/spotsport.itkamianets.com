@@ -283,7 +283,7 @@
 									<div>
 										<div class="flex items-center gap-2">
 											<h4 class="text-sm font-bold text-[var(--c-text-strong)]">
-												{{ isOnline() ? 'Online · Live Sync Active' : 'Offline Mode · Water Cache Active' }}
+												{{ isOnline() ? ts.t('ref.statusOnlineHeader') : ts.t('ref.statusOfflineHeader') }}
 											</h4>
 											<span
 												class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold"
@@ -293,13 +293,11 @@
 													class="h-1.5 w-1.5 rounded-full"
 													[class]="isOnline() ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'"
 												></span>
-												{{ isOnline() ? 'Connected' : 'Offline' }}
+												{{ isOnline() ? ts.t('ref.badgeConnected') : ts.t('ref.badgeOffline') }}
 											</span>
 										</div>
 										<p class="text-xs text-[var(--c-text-muted)]">
-											{{ isOnline()
-												? 'Real-time Cloud Firestore listener active for tournament catches.'
-												: 'Catches are preserved locally and queued for automatic sync upon reconnection.' }}
+											{{ isOnline() ? ts.t('ref.descOnline') : ts.t('ref.descOffline') }}
 										</p>
 									</div>
 								</div>
@@ -314,7 +312,7 @@
 										<span class="material-symbols-outlined text-[16px]" [class.animate-spin]="isRefreshing()">
 											sync
 										</span>
-										<span>{{ isRefreshing() ? 'Syncing...' : 'Sync & Refresh' }}</span>
+										<span>{{ isRefreshing() ? ts.t('ref.syncingBtn') : ts.t('ref.syncRefreshBtn') }}</span>
 									</button>
 								</div>
 							</div>
@@ -322,26 +320,26 @@
 							<!-- Queue & Network Metrics -->
 							<div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
 								<div class="rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)]/50 p-3.5 text-xs">
-									<span class="text-[var(--c-text-muted)]">Pending / In-Review</span>
+									<span class="text-[var(--c-text-muted)]">{{ ts.t('ref.cardPendingInReview') }}</span>
 									<div class="mt-1 flex items-baseline gap-2">
 										<span class="text-lg font-bold text-amber-600">{{ pendingCatches().length }}</span>
-										<span class="text-[11px] text-[var(--c-text-muted)]">catches awaiting decision</span>
+										<span class="text-[11px] text-[var(--c-text-muted)]">{{ ts.t('ref.catchesAwaitingDecision') }}</span>
 									</div>
 								</div>
 
 								<div class="rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)]/50 p-3.5 text-xs">
-									<span class="text-[var(--c-text-muted)]">My Submitted Catches</span>
+									<span class="text-[var(--c-text-muted)]">{{ ts.t('ref.cardMySubmittedCatches') }}</span>
 									<div class="mt-1 flex items-baseline gap-2">
 										<span class="text-lg font-bold text-[var(--c-primary)]">{{ myCatches().length }}</span>
-										<span class="text-[11px] text-[var(--c-text-muted)]">recorded in this tournament</span>
+										<span class="text-[11px] text-[var(--c-text-muted)]">{{ ts.t('ref.recordedInTournament') }}</span>
 									</div>
 								</div>
 
 								<div class="rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)]/50 p-3.5 text-xs">
-									<span class="text-[var(--c-text-muted)]">Last Status Check</span>
+									<span class="text-[var(--c-text-muted)]">{{ ts.t('ref.cardLastStatusCheck') }}</span>
 									<div class="mt-1 flex items-baseline gap-2">
 										<span class="text-sm font-semibold text-[var(--c-text-strong)]">
-											{{ lastSyncedAt() || 'Just now' }}
+											{{ lastSyncedAt() || ts.t('ref.justNow') }}
 										</span>
 									</div>
 								</div>
