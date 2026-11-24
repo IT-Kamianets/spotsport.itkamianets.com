@@ -174,6 +174,61 @@ export class TournamentsComponent {
 		return rules;
 	}
 
+	/**
+	 * Translates a single fish species name into Ukrainian if the current language is 'uk'.
+	 */
+	protected formatSpecies(species?: string | null): string {
+		if (!species) return '';
+		const trimmed = species.trim();
+		if (this.ts.currentLang() !== 'uk') {
+			return trimmed;
+		}
+		const speciesMap: Record<string, string> = {
+			pike: 'Щука',
+			'northern pike': 'Північна щука',
+			perch: 'Окунь',
+			'european perch': 'Європейський окунь',
+			zander: 'Судак',
+			walleye: 'Судак',
+			carp: 'Короп',
+			'common carp': 'Звичайний короп',
+			catfish: 'Сом',
+			'wels catfish': 'Європейський сом',
+			trout: 'Форель',
+			'rainbow trout': 'Райдужна форель',
+			'brown trout': 'Струмкова форель',
+			bass: 'Окунь (бас)',
+			asp: 'Жерех',
+			chub: 'Головень',
+			bream: 'Лящ',
+			crucian: 'Карась',
+			'crucian carp': 'Карась',
+			roach: 'Плітка',
+			tench: 'Лин',
+			rudd: 'Краснопірка',
+			dace: 'Ялець',
+			barbel: 'Марена',
+			grayling: 'Харіус',
+			burbot: 'Минь',
+		};
+		return speciesMap[trimmed.toLowerCase()] || trimmed;
+	}
+
+	/**
+	 * Formats a comma-separated target species list (e.g. "Pike, Perch, Zander"),
+	 * translating each species if Ukrainian is active.
+	 */
+	protected formatTargetSpecies(targetSpecies?: string | null): string {
+		if (!targetSpecies) return '';
+		if (this.ts.currentLang() !== 'uk') {
+			return targetSpecies;
+		}
+		return targetSpecies
+			.split(',')
+			.map((s) => this.formatSpecies(s.trim()))
+			.join(', ');
+	}
+
 	// Pending catches for organizer review
 	protected readonly pendingCatches = computed(() => {
 		return this.catches().filter((c) => c.status === 'pending');

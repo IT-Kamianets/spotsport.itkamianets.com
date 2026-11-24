@@ -203,7 +203,7 @@
 									{{ ts.t('tourn.targetSpeciesLabel') }}
 								</p>
 								<p class="mt-1 font-bold text-sm text-[var(--c-primary)] truncate">
-									{{ tourn.targetSpecies }}
+									{{ formatTargetSpecies(tourn.targetSpecies) }}
 								</p>
 							</div>
 						</div>
@@ -482,7 +482,7 @@
 										{{ ts.t('catch.leaderboardHeading') }}
 									</h3>
 									<p class="text-xs text-[var(--c-text-muted)]">
-										{{ ts.t('tourn.targetSpeciesLabel') }}: {{ tourn.targetSpecies }}
+										{{ ts.t('tourn.targetSpeciesLabel') }}: {{ formatTargetSpecies(tourn.targetSpecies) }}
 										&middot; {{ approvedCatches().length }} {{ ts.t('catch.leaderboardCatches') | lowercase }}
 									</p>
 								</div>
@@ -515,7 +515,7 @@
 										<thead>
 											<tr class="text-left text-[var(--c-text-muted)] border-b border-[var(--c-border)]">
 												<th class="pb-2 pr-3 font-semibold">#</th>
-												<th class="pb-2 pr-3 font-semibold">Angler</th>
+												<th class="pb-2 pr-3 font-semibold">{{ ts.t('catch.leaderboardAngler') }}</th>
 												<th class="pb-2 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardCatches') }}</th>
 												<th class="pb-2 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardTotalWeight') }}</th>
 												<th class="pb-2 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardBestLength') }}</th>
@@ -563,7 +563,7 @@
 											<div class="flex items-center justify-between rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-3 text-xs">
 												<div class="min-w-0 flex-1">
 													<div class="flex items-center gap-2">
-														<span class="font-bold text-[var(--c-text-strong)]">{{ c.species }}</span>
+														<span class="font-bold text-[var(--c-text-strong)]">{{ formatSpecies(c.species) }}</span>
 														<span class="text-[var(--c-text-muted)]">&middot;</span>
 														<span class="font-semibold text-[var(--c-primary)]">{{ c.lengthCm }} cm</span>
 														@if (c.weightKg) {
@@ -671,7 +671,7 @@
 												<div class="flex flex-wrap items-center gap-2">
 													<span class="font-bold text-[var(--c-text-strong)] text-sm">{{ c.anglerName || 'Angler' }}</span>
 													<span class="rounded bg-[var(--c-primary)]/10 px-2 py-0.5 font-semibold text-[var(--c-primary)]">
-														{{ c.species }}
+														{{ formatSpecies(c.species) }}
 													</span>
 													<span class="font-semibold text-[var(--c-text-strong)]">{{ c.lengthCm }} cm</span>
 													@if (c.weightKg) {
@@ -1490,7 +1490,7 @@
 						>
 							<option value="" disabled>{{ ts.t('catch.speciesPlaceholder') }}</option>
 							@for (sp of speciesList(); track sp) {
-								<option [value]="sp">{{ sp }}</option>
+								<option [value]="sp">{{ formatSpecies(sp) }}</option>
 							}
 						</select>
 					</div>
