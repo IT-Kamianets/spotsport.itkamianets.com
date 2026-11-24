@@ -9,72 +9,31 @@
 				<div>
 					<div class="flex items-center gap-2">
 						<span class="rounded bg-[var(--c-primary)]/10 px-2 py-0.5 text-xs font-semibold text-[var(--c-primary)]">
-							MVP Page 01
+							{{ ts.t('home.badge') }}
 						</span>
-						<span class="text-xs uppercase tracking-wider text-[var(--c-text-muted)]">Tournament Hub</span>
+						<span class="text-xs uppercase tracking-wider text-[var(--c-text-muted)]">{{ ts.t('home.category') }}</span>
 					</div>
 					<h1 class="text-2xl font-bold tracking-tight text-[var(--c-text-strong)] sm:text-3xl">
-						SpotSport Tournaments Home
+						{{ ts.t('home.title') }}
 					</h1>
 				</div>
 			</div>
 
 			<div class="flex items-center gap-2.5">
-				<button
-					type="button"
-					(click)="toggleQrScanner()"
-					class="theme-interactive inline-flex items-center gap-2 rounded-xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-4 py-2.5 text-sm font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] shadow-sm"
-				>
-					<span class="material-symbols-outlined text-[20px] text-[var(--c-primary)]">qr_code_scanner</span>
-					<span>Scan QR Code</span>
-				</button>
-
 				<a
 					routerLink="/tournaments"
 					[queryParams]="{ mode: 'editor' }"
 					class="theme-interactive inline-flex items-center gap-2 rounded-xl bg-[var(--c-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--c-primary-hover)] shadow-sm"
 				>
 					<span class="material-symbols-outlined text-[20px]">add_circle</span>
-					<span>Create Tournament</span>
+					<span>{{ ts.t('home.createBtn') }}</span>
 				</a>
 			</div>
 		</div>
 		<p class="mt-3 max-w-2xl text-base text-[var(--c-text)]">
-			Active and previous tournaments, create or join tournaments via QR/code.
+			{{ ts.t('home.desc') }}
 		</p>
 	</header>
-
-	<!-- Additional UI Dialog: QR Scanner (Modal Simulation) -->
-	@if (showQrScannerDialog()) {
-		<div class="mb-8 rounded-2xl border-2 border-[var(--c-primary)] bg-[var(--c-bg-secondary)] p-6 shadow-md">
-			<div class="flex items-center justify-between pb-3 border-b border-[var(--c-border)]">
-				<div class="flex items-center gap-2">
-					<span class="material-symbols-outlined text-[22px] text-[var(--c-primary)]">qr_code_scanner</span>
-					<h3 class="text-base font-semibold text-[var(--c-text-strong)]">
-						Additional UI: QR Scanner Dialog
-					</h3>
-					<span class="rounded bg-[var(--c-primary)]/10 px-2 py-0.5 text-[11px] font-semibold text-[var(--c-primary)]">
-						Dialog Placeholder
-					</span>
-				</div>
-				<button
-					type="button"
-					(click)="toggleQrScanner()"
-					class="theme-interactive rounded-lg p-1 text-[var(--c-text-muted)] hover:bg-[var(--c-bg-primary)] hover:text-[var(--c-text-strong)]"
-				>
-					<span class="material-symbols-outlined text-[20px]">close</span>
-				</button>
-			</div>
-
-			<div class="mt-4 flex flex-col items-center justify-center rounded-xl bg-[var(--c-bg-primary)] py-8 text-center">
-				<span class="material-symbols-outlined text-[48px] text-[var(--c-text-muted)]">qr_code_scanner</span>
-				<p class="mt-2 text-sm font-medium text-[var(--c-text-strong)]">Camera QR Scanner Viewport</p>
-				<p class="mt-1 max-w-sm text-xs text-[var(--c-text-muted)]">
-					Point your device camera at the tournament QR badge to automatically authenticate and join.
-				</p>
-			</div>
-		</div>
-	}
 
 	<!-- Main Empty Canvas Card -->
 	<div class="rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-secondary)] p-6 shadow-[var(--shadow-sm)] sm:p-8">
@@ -87,7 +46,7 @@
 				[class]="activeTab() === 'active' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
 			>
 				<span class="material-symbols-outlined text-[18px]">play_circle</span>
-				<span>Active Tournaments</span>
+				<span>{{ ts.t('home.activeTab') }}</span>
 				<span class="rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold" [class.text-white]="activeTab() === 'active'">
 					{{ activeTournaments().length }}
 				</span>
@@ -100,7 +59,7 @@
 				[class]="activeTab() === 'previous' ? 'bg-[var(--c-primary)] text-white shadow-xs' : 'text-[var(--c-text)] hover:bg-[var(--c-bg-primary)]'"
 			>
 				<span class="material-symbols-outlined text-[18px]">history</span>
-				<span>Previous Tournaments</span>
+				<span>{{ ts.t('home.previousTab') }}</span>
 				<span class="rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold" [class.text-white]="activeTab() === 'previous'">
 					{{ previousTournaments().length }}
 				</span>
@@ -113,8 +72,9 @@
 				<div class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
 					@for (t of activeTournaments(); track t.id || t.title) {
 						<div
-							[routerLink]="['/tournaments', t.id || t.title]"
-							class="flex flex-col justify-between rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs hover:border-[var(--c-primary)] hover:shadow-md transition-all cursor-pointer"
+							[routerLink]="['/tournaments']"
+							[queryParams]="{ tournamentId: t.id || t.title }"
+							class="group flex flex-col justify-between rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs hover:border-[var(--c-primary)] hover:shadow-md transition-all cursor-pointer"
 						>
 							<div>
 								<div class="flex items-start justify-between gap-2">
@@ -128,7 +88,7 @@
 									</span>
 								</div>
 
-								<h4 class="mt-3 text-base font-bold text-[var(--c-text-strong)] leading-snug">
+								<h4 class="mt-3 text-base font-bold text-[var(--c-text-strong)] leading-snug group-hover:text-[var(--c-primary)] transition-colors">
 									{{ t.title }}
 								</h4>
 
@@ -157,16 +117,21 @@
 									[routerLink]="['/refereeing']"
 									[queryParams]="{ tournamentId: t.id || t.title }"
 									(click)="$event.stopPropagation()"
-									class="theme-interactive inline-flex items-center gap-1.5 rounded-lg bg-[var(--c-primary)]/10 px-3 py-1.5 text-xs font-semibold text-[var(--c-primary)] hover:bg-[var(--c-primary)] hover:text-white transition-all"
+									class="theme-interactive inline-flex items-center gap-1.5 rounded-lg bg-[var(--c-primary)]/10 px-3 py-1.5 text-xs font-semibold text-[var(--c-primary)] hover:bg-[var(--c-primary)] hover:text-white transition-all cursor-pointer"
 								>
 									<span class="material-symbols-outlined text-[16px]">gavel</span>
 									<span>{{ ts.t('tourn.refereeingBtn') }}</span>
 								</a>
 
-								<span class="inline-flex items-center gap-1 text-xs font-semibold text-[var(--c-text-muted)] group-hover:text-[var(--c-primary)]">
+								<a
+									[routerLink]="['/tournaments']"
+									[queryParams]="{ tournamentId: t.id || t.title }"
+									(click)="$event.stopPropagation()"
+									class="theme-interactive inline-flex items-center gap-1 text-xs font-semibold text-[var(--c-text-muted)] group-hover:text-[var(--c-primary)] hover:text-[var(--c-primary)] transition-colors cursor-pointer"
+								>
 									<span>{{ ts.t('tourn.detailsBtn') }}</span>
 									<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
-								</span>
+								</a>
 							</div>
 						</div>
 					}
@@ -177,10 +142,10 @@
 						<span class="material-symbols-outlined text-[32px]">sports_score</span>
 					</div>
 					<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
-						No Active Tournaments Found
+						{{ ts.t('home.emptyActiveTitle') }}
 					</h3>
 					<p class="mt-2 max-w-md text-sm text-[var(--c-text-muted)]">
-						There are currently no live or upcoming tournaments in progress.
+						{{ ts.t('home.emptyActiveDesc') }}
 					</p>
 					<div class="mt-6 flex flex-wrap justify-center gap-3">
 						<a
@@ -189,14 +154,14 @@
 							class="theme-interactive inline-flex items-center gap-1.5 rounded-lg bg-[var(--c-primary)] px-3.5 py-2 text-xs font-semibold text-white hover:bg-[var(--c-primary-hover)] cursor-pointer"
 						>
 							<span class="material-symbols-outlined text-[16px]">add</span>
-							<span>Create New Tournament</span>
+							<span>{{ ts.t('home.createNewBtn') }}</span>
 						</a>
 						<a
 							routerLink="/tournaments"
 							class="theme-interactive inline-flex items-center gap-1.5 rounded-lg border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3.5 py-2 text-xs font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] cursor-pointer"
 						>
 							<span class="material-symbols-outlined text-[16px]">visibility</span>
-							<span>View All Tournaments</span>
+							<span>{{ ts.t('home.viewAllBtn') }}</span>
 						</a>
 					</div>
 				</div>
@@ -206,14 +171,15 @@
 				<div class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
 					@for (t of previousTournaments(); track t.id || t.title) {
 						<div
-							[routerLink]="['/tournaments', t.id || t.title]"
-							class="flex flex-col justify-between rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs hover:border-[var(--c-primary)] hover:shadow-md transition-all cursor-pointer opacity-90"
+							[routerLink]="['/tournaments']"
+							[queryParams]="{ tournamentId: t.id || t.title }"
+							class="group flex flex-col justify-between rounded-2xl border border-[var(--c-border)] bg-[var(--c-bg-primary)] p-5 shadow-xs hover:border-[var(--c-primary)] hover:shadow-md transition-all cursor-pointer opacity-90"
 						>
 							<div>
 								<div class="flex items-start justify-between gap-2">
 									<span class="inline-flex items-center gap-1 rounded-full bg-slate-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600 dark:text-slate-400">
 										<span class="h-1.5 w-1.5 rounded-full bg-slate-500"></span>
-										Completed
+										{{ ts.t('home.completedStatus') }}
 									</span>
 									<span class="text-[11px] font-medium text-[var(--c-text-muted)] flex items-center gap-1">
 										<span class="material-symbols-outlined text-[14px]">event_available</span>
@@ -221,7 +187,7 @@
 									</span>
 								</div>
 
-								<h4 class="mt-3 text-base font-bold text-[var(--c-text-strong)] leading-snug">
+								<h4 class="mt-3 text-base font-bold text-[var(--c-text-strong)] leading-snug group-hover:text-[var(--c-primary)] transition-colors">
 									{{ t.title }}
 								</h4>
 
@@ -246,16 +212,21 @@
 									[routerLink]="['/refereeing']"
 									[queryParams]="{ tournamentId: t.id || t.title, tab: 'leaderboard' }"
 									(click)="$event.stopPropagation()"
-									class="theme-interactive inline-flex items-center gap-1.5 rounded-lg bg-[var(--c-primary)]/10 px-3 py-1.5 text-xs font-semibold text-[var(--c-primary)] hover:bg-[var(--c-primary)] hover:text-white transition-all"
+									class="theme-interactive inline-flex items-center gap-1.5 rounded-lg bg-[var(--c-primary)]/10 px-3 py-1.5 text-xs font-semibold text-[var(--c-primary)] hover:bg-[var(--c-primary)] hover:text-white transition-all cursor-pointer"
 								>
 									<span class="material-symbols-outlined text-[16px]">monitoring</span>
-									<span>View Final Leaderboard</span>
+									<span>{{ ts.t('home.viewFinalLeaderboard') }}</span>
 								</a>
 
-								<span class="inline-flex items-center gap-1 text-xs font-semibold text-[var(--c-text-muted)]">
+								<a
+									[routerLink]="['/tournaments']"
+									[queryParams]="{ tournamentId: t.id || t.title }"
+									(click)="$event.stopPropagation()"
+									class="theme-interactive inline-flex items-center gap-1 text-xs font-semibold text-[var(--c-text-muted)] group-hover:text-[var(--c-primary)] hover:text-[var(--c-primary)] transition-colors cursor-pointer"
+								>
 									<span>{{ ts.t('tourn.detailsBtn') }}</span>
 									<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
-								</span>
+								</a>
 							</div>
 						</div>
 					}
@@ -266,10 +237,10 @@
 						<span class="material-symbols-outlined text-[32px]">military_tech</span>
 					</div>
 					<h3 class="mt-4 text-lg font-semibold text-[var(--c-text-strong)]">
-						No Past Tournament Archives
+						{{ ts.t('home.emptyPreviousTitle') }}
 					</h3>
 					<p class="mt-2 max-w-md text-sm text-[var(--c-text-muted)]">
-						Completed tournament results, archives, and final standings will appear here.
+						{{ ts.t('home.emptyPreviousDesc') }}
 					</p>
 					<div class="mt-6 flex flex-wrap justify-center gap-3">
 						<a
@@ -277,12 +248,11 @@
 							class="theme-interactive inline-flex items-center gap-1.5 rounded-lg border border-[var(--c-border)] bg-[var(--c-bg-secondary)] px-3.5 py-2 text-xs font-semibold text-[var(--c-text-strong)] hover:border-[var(--c-primary)] cursor-pointer"
 						>
 							<span class="material-symbols-outlined text-[16px]">visibility</span>
-							<span>View Active Tournaments</span>
+							<span>{{ ts.t('home.viewActiveBtn') }}</span>
 						</a>
 					</div>
 				</div>
 			}
 		}
 	</div>
-
 </section>

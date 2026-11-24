@@ -16,7 +16,6 @@ export class HomeComponent {
 	public readonly ts = inject(TranslationService);
 
 	protected readonly activeTab = signal<HomeTab>('active');
-	protected readonly showQrScannerDialog = signal(false);
 
 	protected readonly tournaments$ = this.tournamentService.getTournaments();
 	protected readonly tournaments = toSignal(this.tournaments$, { initialValue: [] });
@@ -59,9 +58,5 @@ export class HomeComponent {
 
 	protected setTab(tab: HomeTab): void {
 		this.activeTab.set(tab);
-	}
-
-	protected toggleQrScanner(): void {
-		this.showQrScannerDialog.update((v) => !v);
 	}
 }

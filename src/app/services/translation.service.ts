@@ -48,6 +48,24 @@ const TRANSLATIONS_EN: Record<string, string> = {
 	'lang.openMenu': 'Open language menu',
 	'lang.switch': 'Switch language to',
 
+	// Home Page
+	'home.badge': 'MVP Page 01',
+	'home.category': 'Tournament Hub',
+	'home.title': 'SpotSport Tournaments Home',
+	'home.desc': 'Active and previous tournaments, create or join tournaments via QR/code.',
+	'home.createBtn': 'Create Tournament',
+	'home.activeTab': 'Active Tournaments',
+	'home.previousTab': 'Previous Tournaments',
+	'home.completedStatus': 'Completed',
+	'home.viewFinalLeaderboard': 'View Final Leaderboard',
+	'home.emptyActiveTitle': 'No Active Tournaments Found',
+	'home.emptyActiveDesc': 'There are currently no live or upcoming tournaments in progress.',
+	'home.createNewBtn': 'Create New Tournament',
+	'home.viewAllBtn': 'View All Tournaments',
+	'home.emptyPreviousTitle': 'No Past Tournament Archives',
+	'home.emptyPreviousDesc': 'Completed tournament results, archives, and final standings will appear here.',
+	'home.viewActiveBtn': 'View Active Tournaments',
+
 	// Profile Header & Actions
 	'profile.badge': 'MVP Page 06',
 	'profile.category': 'User Account & Auth',
@@ -400,6 +418,24 @@ const TRANSLATIONS_UK: Record<string, string> = {
 	'nav.profileMenu': 'Меню профілю',
 	'lang.openMenu': 'Відкрити меню мов',
 	'lang.switch': 'Перемкнути мову на',
+
+	// Home Page
+	'home.badge': 'MVP Сторінка 01',
+	'home.category': 'Хаб турнірів',
+	'home.title': 'Головна SpotSport: Турніри',
+	'home.desc': 'Активні та завершені турніри, створення та перегляд змагань.',
+	'home.createBtn': 'Створити турнір',
+	'home.activeTab': 'Активні турніри',
+	'home.previousTab': 'Попередні турніри',
+	'home.completedStatus': 'Завершено',
+	'home.viewFinalLeaderboard': 'Переглянути фінальні результати',
+	'home.emptyActiveTitle': 'Активних турнірів не знайдено',
+	'home.emptyActiveDesc': 'Наразі немає активних або запланованих турнірів у процесі.',
+	'home.createNewBtn': 'Створити новий турнір',
+	'home.viewAllBtn': 'Переглянути всі турніри',
+	'home.emptyPreviousTitle': 'Архів турнірів порожній',
+	'home.emptyPreviousDesc': 'Тут відображатимуться результати завершених турнірів, архів та фінальна таблиця.',
+	'home.viewActiveBtn': 'Переглянути активні турніри',
 
 	// Profile Header & Actions
 	'profile.badge': 'MVP Сторінка 06',
