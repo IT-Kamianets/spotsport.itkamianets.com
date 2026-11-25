@@ -87,7 +87,7 @@ export interface TournamentItem {
 	hasBreak?: boolean;
 	breakLabel?: string | null;
 	breakTime?: string | null;
-	status?: 'active' | 'upcoming' | 'completed';
+	status?: 'active' | 'upcoming' | 'completed' | 'finished' | 'draft';
 	createdBy?: string | null;
 	organizerId?: string | null;
 	createdAt?: unknown;
@@ -257,6 +257,23 @@ export class TournamentService {
 
 		const docRef = await addDoc(catchesCol, catchDoc);
 		return docRef.id;
+	}
+
+	/**
+	 * Update the status of a tournament (e.g. 'active', 'completed', 'upcoming') in Cloud Firestore.
+	 */
+	async updateTournamentStatus(
+		tournamentId: string,
+		status: 'active' | 'upcoming' | 'completed',
+	): Promise<void> {
+		if (!tournamentId) {
+			throw new Error('Tournament ID is required to update tournament status.');
+		}
+		const tournRef = doc(this._firestore, 'tournaments', tournamentId);
+		await updateDoc(tournRef, {
+			status,
+			updatedAt: serverTimestamp(),
+		});
 	}
 
 	/**

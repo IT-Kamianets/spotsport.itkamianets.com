@@ -229,6 +229,41 @@ export class TournamentsComponent {
 			.join(', ');
 	}
 
+	/**
+	 * Formats and localizes tournament status badges.
+	 */
+	protected formatTournamentStatus(status?: string | null): string {
+		const s = (status || 'active').toLowerCase().trim();
+		switch (s) {
+			case 'completed':
+			case 'finished':
+				return this.ts.t('tourn.statusCompleted');
+			case 'upcoming':
+				return this.ts.t('tourn.statusUpcoming');
+			case 'draft':
+				return this.ts.t('tourn.statusDraft');
+			case 'active':
+			default:
+				return this.ts.t('tourn.statusActive');
+		}
+	}
+
+	/**
+	 * Returns true if the selected tournament is marked as completed or finished.
+	 */
+	protected isCompleted(status?: string | null): boolean {
+		const s = (status || '').toLowerCase().trim();
+		return s === 'completed' || s === 'finished';
+	}
+
+	/**
+	 * Returns true if the selected tournament is marked as completed or finished.
+	 */
+	protected readonly isTournamentCompleted = computed(() => {
+		const tourn = this.selectedTournament();
+		return this.isCompleted(tourn?.status);
+	});
+
 	// Pending catches for organizer review
 	protected readonly pendingCatches = computed(() => {
 		return this.catches().filter((c) => c.status === 'pending');
@@ -287,6 +322,9 @@ export class TournamentsComponent {
 	protected readonly photoPreview = signal<string | null>(null);
 	protected readonly isCompressingPhoto = signal<boolean>(false);
 	@ViewChild('catchFileInput') protected readonly catchFileInput?: ElementRef<HTMLInputElement>;
+
+	// Finish tournament action state
+	protected readonly isFinishingTournament = signal(false);
 
 	// Active tournament scoring mode detection
 	protected readonly activeScoringMode = computed<TournamentScoringMode>(() => {
@@ -656,9 +694,47 @@ export class TournamentsComponent {
 	}
 
 	/**
+	 * Allows the organizer to finish the tournament, sealing catch submissions and locking standings.
+	 */
+	protected async finishTournament(): Promise<void> {
+		const tourn = this.selectedTournament();
+		if (!tourn?.id || !this.isOrganizer()) return;
+
+		const confirmed = window.confirm(this.ts.t('tourn.finishConfirm'));
+		if (!confirmed) return;
+
+		this.isFinishingTournament.set(true);
+		try {
+			await this.tournamentService.updateTournamentStatus(tourn.id, 'completed');
+			this.selectedTournament.update((current) => (current ? { ...current, status: 'completed' } : null));
+			this.joinFeedback.set({
+				type: 'success',
+				message: this.ts.t('tourn.finishSuccess'),
+			});
+			this.catchModalOpen.set(false);
+		} catch (err: unknown) {
+			console.error('Error finishing tournament:', err);
+			this.joinFeedback.set({
+				type: 'error',
+				message: this.ts.t('tourn.finishError'),
+			});
+		} finally {
+			this.isFinishingTournament.set(false);
+		}
+	}
+
+	/**
 	 * Opens the Submit Catch modal, pre-filling the first target species if available.
 	 */
 	protected openCatchModal(): void {
+		if (this.isTournamentCompleted()) {
+			this.joinFeedback.set({
+				type: 'info',
+				message: this.ts.t('tourn.endedNotice'),
+			});
+			return;
+		}
+
 		const user = this.currentUser();
 		if (!user) {
 			this.joinFeedback.set({
@@ -772,6 +848,14 @@ export class TournamentsComponent {
 	 * Submits the catch form data to Cloud Firestore via TournamentService.
 	 */
 	protected async submitCatch(): Promise<void> {
+		if (this.isTournamentCompleted()) {
+			this.catchFeedback.set({
+				type: 'error',
+				message: this.ts.t('tourn.endedNotice'),
+			});
+			return;
+		}
+
 		if (this.catchForm.invalid) {
 			this.catchForm.markAllAsTouched();
 			return;
