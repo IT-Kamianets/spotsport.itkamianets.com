@@ -273,10 +273,16 @@ export class ProfileComponent {
 					return isUk
 						? 'Невірний email або пароль. Будь ласка, перевірте ваші дані.'
 						: 'Invalid email or password. Please verify your credentials.';
-				case 'auth/popup-closed-by-user':
+				case 'auth/native-unsupported':
 					return isUk
-						? 'Вікно авторизації Google було закрито до завершення.'
-						: 'Google Sign-In popup was closed before completion.';
+						? 'Вхід через зовнішній браузер вимкнено в мобільному додатку для запобігання втрати сесії. Будь ласка, скористайтесь email та паролем.'
+						: 'Google Sign-In via external browser is disabled in the Android app to prevent session state loss. Please sign in with email and password.';
+				case 'auth/popup-closed-by-user':
+				case 'auth/canceled':
+				case '12501': // Google Play Services USER_CANCELLED
+					return isUk
+						? 'Авторизацію Google було скасовано або закрито.'
+						: 'Google Sign-In was closed or cancelled.';
 				case 'auth/network-request-failed':
 					return isUk
 						? 'Помилка мережі. Будь ласка, перевірте зʼєднання з Інтернетом.'

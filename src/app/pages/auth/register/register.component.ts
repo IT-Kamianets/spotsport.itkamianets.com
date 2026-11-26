@@ -117,8 +117,12 @@ export class RegisterComponent {
 					return 'Please enter a valid email address.';
 				case 'auth/weak-password':
 					return 'Password is too weak. Please use at least 6 characters with mixed symbols.';
+				case 'auth/native-unsupported':
+					return 'Google Sign-In via external browser is disabled in the Android app to prevent session state loss. Please register with email and password.';
 				case 'auth/popup-closed-by-user':
-					return 'Google Sign-In popup was closed before completion.';
+				case 'auth/canceled':
+				case '12501': // Google Play Services USER_CANCELLED
+					return 'Google Sign-In was closed or cancelled.';
 				case 'auth/network-request-failed':
 					return 'Network error. Please check your internet connection.';
 				default:

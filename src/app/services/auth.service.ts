@@ -6,6 +6,7 @@ import {
 	GoogleAuthProvider,
 	sendEmailVerification,
 	sendPasswordResetEmail,
+	signInWithCredential,
 	signInWithEmailAndPassword,
 	signInWithPopup,
 	signOut,
@@ -13,6 +14,8 @@ import {
 	UserCredential,
 } from '@angular/fire/auth';
 import { doc, Firestore, serverTimestamp, setDoc } from '@angular/fire/firestore';
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
+import { Capacitor } from '@capacitor/core';
 import { Observable } from 'rxjs';
 
 export interface UserProfileData {
@@ -49,9 +52,65 @@ export class AuthService {
 	}
 
 	/**
-	 * Functional Google Authentication method using popup and syncs user to Cloud Firestore.
+	 * Whether the application is running in a native mobile environment (e.g. Android/iOS Capacitor).
+	 */
+	get isNativePlatform(): boolean {
+		return Capacitor.isNativePlatform();
+	}
+
+	/**
+	 * Functional Google Authentication method.
+	 * - On native mobile platforms (Android/iOS via Capacitor):
+	 *   Triggers the native Google Account Picker via `@capacitor-firebase/authentication` (using Google Play Services
+	 *   / Credential Manager), retrieves the `idToken`, and signs into Firebase via
+	 *   `signInWithCredential(auth, GoogleAuthProvider.credential(idToken))` without opening an external browser
+	 *   or losing session state.
+	 * - On web / desktop browsers:
+	 *   Uses standard Firebase `signInWithPopup(auth, provider)`.
 	 */
 	async signInWithGoogle(): Promise<UserCredential> {
+		if (Capacitor.isNativePlatform()) {
+			try {
+				const result = await FirebaseAuthentication.signInWithGoogle();
+				const idToken = result.credential?.idToken;
+
+				if (!idToken) {
+					// Fallback check if user object was returned directly by native plugin
+					if (result.user?.uid) {
+						// Native SDK already authenticated user with Firebase
+						if (this._auth.currentUser) {
+							await this.syncUserToFirestore(this._auth.currentUser, {
+								displayName: this._auth.currentUser.displayName,
+								photoURL: this._auth.currentUser.photoURL,
+								role: 'angler',
+							});
+							return {
+								user: this._auth.currentUser,
+								providerId: 'google.com',
+								operationType: 'signIn',
+							} as UserCredential;
+						}
+					}
+					throw new Error('Google Sign-In was cancelled or did not provide an ID token.');
+				}
+
+				const credential = GoogleAuthProvider.credential(idToken);
+				const userCred = await signInWithCredential(this._auth, credential);
+				if (userCred.user) {
+					await this.syncUserToFirestore(userCred.user, {
+						displayName: userCred.user.displayName,
+						photoURL: userCred.user.photoURL,
+						role: 'angler',
+					});
+				}
+				return userCred;
+			} catch (err: unknown) {
+				console.error('Native Google Sign-In error:', err);
+				throw err;
+			}
+		}
+
+		// Standard desktop / browser Web flow
 		const provider = new GoogleAuthProvider();
 		const credential = await signInWithPopup(this._auth, provider);
 		if (credential.user) {

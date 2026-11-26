@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SpotSport</string>
+    <string name="title_activity_main">SpotSport</string>
+    <string name="package_name">com.spotsport.itkamianets</string>
+    <string name="custom_url_scheme">com.spotsport.itkamianets</string>
+</resources>

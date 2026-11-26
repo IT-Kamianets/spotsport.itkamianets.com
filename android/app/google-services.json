@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1056344541924",
+    "project_id": "spotsport-64708",
+    "storage_bucket": "spotsport-64708.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1056344541924:android:c7f1aae4c78092224abaf1",
+        "android_client_info": {
+          "package_name": "com.spotsport.itkamianets"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1056344541924-slr82ppoad87rfc4e60pvsed7h4eska7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.spotsport.itkamianets",
+            "certificate_hash": "cce80903c6323a39c13f88a9c9dd8bbdb2dbe57b"
+          }
+        },
+        {
+          "client_id": "1056344541924-kvkr43qce1ceali0bqckh7t1sfh6q4j6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2C7meTn-hZvp5l2eAMBMd1x_VaEtkeYo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1056344541924-kvkr43qce1ceali0bqckh7t1sfh6q4j6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
