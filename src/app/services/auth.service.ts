@@ -112,6 +112,7 @@ export class AuthService {
 
 		// Standard desktop / browser Web flow
 		const provider = new GoogleAuthProvider();
+		provider.setCustomParameters({ prompt: 'select_account' });
 		const credential = await signInWithPopup(this._auth, provider);
 		if (credential.user) {
 			await this.syncUserToFirestore(credential.user, {
