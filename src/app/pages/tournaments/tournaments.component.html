@@ -572,8 +572,13 @@
 												<th class="pb-2 pr-3 font-semibold">#</th>
 												<th class="pb-2 pr-3 font-semibold">{{ ts.t('catch.leaderboardAngler') }}</th>
 												<th class="pb-2 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardCatches') }}</th>
-												<th class="pb-2 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardTotalWeight') }}</th>
-												<th class="pb-2 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardBestLength') }}</th>
+												@if (activeScoringMode() === 'weight') {
+													<th class="pb-2 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardTotalWeight') }}</th>
+													<th class="pb-2 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardBestWeight') }}</th>
+												} @else {
+													<th class="pb-2 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardTotalLength') }}</th>
+													<th class="pb-2 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardBestLength') }}</th>
+												}
 											</tr>
 										</thead>
 										<tbody>
@@ -588,8 +593,13 @@
 													</td>
 													<td class="py-2.5 pr-3 max-w-[160px] truncate">{{ row.displayName }}</td>
 													<td class="py-2.5 pr-3 text-right font-medium">{{ row.catches }}</td>
-													<td class="py-2.5 pr-3 text-right">{{ row.totalWeightKg > 0 ? (row.totalWeightKg | number:'1.2-2') : '—' }}</td>
-													<td class="py-2.5 pr-3 text-right font-semibold">{{ row.bestLengthCm }} cm</td>
+													@if (activeScoringMode() === 'weight') {
+														<td class="py-2.5 pr-3 text-right font-semibold">{{ row.totalWeightKg | number:'1.2-2' }} kg</td>
+														<td class="py-2.5 pr-3 text-right">{{ row.bestWeightKg > 0 ? (row.bestWeightKg | number:'1.2-2') + ' kg' : '—' }}</td>
+													} @else {
+														<td class="py-2.5 pr-3 text-right font-semibold">{{ row.totalLengthCm | number:'1.1-1' }} cm</td>
+														<td class="py-2.5 pr-3 text-right">{{ row.bestLengthCm }} cm</td>
+													}
 												</tr>
 											}
 										</tbody>
@@ -620,9 +630,16 @@
 													<div class="flex items-center gap-2">
 														<span class="font-bold text-[var(--c-text-strong)]">{{ formatSpecies(c.species) }}</span>
 														<span class="text-[var(--c-text-muted)]">&middot;</span>
-														<span class="font-semibold text-[var(--c-primary)]">{{ c.lengthCm }} cm</span>
-														@if (c.weightKg) {
-															<span class="text-[var(--c-text-muted)]">({{ c.weightKg }} kg)</span>
+														@if (activeScoringMode() === 'weight') {
+															<span class="font-semibold text-[var(--c-primary)]">{{ c.weightKg ? (c.weightKg + ' kg') : (c.lengthCm + ' cm') }}</span>
+															@if (c.weightKg && c.lengthCm) {
+																<span class="text-[var(--c-text-muted)]">({{ c.lengthCm }} cm)</span>
+															}
+														} @else {
+															<span class="font-semibold text-[var(--c-primary)]">{{ c.lengthCm }} cm</span>
+															@if (c.weightKg) {
+																<span class="text-[var(--c-text-muted)]">({{ c.weightKg }} kg)</span>
+															}
 														}
 													</div>
 													@if (formatCatchTime(c.submittedAt || c.createdAt); as formattedTime) {
@@ -1737,8 +1754,12 @@
 
 					<!-- Reminder helper label -->
 					<div class="mb-2 flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 p-2.5 text-xs text-amber-800 dark:text-amber-200">
-						<span class="material-symbols-outlined text-[18px] text-amber-500 shrink-0">straighten</span>
-						<span class="leading-relaxed">{{ ts.t('catch.photoRulerHint') }}</span>
+						<span class="material-symbols-outlined text-[18px] text-amber-500 shrink-0">
+							{{ activeScoringMode() === 'weight' ? 'scale' : 'straighten' }}
+						</span>
+						<span class="leading-relaxed">
+							{{ activeScoringMode() === 'weight' ? ts.t('catch.photoScaleHint') : ts.t('catch.photoRulerHint') }}
+						</span>
 					</div>
 
 					<!-- Hidden File/Camera Input -->

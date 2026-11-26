@@ -274,6 +274,7 @@ export class TournamentsComponent {
 	// Leaderboard rows aggregated from approved catches
 	protected readonly leaderboard = computed(() => {
 		const approved = this.approvedCatches();
+		const mode = this.activeScoringMode();
 		const map = new Map<
 			string,
 			{
@@ -283,10 +284,21 @@ export class TournamentsComponent {
 				totalLengthCm: number;
 				totalWeightKg: number;
 				bestLengthCm: number;
+				bestWeightKg: number;
 			}
 		>();
 
+		// Filter out duplicate catches by catch id if present
+		const seenCatchIds = new Set<string>();
+
 		for (const c of approved) {
+			if (c.id) {
+				if (seenCatchIds.has(c.id)) {
+					continue;
+				}
+				seenCatchIds.add(c.id);
+			}
+
 			const existing = map.get(c.userId);
 			const weight = c.weightKg ? Number(c.weightKg) : 0;
 			const length = Number(c.lengthCm) || 0;
@@ -297,6 +309,9 @@ export class TournamentsComponent {
 				if (length > existing.bestLengthCm) {
 					existing.bestLengthCm = length;
 				}
+				if (weight > existing.bestWeightKg) {
+					existing.bestWeightKg = weight;
+				}
 			} else {
 				map.set(c.userId, {
 					userId: c.userId,
@@ -305,13 +320,29 @@ export class TournamentsComponent {
 					totalLengthCm: length,
 					totalWeightKg: weight,
 					bestLengthCm: length,
+					bestWeightKg: weight,
 				});
 			}
 		}
 
 		return Array.from(map.values()).sort((a, b) => {
-			if (b.totalLengthCm !== a.totalLengthCm) {
+			if (mode === 'weight') {
+				// Primary sorting: total weight, secondary: best weight, tiebreak: total length
+				if (Math.abs(b.totalWeightKg - a.totalWeightKg) > 0.0001) {
+					return b.totalWeightKg - a.totalWeightKg;
+				}
+				if (Math.abs(b.bestWeightKg - a.bestWeightKg) > 0.0001) {
+					return b.bestWeightKg - a.bestWeightKg;
+				}
 				return b.totalLengthCm - a.totalLengthCm;
+			}
+
+			// Mode 'length' (default CPR format): Primary total length, secondary best length, tiebreak: weight
+			if (Math.abs(b.totalLengthCm - a.totalLengthCm) > 0.01) {
+				return b.totalLengthCm - a.totalLengthCm;
+			}
+			if (Math.abs(b.bestLengthCm - a.bestLengthCm) > 0.01) {
+				return b.bestLengthCm - a.bestLengthCm;
 			}
 			return b.totalWeightKg - a.totalWeightKg;
 		});

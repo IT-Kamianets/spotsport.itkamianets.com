@@ -192,9 +192,16 @@
 												<div class="min-w-0 flex-1 space-y-1.5">
 													<div class="flex flex-wrap items-center gap-2">
 														<span class="font-bold text-[var(--c-text-strong)] text-sm">{{ c.species }}</span>
-														<span class="font-semibold text-[var(--c-primary)]">{{ c.lengthCm }} cm</span>
-														@if (c.weightKg) {
-															<span class="text-[var(--c-text-muted)]">({{ c.weightKg }} kg)</span>
+														@if (activeScoringMode() === 'weight') {
+															<span class="font-semibold text-[var(--c-primary)]">{{ c.weightKg ? (c.weightKg + ' kg') : (c.lengthCm + ' cm') }}</span>
+															@if (c.weightKg && c.lengthCm) {
+																<span class="text-[var(--c-text-muted)]">({{ c.lengthCm }} cm)</span>
+															}
+														} @else {
+															<span class="font-semibold text-[var(--c-primary)]">{{ c.lengthCm }} cm</span>
+															@if (c.weightKg) {
+																<span class="text-[var(--c-text-muted)]">({{ c.weightKg }} kg)</span>
+															}
 														}
 														<span
 															class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
@@ -460,9 +467,16 @@
 														<span class="rounded bg-[var(--c-primary)]/10 px-2 py-0.5 font-semibold text-[var(--c-primary)]">
 															{{ c.species }}
 														</span>
-														<span class="font-semibold text-[var(--c-text-strong)]">{{ c.lengthCm }} cm</span>
-														@if (c.weightKg) {
-															<span class="text-[var(--c-text-muted)]">({{ c.weightKg }} kg)</span>
+														@if (activeScoringMode() === 'weight') {
+															<span class="font-semibold text-[var(--c-text-strong)]">{{ c.weightKg ? (c.weightKg + ' kg') : (c.lengthCm + ' cm') }}</span>
+															@if (c.weightKg && c.lengthCm) {
+																<span class="text-[var(--c-text-muted)]">({{ c.lengthCm }} cm)</span>
+															}
+														} @else {
+															<span class="font-semibold text-[var(--c-text-strong)]">{{ c.lengthCm }} cm</span>
+															@if (c.weightKg) {
+																<span class="text-[var(--c-text-muted)]">({{ c.weightKg }} kg)</span>
+															}
 														}
 														<span
 															class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold"
@@ -626,10 +640,15 @@
 											<thead>
 												<tr class="text-left text-[var(--c-text-muted)] border-b border-[var(--c-border)]">
 													<th class="pb-2.5 pr-3 font-semibold">#</th>
-													<th class="pb-2.5 pr-3 font-semibold">Angler</th>
+													<th class="pb-2.5 pr-3 font-semibold">{{ ts.t('catch.leaderboardAngler') }}</th>
 													<th class="pb-2.5 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardCatches') }}</th>
-													<th class="pb-2.5 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardTotalWeight') }}</th>
-													<th class="pb-2.5 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardBestLength') }}</th>
+													@if (activeScoringMode() === 'weight') {
+														<th class="pb-2.5 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardTotalWeight') }}</th>
+														<th class="pb-2.5 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardBestWeight') }}</th>
+													} @else {
+														<th class="pb-2.5 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardTotalLength') }}</th>
+														<th class="pb-2.5 pr-3 font-semibold text-right">{{ ts.t('catch.leaderboardBestLength') }}</th>
+													}
 												</tr>
 											</thead>
 											<tbody>
@@ -654,12 +673,21 @@
 														<td class="py-2.5 pr-3 text-right font-medium">
 															{{ row.catches }}
 														</td>
-														<td class="py-2.5 pr-3 text-right">
-															{{ row.totalWeightKg > 0 ? (row.totalWeightKg | number:'1.2-2') : '—' }}
-														</td>
-														<td class="py-2.5 pr-3 text-right font-semibold">
-															{{ row.bestLengthCm }} cm
-														</td>
+														@if (activeScoringMode() === 'weight') {
+															<td class="py-2.5 pr-3 text-right font-semibold">
+																{{ row.totalWeightKg | number:'1.2-2' }} kg
+															</td>
+															<td class="py-2.5 pr-3 text-right">
+																{{ row.bestWeightKg > 0 ? (row.bestWeightKg | number:'1.2-2') + ' kg' : '—' }}
+															</td>
+														} @else {
+															<td class="py-2.5 pr-3 text-right font-semibold">
+																{{ row.totalLengthCm | number:'1.1-1' }} cm
+															</td>
+															<td class="py-2.5 pr-3 text-right">
+																{{ row.bestLengthCm }} cm
+															</td>
+														}
 													</tr>
 												}
 											</tbody>

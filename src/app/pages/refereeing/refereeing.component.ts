@@ -12,6 +12,7 @@ import {
 	PenaltyItem,
 	PenaltySeverity,
 	TournamentItem,
+	TournamentScoringMode,
 	TournamentService,
 } from '../../services/tournament.service';
 import { TranslationService } from '../../services/translation.service';
@@ -60,6 +61,20 @@ export class RefereeingComponent {
 			return list[0] || null;
 		}
 		return list.find((t) => t.id === id || t.title === id) || list[0] || null;
+	});
+
+	// Active tournament scoring mode detection
+	protected readonly activeScoringMode = computed<TournamentScoringMode>(() => {
+		const tourn = this.selectedTournament();
+		if (!tourn) return 'length';
+		if (tourn.scoringMode) return tourn.scoringMode;
+		const rulesLower = (tourn.rules || '').toLowerCase();
+		const descLower = (tourn.description || '').toLowerCase();
+		const text = `${rulesLower} ${descLower}`;
+		if (text.includes('ваг') || text.includes('weight') || text.includes('gram') || text.includes('грам')) {
+			return 'weight';
+		}
+		return 'length';
 	});
 
 	// Organizer verification check
@@ -137,6 +152,7 @@ export class RefereeingComponent {
 	// Live leaderboard standings aggregated from approved catches
 	protected readonly liveStandings = computed(() => {
 		const approved = this.approvedCatches();
+		const mode = this.activeScoringMode();
 		const map = new Map<
 			string,
 			{
@@ -146,10 +162,21 @@ export class RefereeingComponent {
 				totalLengthCm: number;
 				totalWeightKg: number;
 				bestLengthCm: number;
+				bestWeightKg: number;
 			}
 		>();
 
+		// Filter out duplicate catches by catch id if present
+		const seenCatchIds = new Set<string>();
+
 		for (const c of approved) {
+			if (c.id) {
+				if (seenCatchIds.has(c.id)) {
+					continue;
+				}
+				seenCatchIds.add(c.id);
+			}
+
 			const existing = map.get(c.userId);
 			const weight = c.weightKg ? Number(c.weightKg) : 0;
 			const length = Number(c.lengthCm) || 0;
@@ -160,6 +187,9 @@ export class RefereeingComponent {
 				if (length > existing.bestLengthCm) {
 					existing.bestLengthCm = length;
 				}
+				if (weight > existing.bestWeightKg) {
+					existing.bestWeightKg = weight;
+				}
 			} else {
 				map.set(c.userId, {
 					userId: c.userId,
@@ -168,18 +198,31 @@ export class RefereeingComponent {
 					totalLengthCm: length,
 					totalWeightKg: weight,
 					bestLengthCm: length,
+					bestWeightKg: weight,
 				});
 			}
 		}
 
 		return Array.from(map.values()).sort((a, b) => {
-			if (b.totalWeightKg !== a.totalWeightKg) {
-				return b.totalWeightKg - a.totalWeightKg;
-			}
-			if (b.totalLengthCm !== a.totalLengthCm) {
+			if (mode === 'weight') {
+				// Primary sorting: total weight, secondary: best weight, tiebreak: total length
+				if (Math.abs(b.totalWeightKg - a.totalWeightKg) > 0.0001) {
+					return b.totalWeightKg - a.totalWeightKg;
+				}
+				if (Math.abs(b.bestWeightKg - a.bestWeightKg) > 0.0001) {
+					return b.bestWeightKg - a.bestWeightKg;
+				}
 				return b.totalLengthCm - a.totalLengthCm;
 			}
-			return b.bestLengthCm - a.bestLengthCm;
+
+			// Mode 'length' (default CPR format): Primary total length, secondary best length, tiebreak: weight
+			if (Math.abs(b.totalLengthCm - a.totalLengthCm) > 0.01) {
+				return b.totalLengthCm - a.totalLengthCm;
+			}
+			if (Math.abs(b.bestLengthCm - a.bestLengthCm) > 0.01) {
+				return b.bestLengthCm - a.bestLengthCm;
+			}
+			return b.totalWeightKg - a.totalWeightKg;
 		});
 	});
 
