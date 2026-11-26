@@ -12,6 +12,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ThemeService } from '@wawjs/ngx-ui';
 import { AuthService } from '../../services/auth.service';
 import { AppLang, TranslationService } from '../../services/translation.service';
+import { ScrollService } from '../../services/scroll.service';
 
 export type ProfileTab = 'personal' | 'history' | 'settings' | 'auth';
 export type AuthSubTab = 'register' | 'login' | 'recovery';
@@ -25,6 +26,7 @@ export class ProfileComponent {
 	private readonly _route = inject(ActivatedRoute);
 	private readonly _themeService = inject(ThemeService);
 	private readonly _authService = inject(AuthService);
+	private readonly _scrollService = inject(ScrollService);
 	public readonly ts = inject(TranslationService);
 
 	protected readonly currentUser = toSignal(this._authService.authState$, { initialValue: null });
@@ -138,12 +140,14 @@ export class ProfileComponent {
 		this.activeTab.set(tab);
 		this.authError.set(null);
 		this.authSuccess.set(null);
+		this._scrollService.scrollToTop();
 	}
 
 	protected setAuthTab(tab: AuthSubTab): void {
 		this.activeAuthTab.set(tab);
 		this.authError.set(null);
 		this.authSuccess.set(null);
+		this._scrollService.scrollToTop();
 	}
 
 	protected toggleMode(): void {

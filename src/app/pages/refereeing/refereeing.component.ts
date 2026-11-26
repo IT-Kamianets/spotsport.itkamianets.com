@@ -15,6 +15,7 @@ import {
 	TournamentService,
 } from '../../services/tournament.service';
 import { TranslationService } from '../../services/translation.service';
+import { ScrollService } from '../../services/scroll.service';
 
 export type RefereeingMode = 'catch' | 'judging';
 export type CatchTab = 'status' | 'offline';
@@ -32,6 +33,7 @@ export class RefereeingComponent {
 	public readonly authService = inject(AuthService);
 	public readonly tournamentService = inject(TournamentService);
 	public readonly ts = inject(TranslationService);
+	private readonly _scrollService = inject(ScrollService);
 
 	// Online status signal
 	protected readonly isOnline = signal<boolean>(this._isBrowser ? navigator.onLine : true);
@@ -245,14 +247,17 @@ export class RefereeingComponent {
 
 	protected setMode(mode: RefereeingMode): void {
 		this.mode.set(mode);
+		this._scrollService.scrollToTop();
 	}
 
 	protected setCatchTab(tab: CatchTab): void {
 		this.activeCatchTab.set(tab);
+		this._scrollService.scrollToTop();
 	}
 
 	protected setJudgingTab(tab: JudgingTab): void {
 		this.activeJudgingTab.set(tab);
+		this._scrollService.scrollToTop();
 	}
 
 	protected toggleCatchDetails(): void {
@@ -261,6 +266,7 @@ export class RefereeingComponent {
 
 	protected onSelectTournament(t: TournamentItem): void {
 		this.activeTournamentId.set(t.id || t.title);
+		this._scrollService.scrollToTop();
 	}
 
 	protected formatCatchTime(val: unknown): string {

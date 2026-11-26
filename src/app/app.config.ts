@@ -7,7 +7,7 @@ import {
 
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
@@ -56,7 +56,13 @@ export const appConfig: ApplicationConfig = {
 			siteUrl: companyProfile.siteUrl,
 		}),
 		provideNgxUi(),
-		provideRouter(routes),
+		provideRouter(
+			routes,
+			withInMemoryScrolling({
+				scrollPositionRestoration: 'top',
+				anchorScrolling: 'enabled',
+			}),
+		),
 		provideClientHydration(withEventReplay()),
 		provideTranslate({
 			defaultLanguage: environment.defaultLanguage,

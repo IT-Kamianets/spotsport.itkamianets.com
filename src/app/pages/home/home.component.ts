@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { TournamentItem, TournamentService } from '../../services/tournament.service';
 import { TranslationService } from '../../services/translation.service';
+import { ScrollService } from '../../services/scroll.service';
 
 type HomeTab = 'active' | 'previous';
 
@@ -14,6 +15,7 @@ type HomeTab = 'active' | 'previous';
 export class HomeComponent {
 	public readonly tournamentService = inject(TournamentService);
 	public readonly ts = inject(TranslationService);
+	private readonly _scrollService = inject(ScrollService);
 
 	protected readonly activeTab = signal<HomeTab>('active');
 
@@ -58,5 +60,6 @@ export class HomeComponent {
 
 	protected setTab(tab: HomeTab): void {
 		this.activeTab.set(tab);
+		this._scrollService.scrollToTop();
 	}
 }

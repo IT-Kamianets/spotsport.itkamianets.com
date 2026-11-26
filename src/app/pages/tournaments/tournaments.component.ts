@@ -23,6 +23,7 @@ import {
 	TournamentService,
 } from '../../services/tournament.service';
 import { TranslationService } from '../../services/translation.service';
+import { ScrollService } from '../../services/scroll.service';
 
 export type TournamentMainMode = 'view' | 'editor';
 export type TournamentTab = 'overview' | 'participants' | 'status' | 'leaderboard';
@@ -48,6 +49,7 @@ export interface ParticipantItem {
 export class TournamentsComponent {
 	private readonly _route = inject(ActivatedRoute);
 	private readonly _router = inject(Router);
+	private readonly _scrollService = inject(ScrollService);
 	private readonly _firestore = inject(Firestore);
 	public readonly authService = inject(AuthService);
 	public readonly tournamentService = inject(TournamentService);
@@ -482,14 +484,17 @@ export class TournamentsComponent {
 		this.settingsMenuOpen.set(false);
 		this.saveError.set(null);
 		this.saveSuccess.set(null);
+		this._scrollService.scrollToTop();
 	}
 
 	protected setTab(tab: TournamentTab): void {
 		this.activeTab.set(tab);
+		this._scrollService.scrollToTop();
 	}
 
 	protected setDetailTab(tab: TournamentDetailTab): void {
 		this.activeDetailTab.set(tab);
+		this._scrollService.scrollToTop();
 	}
 
 	protected toggleSettingsMenu(): void {
@@ -499,10 +504,12 @@ export class TournamentsComponent {
 	protected selectSection(tab: TournamentDetailTab): void {
 		this.activeDetailTab.set(tab);
 		this.settingsMenuOpen.set(false);
+		this._scrollService.scrollToTop();
 	}
 
 	protected setSection(section: EditorSection): void {
 		this.activeSection.set(section);
+		this._scrollService.scrollToTop();
 	}
 
 	protected selectTournament(tournament: TournamentItem | null): void {
@@ -515,6 +522,7 @@ export class TournamentsComponent {
 			this.activeDetailTab.set('overview');
 			this.mode.set('view');
 		}
+		this._scrollService.scrollToTop();
 	}
 
 	/**

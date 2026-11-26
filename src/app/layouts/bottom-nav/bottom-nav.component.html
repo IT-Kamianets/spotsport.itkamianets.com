@@ -7,6 +7,7 @@
 		<a
 			routerLink="/tournaments"
 			routerLinkActive="text-[var(--c-primary)] font-semibold"
+			(click)="onNavClick()"
 			class="theme-interactive flex flex-col items-center justify-center gap-1 py-1 text-xs text-[var(--c-text-muted)] hover:text-[var(--c-text-strong)] transition-colors cursor-pointer"
 		>
 			<span class="material-symbols-outlined text-[24px]">emoji_events</span>
@@ -17,6 +18,7 @@
 		<a
 			routerLink="/refereeing"
 			routerLinkActive="text-[var(--c-primary)] font-semibold"
+			(click)="onNavClick()"
 			class="theme-interactive flex flex-col items-center justify-center gap-1 py-1 text-xs text-[var(--c-text-muted)] hover:text-[var(--c-text-strong)] transition-colors cursor-pointer"
 		>
 			<span class="material-symbols-outlined text-[24px]">gavel</span>
@@ -27,6 +29,7 @@
 		<a
 			routerLink="/about"
 			routerLinkActive="text-[var(--c-primary)] font-semibold"
+			(click)="onNavClick()"
 			class="theme-interactive flex flex-col items-center justify-center gap-1 py-1 text-xs text-[var(--c-text-muted)] hover:text-[var(--c-text-strong)] transition-colors cursor-pointer"
 		>
 			<span class="material-symbols-outlined text-[24px]">info</span>

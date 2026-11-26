@@ -1,6 +1,8 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, effect, inject } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
+import { ScrollService } from './services/scroll.service';
 import { CanonicalService } from '@wawjs/ngx-default';
 import { LanguageService } from '@wawjs/ngx-translate';
 import { ThemeService } from '@wawjs/ngx-ui';
@@ -28,10 +30,18 @@ export class App {
 	private readonly _document = inject(DOCUMENT);
 	private readonly _languageService = inject(LanguageService);
 	private readonly _themeService = inject(ThemeService);
+	private readonly _router = inject(Router);
+	private readonly _scrollService = inject(ScrollService);
 
 	constructor() {
 		this._themeService.init();
 		this._canonicalService.initialize();
+
+		this._router.events
+			.pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+			.subscribe(() => {
+				this._scrollService.scrollToTop();
+			});
 
 		effect(() => {
 			const language = this._languageService.language();
